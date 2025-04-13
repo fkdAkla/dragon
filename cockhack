@@ -1,7 +1,7 @@
-getgenv().gethui = function() return game:GetService('CoreGui') end
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
+--https://docs.sirius.menu/rayfield/interaction/interactive-elements#creating-an-adaptive-input-textbox
 
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/orion')))()
 
 local player = game.Players.LocalPlayer
 
@@ -69,6 +69,51 @@ local hrp = player.Character.HumanoidRootPart
 
 local ups = debug.getupvalues(updMousePosFunc)
 
+local autoSellValue = genv.autoSellValue or 0
+
+local shopPlaceId = 3475397644
+local mainPlaceId = 4728805070
+
+--local sellRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SellItemRemote")
+    
+local sellArgs = {"ItemName", "Amount"}
+local toSell = {"JuniperBerry", "Dragonfruit", "Lime"}
+
+local resourcesFolder = player:WaitForChild("Data"):WaitForChild("Resources")
+
+genv.isTeleporting = false
+
+for i, v in toSell do
+    local val = resourcesFolder:WaitForChild(v)
+    val.Changed:Connect(function()
+        if autoSellValue == 0 then return end
+        if genv.isTeleporting then return end
+        if val.Value < autoSellValue then return end
+        genv.isTeleporting = true
+        local s = [[
+    local shopPlaceId = 3475397644
+    local mainPlaceId = 4728805070
+    if game.PlaceId ~= shopPlaceId then return end
+    local remote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SellItemRemote")
+    local resourcesFolder = game.Players.LocalPlayer:WaitForChild("Data"):WaitForChild("Resources")
+    
+    local sellArgs = {"ItemName", "Amount"}
+    local toSell = {"JuniperBerry", "Dragonfruit", "Lime"}
+    task.wait(5)
+    for i, v in toSell do
+        remote:FireServer({ItemName = v, Amount = resourcesFolder[v].Value})
+    end
+    task.wait(1)
+    
+    queue_on_teleport("getgenv().AutoFarm = <AutoFVal> getgenv().autoSellValue = <autoSVal> task.wait(20) loadstring(game:HttpGet(('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack')))()")
+    game:service("TeleportService"):Teleport(mainPlaceId, game.Players.LocalPlayer)
+]]      
+        s = s:gsub("<AutoFVal>", tostring(genv.AutoFarm)):gsub("<autoSVal>", autoSellValue)
+        queue_on_teleport(s)
+        game:service("TeleportService"):Teleport(shopPlaceId, game.Players.LocalPlayer)
+    end)
+end
+
 --if true then return end
 
 local oldMouseP
@@ -105,6 +150,8 @@ local function farm()
     
     if not fire then return end
     
+    genv.AutoFarm = true
+    
     local c
     c = camera.ChildAdded:Connect(function(child)
         local handle = child:FindFirstChild("Handle")
@@ -130,14 +177,15 @@ local function farm()
             
             --camera.CameraSubject = v["5"]:FindFirstChildWhichIsA("MeshPart")
             local hb = v.Hitbox
-            camera.CameraSubject = hb
+            --camera.CameraSubject = hb
             genv.FoodPos = hb.Position
             
             while task.wait() do
                 if _G.stopped then c:Disconnect() return end
                 --local mousePos = mouse.Hit.Position
                 
-                local tPos = v["2"]:FindFirstChildWhichIsA("MeshPart").CFrame
+                --local tPos = v["2"]:FindFirstChildWhichIsA("MeshPart").CFrame
+                local tPos = hb.CFrame * CFrame.new(-15, 0, 0)
                 
                 player.Character:PivotTo(tPos)--CFrame.new(tPos, mousePos))
                 
@@ -167,28 +215,77 @@ local function farm()
     
 end
 
-local Window = OrionLib:MakeWindow({Name = "Cockhack", HidePremium = false, SaveConfig = false, ConfigFolder = "OrionTest"})
-local Tab = Window:MakeTab({
-	Name = "Main",
-	Icon = "rbxassetid://4483345998",
-	PremiumOnly = false
+local Window = Rayfield:CreateWindow({
+   Name = "Cockhack",
+   Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
+   LoadingTitle = "Rayfield Interface Suite",
+   LoadingSubtitle = "by Sirius",
+   Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
+
+   DisableRayfieldPrompts = false,
+   DisableBuildWarnings = false, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
+
+   ConfigurationSaving = {
+      Enabled = false,
+      FolderName = nil, -- Create a custom folder for your hub/game
+      FileName = "Big Hub"
+   },
+
+   Discord = {
+      Enabled = false, -- Prompt the user to join your Discord server if their executor supports it
+      Invite = "noinvitelink", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ ABCD would be ABCD
+      RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+   },
+
+   KeySystem = false, -- Set this to true to use our key system
+   KeySettings = {
+      Title = "Untitled",
+      Subtitle = "Key System",
+      Note = "No method of obtaining the key is provided", -- Use this to tell the user how to get a key
+      FileName = "Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
+      SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
+      GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+      Key = {"Hello"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
+   }
 })
 
-local Section = Tab:AddSection({
-	Name = "Farm"
-})
+local Tab = Window:CreateTab("Main", "app-window") -- Title, Image
 
-Tab:AddToggle({
-	Name = "Food Farm",
-	Default = false,
-	Callback = function(Value)
-		 if Value then
+local Section = Tab:CreateSection("Farm")
+
+local Toggle = Tab:CreateToggle({
+   Name = "Food Farm",
+   CurrentValue = false,
+   Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       if Value then
            genv.currentHooking._updateMousePosition = true
            farm()
         else
             _G.stopped = true
+            genv.AutoFarm = false
             genv.currentHooking._updateMousePosition = nil
-            camera.CameraSubject = player.Character
+            --camera.CameraSubject = player.Character
         end
-	end    
+   end,
 })
+
+local Slider = Tab:CreateSlider({
+   Name = "Auto Sell (Lime/DragonFruit/JuniperBerry, 0 = disable)",
+   Range = {0, 10000},
+   Increment = 50,
+   Suffix = "Value",
+   CurrentValue = autoSellValue,
+   Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       autoSellValue = Value
+   end,
+})
+
+if genv.AutoFarm then
+    Toggle:Set(true)
+end
+
+--task.wait(10)
+
+--Rayfield:Destroy()
