@@ -215,6 +215,12 @@ local function farm()
     
 end
 
+player.Idled:connect(function()
+    game:FindService("VirtualInputManager"):Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+    game:FindService("VirtualInputManager"):Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+end)
+
+
 local Window = Rayfield:CreateWindow({
    Name = "Cockhack",
    Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
@@ -249,11 +255,13 @@ local Window = Rayfield:CreateWindow({
    }
 })
 
-local Tab = Window:CreateTab("Main", "app-window") -- Title, Image
+local MainTab = Window:CreateTab("Main", "app-window") -- Title, Image
 
-local Section = Tab:CreateSection("Farm")
+local Section = MainTab:CreateSection("Farm")
 
-local Toggle = Tab:CreateToggle({
+local Label = MainTab:CreateLabel("Anti Afk is Enabled", 4483362458, Color3.fromRGB(255, 255, 255), false) -- Title, Icon, Color, IgnoreTheme
+
+local Toggle = MainTab:CreateToggle({
    Name = "Food Farm",
    CurrentValue = false,
    Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
@@ -270,15 +278,32 @@ local Toggle = Tab:CreateToggle({
    end,
 })
 
-local Slider = Tab:CreateSlider({
-   Name = "Auto Sell (Lime/DragonFruit/JuniperBerry, 0 = disable)",
-   Range = {0, 10000},
+local Label2 = MainTab:CreateLabel("Auto Sell is for Lime | DragonFruit | JuniperBerry", 4483362458, Color3.fromRGB(255, 255, 255), false) -- Title, Icon, Color, IgnoreTheme
+
+local Slider = MainTab:CreateSlider({
+   Name = "Auto Sell (0 = disable)",
+   Range = {50, 10000},
    Increment = 50,
    Suffix = "Value",
    CurrentValue = autoSellValue,
    Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
    Callback = function(Value)
        autoSellValue = Value
+   end,
+})
+
+local performanceTab = Window:CreateTab("Performance", "battery-charging")
+
+performanceTab:CreateSlider({
+    Name = "Set Fps Cap (0 = Default)",
+   Range = {20, 60},
+   Increment = 5,
+   Suffix = "FPS",
+   CurrentValue = 0,
+   Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       if Value == 0 then return end
+       setfpscap(Value)
    end,
 })
 
