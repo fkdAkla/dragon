@@ -98,12 +98,13 @@ local resourcesFolder = player:WaitForChild("Data"):WaitForChild("Resources")
 genv.isTeleporting = false
 
 local cmdText = [[
+task.spawn(function() 
 getgenv().AutoFarm = <AutoFVal>
 getgenv().autoSellValue = <autoSVal>
 getgenv().tpThrough = <tpTVal>
 task.wait(20)
 loadstring(game:HttpGet('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack'))()
-
+end) 
 ]]
 
 for i, v in toSell do
