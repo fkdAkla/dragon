@@ -135,7 +135,7 @@ for i, v in toSell do
         queue_on_teleport("getgenv().AutoFarm = <AutoFVal> getgenv().autoSellValue = <autoSVal> task.wait(20) loadstring(game:HttpGet(('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack')))()")
         game:service("TeleportService"):Teleport(mainPlaceId, game.Players.LocalPlayer)
     else
-        queue_on_teleport("task.wait(10) queue_on_teleport('<partOfCode1>'))
+        queue_on_teleport("task.wait(10) queue_on_teleport('<partOfCode1>')")
     
         game:service("TeleportService"):Teleport(tpThrough, game.Players.LocalPlayer)
     end
