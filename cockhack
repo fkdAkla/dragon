@@ -102,7 +102,7 @@ getgenv().AutoFarm = <AutoFVal>
 getgenv().autoSellValue = <autoSVal>
 getgenv().tpThrough = <tpTVal>
 task.wait(20)
-loadstring(game:HttpGet('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack'))()') game:service('TeleportService'):Teleport(4728805070, game.Players.LocalPlayer)
+loadstring(game:HttpGet('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack'))()) game:service('TeleportService'):Teleport(4728805070, game.Players.LocalPlayer)
 ]]
 
 for i, v in toSell do
