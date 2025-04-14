@@ -110,7 +110,7 @@ for i, v in toSell do
     val.Changed:Connect(function()
         if autoSellValue == 0 then return end
         if genv.isTeleporting then return end
-        --if val.Value < autoSellValue then return end
+        if val.Value < autoSellValue then return end
         genv.isTeleporting = true
         local s = [==[
     local shopPlaceId = 3475397644
