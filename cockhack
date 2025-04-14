@@ -112,7 +112,7 @@ for i, v in toSell do
         if genv.isTeleporting then return end
         --if val.Value < autoSellValue then return end
         genv.isTeleporting = true
-        local s = [=[
+        local s = [==[
     local shopPlaceId = 3475397644
     local mainPlaceId = 4728805070
     if game.PlaceId ~= shopPlaceId then return end
@@ -133,11 +133,11 @@ for i, v in toSell do
         queue_on_teleport("getgenv().AutoFarm = <AutoFVal> getgenv().autoSellValue = <autoSVal> task.wait(20) loadstring(game:HttpGet(('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack')))()")
         game:service("TeleportService"):Teleport(mainPlaceId, game.Players.LocalPlayer)
     else
-        queue_on_teleport("task.wait(10) queue_on_teleport([[<partOfCode1>]])")
+        queue_on_teleport([=[ task.wait(10) queue_on_teleport([[<partOfCode1>]]) ]=])
     
         game:service("TeleportService"):Teleport(tpThrough, game.Players.LocalPlayer)
     end
-]=]      
+]==]      
         s = s:gsub("<partOfCode1>", cmdText):gsub("<AutoFVal>", tostring(genv.AutoFarm), 10):gsub("<autoSVal>", autoSellValue, 10):gsub("<tpTVal>", tpThrough or "nil", 10)
         queue_on_teleport(s)
         game:service("TeleportService"):Teleport(shopPlaceId, game.Players.LocalPlayer)
