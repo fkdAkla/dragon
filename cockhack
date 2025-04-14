@@ -74,6 +74,20 @@ local autoSellValue = genv.autoSellValue or 0
 local shopPlaceId = 3475397644
 local mainPlaceId = 4728805070
 
+if game.PlaceId ~= mainPlaceId then return end
+
+local worldIds = {
+    Grassland = 3475419198,
+    Jungle = 3475422608,
+    Volcano = 3487210751,
+    Tundra = 3623549100,
+    Ocean = 3737848045,
+    Desert = 3752680052,
+    Fantasy = 4174118306
+}
+
+local tpThrough = getgenv().tpThrough
+
 --local sellRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SellItemRemote")
     
 local sellArgs = {"ItemName", "Amount"}
@@ -106,9 +120,21 @@ for i, v in toSell do
     task.wait(1)
     
     queue_on_teleport("getgenv().AutoFarm = <AutoFVal> getgenv().autoSellValue = <autoSVal> task.wait(20) loadstring(game:HttpGet(('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack')))()")
-    game:service("TeleportService"):Teleport(mainPlaceId, game.Players.LocalPlayer)
+    
+    local tpThrough = <tpTVal>
+
+    if tpThrough then
+        queue_on_teleport("getgenv().AutoFarm = <AutoFVal> getgenv().autoSellValue = <autoSVal> task.wait(20) loadstring(game:HttpGet(('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack')))()")
+        game:service("TeleportService"):Teleport(mainPlaceId, game.Players.LocalPlayer)
+        return
+    end
+    
+    
+    queue_on_teleport("task.wait(1) queue_on_teleport('getgenv().AutoFarm = <AutoFVal> getgenv().autoSellValue = <autoSVal> getgenv().tpThrough = <tpTVal> task.wait(20) <partOfCode1>")
+    
+    game:service("TeleportService"):Teleport(tpThrough, game.Players.LocalPlayer)
 ]]      
-        s = s:gsub("<AutoFVal>", tostring(genv.AutoFarm)):gsub("<autoSVal>", autoSellValue)
+        s = s:gsub("<AutoFVal>", tostring(genv.AutoFarm), 10):gsub("<autoSVal>", autoSellValue, 10):gsub("<tpTVal>", tpThrough or "nil", 10):gsub("<partOfCode1>", "loadstring(game:HttpGet(('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack')))()') game:service('TeleportService'):Teleport(4728805070, game.Players.LocalPlayer)")
         queue_on_teleport(s)
         game:service("TeleportService"):Teleport(shopPlaceId, game.Players.LocalPlayer)
     end)
@@ -292,6 +318,18 @@ local Slider = MainTab:CreateSlider({
    end,
 })
 
+local Dropdown = MainTab:CreateDropdown({
+   Name = "AutoSell: Teleport Through A World",
+   Options = {"None","Grassland","Jungle","Volcano","Tundra","Ocean","Desert","Fantasy"},
+   CurrentOption = {"None"},
+   MultipleOptions = false,
+   Flag = "Dropdown1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Options)
+       if Options[1] == "None" then tpThrough = nil return end
+       tpThrough = worldIds[Options[1]]
+   end,
+})
+
 local performanceTab = Window:CreateTab("Performance", "battery-charging")
 
 performanceTab:CreateSlider({
@@ -309,6 +347,11 @@ performanceTab:CreateSlider({
 
 if genv.AutoFarm then
     Toggle:Set(true)
+end
+
+if genv.tpThrough then
+    local found = (function() for i, v in worldIds do if v == genv.tpThrough then return i end end end)()
+    Dropdown:Set(found)
 end
 
 --task.wait(10)
