@@ -1,5 +1,6 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
+set_thread_identity(8)
 --https://docs.sirius.menu/rayfield/interaction/interactive-elements#creating-an-adaptive-input-textbox
 
 
@@ -102,7 +103,6 @@ getgenv().AutoFarm = <AutoFVal>
 getgenv().autoSellValue = <autoSVal>
 getgenv().tpThrough = <tpTVal>
 task.wait(20)
-set_thread_identity(8)
 loadstring(game:HttpGet('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack'))()
 
 ]]
@@ -331,7 +331,7 @@ local Dropdown = MainTab:CreateDropdown({
    MultipleOptions = false,
    Flag = "Dropdown1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
    Callback = function(Options)
-       if Options[1] == "None" then tpThrough = nil return end
+       if Options[1] == "None"  print('nullified!') tpThrough = nil return end
        tpThrough = worldIds[Options[1]]
    end,
 })
@@ -356,7 +356,8 @@ if genv.AutoFarm then
 end
 
 if genv.tpThrough then
-    local found = (function() for i, v in worldIds do if v == genv.tpThrough then return i end end end)()
+    local found = (function() for i, v in worldIds do if v == genv.tpThrough then return i end)
+    
     Dropdown:Set(found)
 end
 
