@@ -127,8 +127,6 @@ for i, v in toSell do
     end
     task.wait(1)
     
-    queue_on_teleport("getgenv().AutoFarm = <AutoFVal> getgenv().autoSellValue = <autoSVal> task.wait(20) loadstring(game:HttpGet(('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack')))()")
-    
     local tpThrough = <tpTVal>
 
     if not tpThrough then
