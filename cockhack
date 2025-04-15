@@ -98,12 +98,13 @@ local resourcesFolder = player:WaitForChild("Data"):WaitForChild("Resources")
 genv.isTeleporting = false
 
 local cmdText = [[
+task.spawn(function()
 getgenv().AutoFarm = <AutoFVal>
 getgenv().autoSellValue = <autoSVal>
 getgenv().tpThrough = <tpTVal>
 task.wait(20)
 loadstring(game:HttpGet('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack'))()
-
+end)
 ]]
 
 for i, v in toSell do
@@ -111,7 +112,7 @@ for i, v in toSell do
     val.Changed:Connect(function()
         if autoSellValue == 0 then return end
         if genv.isTeleporting then return end
-        --if val.Value < autoSellValue then return end
+        if val.Value < autoSellValue then return end
         genv.isTeleporting = true
         local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
         local s = [==[
@@ -356,12 +357,18 @@ performanceTab:CreateSlider({
 })
 
 if genv.AutoFarm then
-    Toggle:Set(true)
+    task.spawn(function()
+        task.wait(5)
+        Toggle:Set(true)
+    end)
 end
 
 if genv.tpThrough then
-    local found = (function() for i, v in worldIds do if v == genv.tpThrough then return i end end end)()
-    Dropdown:Set(found)
+    task.spawn(function()
+        task.wait(5)
+        local found = (function() for i, v in worldIds do if v == genv.tpThrough then return i end end end)()
+        Dropdown:Set(found)
+    end)
 end
 
 --task.wait(10)
