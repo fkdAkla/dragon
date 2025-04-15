@@ -102,7 +102,7 @@ task.spawn(function()
 getgenv().AutoFarm = <AutoFVal>
 getgenv().autoSellValue = <autoSVal>
 getgenv().tpThrough = <tpTVal>
-task.wait(15)
+task.wait(10)
 loadstring(game:HttpGet('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack'))()
 end)
 ]]
@@ -360,14 +360,14 @@ performanceTab:CreateSlider({
 
 if genv.AutoFarm then
     task.spawn(function()
-        task.wait(5)
+        task.wait(3)
         Toggle:Set(true)
     end)
 end
 
 if genv.tpThrough then
     task.spawn(function()
-        task.wait(5)
+        task.wait(3)
         local found = (function() for i, v in worldIds do if v == genv.tpThrough then return i end end end)()
         Dropdown:Set({found})
     end)
