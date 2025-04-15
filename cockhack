@@ -140,7 +140,7 @@ for i, v in toSell do
         queue_on_teleport("getgenv().AutoFarm = <AutoFVal> getgenv().autoSellValue = <autoSVal> task.wait(20) loadstring(game:HttpGet(('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack')))()")
         tpRemote:InvokeServer(<tpTVal>, {})
     else
-        queue_on_teleport([=[ task.wait(10) queue_on_teleport([[<partOfCode1>]]) game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote"):InvokeServer(4728805070, {}) ]=])
+        queue_on_teleport([=[ task.wait(15) queue_on_teleport([[<partOfCode1>]]) game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote"):InvokeServer(4728805070, {}) ]=])
     
         tpRemote:InvokeServer(tpThrough, {})
     end
