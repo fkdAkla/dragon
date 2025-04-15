@@ -116,6 +116,7 @@ for i, v in toSell do
         genv.isTeleporting = true
         local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
         local s = [==[
+        task.spawn(function()
     local shopPlaceId = 3475397644
     local mainPlaceId = 4728805070
     if game.PlaceId ~= shopPlaceId then return end
@@ -135,16 +136,17 @@ for i, v in toSell do
     task.wait(1)
     
     local tpThrough = <tpTVal>
-
+    
     if not tpThrough then
         queue_on_teleport("getgenv().AutoFarm = <AutoFVal> getgenv().autoSellValue = <autoSVal> task.wait(20) loadstring(game:HttpGet(('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack')))()")
         wait()
-        repeat tpRemote:InvokeServer(<tpTVal>, {}) task.wait(5) until not tpRemote
+        task.spawn(function() repeat tpRemote:InvokeServer(<tpTVal>, {}) task.wait(5) until not tpRemote end)
     else
-        queue_on_teleport([=[ task.wait(10) queue_on_teleport([[<partOfCode1>]]) wait() local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote") repeat tpRemote:InvokeServer(4728805070, {}) task.wait(5) until not tpRemote ]=])
+        queue_on_teleport([=[ task.spawn(function() task.wait(10) queue_on_teleport([[<partOfCode1>]]) wait() local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote") repeat tpRemote:InvokeServer(4728805070, {}) task.wait(5) until not tpRemote end) ]=])
         wait()
-        repeat tpRemote:InvokeServer(<tpTVal>, {}) task.wait(5) until not tpRemote
+        task.spawn(function() repeat tpRemote:InvokeServer(<tpTVal>, {}) task.wait(5) until not tpRemote end)
     end
+    end)
 ]==]      
         s = s:gsub("<partOfCode1>", cmdText):gsub("<AutoFVal>", tostring(genv.AutoFarm), 10):gsub("<autoSVal>", autoSellValue, 10):gsub("<tpTVal>", tpThrough or "nil", 10)
         queue_on_teleport(s)
