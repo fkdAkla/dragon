@@ -338,10 +338,8 @@ local Dropdown = MainTab:CreateDropdown({
    MultipleOptions = false,
    Flag = "Dropdown1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
    Callback = function(Options)
-       if Options[1] == "None" then warn("set to nil") tpThrough = nil return end
+       if Options[1] == "None" then tpThrough = nil return end
        tpThrough = worldIds[Options[1]]
-       warn(tpThrough.." - from callback.")
-       warn(Options[1].." - from callback")
    end,
 })
 
@@ -371,8 +369,7 @@ if genv.tpThrough then
     task.spawn(function()
         task.wait(5)
         local found = (function() for i, v in worldIds do if v == genv.tpThrough then return i end end end)()
-        Dropdown:Set(found)
-        warn(getgenv().tpThrough.." - getgenv check")
+        Dropdown:Set({found})
     end)
 end
 
