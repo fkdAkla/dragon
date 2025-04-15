@@ -132,17 +132,18 @@ for i, v in toSell do
     for i, v in toSell do
         remote:FireServer({ItemName = v, Amount = resourcesFolder[v].Value})
     end
-    task.wait(10)
+    task.wait(1)
     
     local tpThrough = <tpTVal>
 
     if not tpThrough then
         queue_on_teleport("getgenv().AutoFarm = <AutoFVal> getgenv().autoSellValue = <autoSVal> task.wait(20) loadstring(game:HttpGet(('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack')))()")
-        tpRemote:InvokeServer(<tpTVal>, {})
+        wait()
+        print(tpRemote:InvokeServer(<tpTVal>, {}))
     else
-        queue_on_teleport([=[ task.wait(15) queue_on_teleport([[<partOfCode1>]]) game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote"):InvokeServer(4728805070, {}) ]=])
-    
-        tpRemote:InvokeServer(tpThrough, {})
+        queue_on_teleport([=[ task.wait(10) queue_on_teleport([[<partOfCode1>]]) wait() game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote"):InvokeServer(4728805070, {}) ]=])
+        wait()
+        print(tpRemote:InvokeServer(tpThrough, {}))
     end
 ]==]      
         s = s:gsub("<partOfCode1>", cmdText):gsub("<AutoFVal>", tostring(genv.AutoFarm), 10):gsub("<autoSVal>", autoSellValue, 10):gsub("<tpTVal>", tpThrough or "nil", 10)
