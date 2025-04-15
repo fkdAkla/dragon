@@ -132,7 +132,7 @@ for i, v in toSell do
     for i, v in toSell do
         remote:FireServer({ItemName = v, Amount = resourcesFolder[v].Value})
     end
-    task.wait(1)
+    task.wait(3)
     
     local tpThrough = <tpTVal>
 
