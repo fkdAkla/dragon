@@ -86,7 +86,7 @@ local worldIds = {
     Fantasy = 4174118306
 }
 
-local tpThrough
+local tpThrough = genv.tpThrough
 
 --local sellRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SellItemRemote")
     
@@ -338,8 +338,10 @@ local Dropdown = MainTab:CreateDropdown({
    MultipleOptions = false,
    Flag = "Dropdown1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
    Callback = function(Options)
-       if Options[1] == "None" then tpThrough = nil return end
+       if Options[1] == "None" then warn("set to nil") tpThrough = nil return end
        tpThrough = worldIds[Options[1]]
+       warn(tpThrough.." - from callback.")
+       warn(Options[1].." - from callback")
    end,
 })
 
@@ -358,20 +360,19 @@ performanceTab:CreateSlider({
    end,
 })
 
-tpThrough = genv.tpThrough
-
 if genv.AutoFarm then
     task.spawn(function()
-        task.wait(3)
+        task.wait(5)
         Toggle:Set(true)
     end)
 end
 
 if genv.tpThrough then
     task.spawn(function()
-        task.wait(3)
+        task.wait(5)
         local found = (function() for i, v in worldIds do if v == genv.tpThrough then return i end end end)()
         Dropdown:Set(found)
+        warn(getgenv().tpThrough.." - getgenv check")
     end)
 end
 
