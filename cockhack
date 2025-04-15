@@ -98,13 +98,12 @@ local resourcesFolder = player:WaitForChild("Data"):WaitForChild("Resources")
 genv.isTeleporting = false
 
 local cmdText = [[
-task.spawn(function() 
 getgenv().AutoFarm = <AutoFVal>
 getgenv().autoSellValue = <autoSVal>
 getgenv().tpThrough = <tpTVal>
 task.wait(20)
 loadstring(game:HttpGet('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack'))()
-end) 
+
 ]]
 
 for i, v in toSell do
@@ -112,8 +111,9 @@ for i, v in toSell do
     val.Changed:Connect(function()
         if autoSellValue == 0 then return end
         if genv.isTeleporting then return end
-        if val.Value < autoSellValue then return end
+        --if val.Value < autoSellValue then return end
         genv.isTeleporting = true
+        local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
         local s = [==[
     local shopPlaceId = 3475397644
     local mainPlaceId = 4728805070
@@ -122,6 +122,10 @@ for i, v in toSell do
     local resourcesFolder = game.Players.LocalPlayer:WaitForChild("Data"):WaitForChild("Resources")
     
     local sellArgs = {"ItemName", "Amount"}
+    local tpArgs =  {[1] = <tpTVal>,
+    [2] = {}
+    }
+    local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
     local toSell = {"JuniperBerry", "Dragonfruit", "Lime"}
     task.wait(5)
     for i, v in toSell do
@@ -133,16 +137,16 @@ for i, v in toSell do
 
     if not tpThrough then
         queue_on_teleport("getgenv().AutoFarm = <AutoFVal> getgenv().autoSellValue = <autoSVal> task.wait(20) loadstring(game:HttpGet(('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack')))()")
-        game:service("TeleportService"):Teleport(mainPlaceId, game.Players.LocalPlayer)
+        tpRemote:InvokeServer(<tpTVal>, {})
     else
-        queue_on_teleport([=[ task.wait(10) queue_on_teleport([[<partOfCode1>]]) game:service("TeleportService"):Teleport(4728805070, game.Players.LocalPlayer) ]=])
+        queue_on_teleport([=[ task.wait(10) queue_on_teleport([[<partOfCode1>]]) game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote"):InvokeServer(4728805070, {}) ]=])
     
-        game:service("TeleportService"):Teleport(tpThrough, game.Players.LocalPlayer)
+        tpRemote:InvokeServer(tpThrough, {})
     end
 ]==]      
         s = s:gsub("<partOfCode1>", cmdText):gsub("<AutoFVal>", tostring(genv.AutoFarm), 10):gsub("<autoSVal>", autoSellValue, 10):gsub("<tpTVal>", tpThrough or "nil", 10)
         queue_on_teleport(s)
-        game:service("TeleportService"):Teleport(shopPlaceId, game.Players.LocalPlayer)
+        tpRemote:InvokeServer(shopPlaceId, {})
     end)
 end
 
