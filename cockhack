@@ -2,6 +2,9 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 --https://docs.sirius.menu/rayfield/interaction/interactive-elements#creating-an-adaptive-input-textbox 
 
+game.ReplicatedStorage:WaitForChild("AFKEvent"):Destroy()
+
+require(game.ReplicatedStorage:WaitForChild("_replicationFolder"):WaitForChild("DragonClassClient")
 
 local player = game.Players.LocalPlayer
 
