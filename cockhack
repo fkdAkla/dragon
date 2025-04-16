@@ -4,7 +4,7 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 game.ReplicatedStorage:WaitForChild("AFKEvent"):Destroy()
 
-require(game.ReplicatedStorage:WaitForChild("_replicationFolder"):WaitForChild("DragonClassClient")
+require(game.ReplicatedStorage:WaitForChild("_replicationFolder"):WaitForChild("DragonClassClient")) 
 
 local player = game.Players.LocalPlayer
 
