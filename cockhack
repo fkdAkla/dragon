@@ -2,6 +2,8 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 --https://docs.sirius.menu/rayfield/interaction/interactive-elements#creating-an-adaptive-input-textbox 
 
+local vu = game:GetService("VirtualUser") 
+
 game.ReplicatedStorage:WaitForChild("AFKEvent"):Destroy()
 
 require(game.ReplicatedStorage:WaitForChild("_replicationFolder"):WaitForChild("DragonClassClient")) 
@@ -258,10 +260,11 @@ local function farm()
 end
 
 player.Idled:connect(function()
-    game:GetService("VirtualUser"):Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
-    game:GetService("VirtualUser"):Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+  vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+    vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
 end)
 
+vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
 
 local Window = Rayfield:CreateWindow({
    Name = "Cockhack",
