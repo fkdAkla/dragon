@@ -317,7 +317,7 @@ local MainTab = Window:CreateTab("Main", "app-window") -- Title, Image
 
 local Section = MainTab:CreateSection("Farm")
 
-local Label = MainTab:CreateLabel("Anti Afk is Enabled", 4483362458, Color3.fromRGB(255, 255, 255), false) -- Title, Icon, Color, IgnoreTheme
+local Label = MainTab:CreateLabel("Anti Afk is Enabled", 4483362458, nil, false) -- Title, Icon, Color, IgnoreTheme
 
 local Toggle = MainTab:CreateToggle({
    Name = "Food Farm",
@@ -339,7 +339,7 @@ local Toggle = MainTab:CreateToggle({
    end,
 })
 
-local Label2 = MainTab:CreateLabel("Auto Sell is for Lime | DragonFruit | JuniperBerry", 4483362458, Color3.fromRGB(255, 255, 255), false) -- Title, Icon, Color, IgnoreTheme
+local Label2 = MainTab:CreateLabel("Auto Sell (Wasteland food)", 4483362458, nil, false) -- Title, Icon, Color, IgnoreTheme
 
 local Slider = MainTab:CreateSlider({
    Name = "Auto Sell (0 = disable)",
