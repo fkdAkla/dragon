@@ -389,7 +389,7 @@ end
 
 if genv.tpThrough then
     task.spawn(function()
-        task.wait(3)
+        task.wait(1)
         local found = (function() for i, v in worldIds do if v == genv.tpThrough then return i end end end)()
         Dropdown:Set({found})
     end)
