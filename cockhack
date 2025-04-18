@@ -382,7 +382,7 @@ performanceTab:CreateSlider({
 
 if genv.AutoFarm then
     task.spawn(function()
-        task.wait(3)
+        task.wait(1)
         Toggle:Set(true)
     end)
 end
