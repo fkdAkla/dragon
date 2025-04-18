@@ -4,7 +4,8 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local vu = game:GetService("VirtualUser") 
 
-game.ReplicatedStorage:WaitForChild("AFKEvent"):Destroy()
+local afkEvent = game.ReplicatedStorage:WaitForChild("AFKEvent",5)
+if afkEvent then afkEvent:Destroy() end
 
 require(game.ReplicatedStorage:WaitForChild("_replicationFolder"):WaitForChild("DragonClassClient")) 
 
@@ -93,6 +94,7 @@ local worldIds = {
 
 local tpThrough = genv.tpThrough
 
+
 --local sellRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SellItemRemote")
     
 local sellArgs = {"ItemName", "Amount"}
@@ -101,6 +103,9 @@ local toSell = {"JuniperBerry", "Dragonfruit", "Lime"}
 local resourcesFolder = player:WaitForChild("Data"):WaitForChild("Resources")
 
 genv.isTeleporting = false
+
+local tpOnWaiting = nil
+local desiredCameraCfr = CFrame.new(314.103821, 69.2530136, 100, 0, 1, -0, 0.5, 1, -0.5, 0.380629182, 1, 0.894421339)
 
 local cmdText = [[
 task.spawn(function()
@@ -196,6 +201,7 @@ local function farm()
     
     genv.AutoFarm = true
     
+    if not tpOnWaiting then tpOnWaiting = player.Character:GetPivot() * CFrame.new(0,5,0) end
     local c
     c = camera.ChildAdded:Connect(function(child)
         local handle = child:FindFirstChild("Handle")
@@ -207,7 +213,7 @@ local function farm()
         firetouchinterest(player.Character.HumanoidRootPart, handle, 0)
         
      end)
-    
+    game:GetService("RunService"):Set3dRenderingEnabled(false)
     task.spawn(function()
     while task.wait() do
         if _G.stopped then c:Disconnect() return end
@@ -218,6 +224,10 @@ local function farm()
             local deadVal = bg.Dead
             
             if deadVal.Value then continue end
+            
+            camera.CameraType = Enum.CameraType.Scriptable
+            
+            camera.CFrame = desiredCameraCfr
             
             --camera.CameraSubject = v["5"]:FindFirstChildWhichIsA("MeshPart")
             local hb = v.Hitbox
@@ -236,8 +246,11 @@ local function farm()
                 if deadVal.Value then fire:_setAttack(false) genv.FoodPos = nil break end
             end
                 
-                
+            
         end
+        
+        player.Character:PivotTo(tpOnWaiting)
+        
     end
     
     end)
@@ -318,6 +331,9 @@ local Toggle = MainTab:CreateToggle({
             _G.stopped = true
             genv.AutoFarm = false
             genv.currentHooking._updateMousePosition = nil
+            camera.CameraType = Enum.CameraType.Custom
+            game:GetService("RunService"):Set3dRenderingEnabled(true)
+            player.Character:PivotTo(tpOnWaiting)
             --camera.CameraSubject = player.Character
         end
    end,
