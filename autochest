@@ -132,7 +132,7 @@ end
 genv.currentHooking._updateMousePosition = true
 local fire
 repeat wait() fire = genv.funcs.GetEntityToControl() until fire
-setfpscap(30)
+
 local count = 0
 for _, v in treasureFolder:GetChildren() do
     local model = v:FindFirstChildWhichIsA("Model")
