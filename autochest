@@ -156,7 +156,7 @@ task.wait(7)
 if worldOrder[currWorld+1] then
     local tpTo = worldOrder[currWorld+1]
     local s = [===[
-        task.wait(10)
+        wait(10)
         getgenv().worldNum = currWorld+1
         loadstring(game:HttpGet('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/autochest'))()
     ]===]
