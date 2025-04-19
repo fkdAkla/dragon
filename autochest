@@ -8,6 +8,7 @@ if game.PlaceId ~= 3475397644 then
         loadstring(game:HttpGet('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/autochest'))()
     ]===]
     queue_on_teleport(s)
+    tpRemote:InvokeServer(3475397644, {})
     return
 end
 
