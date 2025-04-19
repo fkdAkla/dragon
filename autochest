@@ -1,6 +1,15 @@
 local mainPlaceId = 4728805070
 if game.PlaceId == mainPlaceId then return end
+local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
 
+if game.PlaceId ~= 3475397644 then
+    local s = [===[
+        task.wait(10)
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/autochest'))()
+    ]===]
+    queue_on_teleport(s)
+    return
+end
 
 local genv = getgenv()
 
@@ -9,9 +18,7 @@ local vu = game:GetService("VirtualUser")
 local afkEvent = game.ReplicatedStorage:WaitForChild("AFKEvent",5)
 if afkEvent then afkEvent:Destroy() end
 
-require(game.ReplicatedStorage:WaitForChild("_replicationFolder"):WaitForChild("DragonClassClient")) 
-
-local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
+require(game.ReplicatedStorage:WaitForChild("_replicationFolder"):WaitForChild("DragonClassClient"))
 
 local worldIds = {
     Grassland = 3475419198,
@@ -137,11 +144,13 @@ end
 if worldOrder[currWorld+1] then
     local tpTo = worldOrder[currWorld+1]
     local s = [===[
-        task.wait(15)
+        task.wait(10)
         getgenv().worldNum = currWorld+1
         loadstring(game:HttpGet('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/autochest'))()
     ]===]
+    s = s:gsub("currWorld", currWorld)
     queue_on_teleport(s)
+    tpRemote:InvokeServer(tpTo, {})
 else
     loadstring(game:HttpGet('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack'))()
 end
