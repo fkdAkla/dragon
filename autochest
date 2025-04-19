@@ -161,5 +161,6 @@ if worldOrder[currWorld+1] then
 else
     genv.worldNum = nil
     genv.currentHooking._updateMousePosition = nil
+    print("loading gui...")
     loadstring(game:HttpGet('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack'))()
 end
