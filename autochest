@@ -124,7 +124,7 @@ oldMouseP = hookfunction(updMousePosFunc, function(p_u_139, p140)
     return oldMouseP(p_u_139, p140)
 end)
 
-for _, v in treasureFolder do
+for _, v in treasureFolder:GetChildren() do
     local model = v:FindFirstChildWhichIsA("Model")
     if not model then continue end
     
