@@ -148,7 +148,7 @@ for _, v in treasureFolder:GetChildren() do
     count += 1
 end
 
-task.wait(count>0 and 7)
+task.wait(count>0 and 7 or 0.5)
 
 if worldOrder[currWorld+1] then
     local tpTo = worldOrder[currWorld+1]
