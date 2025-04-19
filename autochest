@@ -129,7 +129,6 @@ oldMouseP = hookfunction(updMousePosFunc, function(p_u_139, p140)
 end)
 end
 
-genv.currentHooking._updateMousePosition = true
 local fire
 repeat wait() fire = genv.funcs.GetEntityToControl() until fire
 
@@ -139,6 +138,7 @@ for _, v in treasureFolder:GetChildren() do
     if not model then continue end
     
     if model.HumanoidRootPart.Dead.Value then continue end
+    genv.currentHooking._updateMousePosition = true
     player.Character:PivotTo(model.HumanoidRootPart.CFrame)
     
     genv.FoodPos = model.HumanoidRootPart.Position
