@@ -322,8 +322,9 @@ local Section = MainTab:CreateSection("Farm")
 
 local Label = MainTab:CreateLabel("Anti Afk is Enabled", 4483362458, nil, false) -- Title, Icon, Color, IgnoreTheme
 
+local Toggle
 if game.PlaceId == mainPlaceId then
-    local Toggle = MainTab:CreateToggle({
+    Toggle = MainTab:CreateToggle({
        Name = "Food Farm",
        CurrentValue = false,
        Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
