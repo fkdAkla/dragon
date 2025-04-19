@@ -2,7 +2,7 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 --https://docs.sirius.menu/rayfield/interaction/interactive-elements#creating-an-adaptive-input-textbox 
 
-local vu = game:GetService("VirtualUser") 
+local vu = game:GetService("VirtualUser")
 
 local afkEvent = game.ReplicatedStorage:WaitForChild("AFKEvent",5)
 if afkEvent then afkEvent:Destroy() end
@@ -55,13 +55,14 @@ end
 
 if not genv.initFuncs.init then
     genv.initFuncs.init = (function()
-    
+        if genv.inited then return end
         for i, v in genv.neededFuncs do
             local f = genv.initFuncs.getFunc(v)
             if not f then warn('not found '..v) continue end
             genv.funcs[debug.info(f, "n")] = f
         end
-    
+        
+        genv.inited = true
     end)
 
 end
@@ -80,7 +81,7 @@ local autoSellValue = genv.autoSellValue or 0
 local shopPlaceId = 3475397644
 local mainPlaceId = 4728805070
 
-if game.PlaceId ~= mainPlaceId then return end
+if game.PlaceId ~= mainPlaceId and game.PlaceId ~= shopPlaceId then return end
 
 local worldIds = {
     Grassland = 3475419198,
@@ -321,25 +322,47 @@ local Section = MainTab:CreateSection("Farm")
 
 local Label = MainTab:CreateLabel("Anti Afk is Enabled", 4483362458, nil, false) -- Title, Icon, Color, IgnoreTheme
 
-local Toggle = MainTab:CreateToggle({
-   Name = "Food Farm",
-   CurrentValue = false,
-   Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-   Callback = function(Value)
-       if Value then
-           genv.currentHooking._updateMousePosition = true
-           farm()
-        else
-            _G.stopped = true
-            genv.AutoFarm = false
-            genv.currentHooking._updateMousePosition = nil
-            camera.CameraType = Enum.CameraType.Custom
-            game:GetService("RunService"):Set3dRenderingEnabled(true)
-            player.Character:PivotTo(tpOnWaiting)
-            --camera.CameraSubject = player.Character
-        end
-   end,
-})
+if game.PlaceId == mainPlaceId then
+    local Toggle = MainTab:CreateToggle({
+       Name = "Food Farm",
+       CurrentValue = false,
+       Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+       Callback = function(Value)
+           if Value then
+               genv.currentHooking._updateMousePosition = true
+               farm()
+            else
+                _G.stopped = true
+                genv.AutoFarm = false
+                genv.currentHooking._updateMousePosition = nil
+                camera.CameraType = Enum.CameraType.Custom
+                game:GetService("RunService"):Set3dRenderingEnabled(true)
+                player.Character:PivotTo(tpOnWaiting)
+                --camera.CameraSubject = player.Character
+            end
+       end,
+    })
+    
+else
+    local Button = MainTab:CreateButton({
+        Name = "Teleport to Wasteland and AutoFarm food",
+        Callback = function()
+            task.spawn(function() Rayfield:Destroy() end)
+            local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
+            local s = [===[
+                local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
+                local tpThrough = <tpTVal>
+                
+                queue_on_teleport([==[ task.wait(10) queue_on_teleport([[<partOfCode1>]]) wait() game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote"):InvokeServer(4728805070, {}) ]==])
+                tpRemote:InvokeServer(tpThrough, {})
+                ]===]
+            s = s:gsub("<partOfCode1>", cmdText):gsub("<AutoFVal>", tostring(true), 10):gsub("<autoSVal>", autoSellValue, 10):gsub("<tpTVal>", tpThrough or "nil", 10)
+            queue_on_teleport(s)
+            tpRemote:InvokeServer(tpThrough, {})
+        end,
+    })
+
+end
 
 local Label2 = MainTab:CreateLabel("Auto Sell (Wasteland food)", 4483362458, nil, false) -- Title, Icon, Color, IgnoreTheme
 
@@ -365,6 +388,14 @@ local Dropdown = MainTab:CreateDropdown({
        if Options[1] == "None" then tpThrough = nil return end
        tpThrough = worldIds[Options[1]]
    end,
+})
+
+local chestBtn = MainTab:CreateButton({
+    Name = "Auto Chest ALL WORLDS",
+    Callback = function()
+        task.spawn(function() Rayfield:Destroy() end)
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/autochest'))()
+    end,
 })
 
 local performanceTab = Window:CreateTab("Performance", "battery-charging")
