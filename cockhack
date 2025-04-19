@@ -345,9 +345,12 @@ if game.PlaceId == mainPlaceId then
     })
     
 else
+    local clickedTpWasteland = false
     local Button = MainTab:CreateButton({
         Name = "Teleport to Wasteland and AutoFarm food",
         Callback = function()
+            if clickedTpWasteland then return end
+            clickedTpWasteland = true
             local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
             local s = [===[
                 local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
@@ -359,7 +362,6 @@ else
             s = s:gsub("<partOfCode1>", cmdText):gsub("<AutoFVal>", tostring(true), 10):gsub("<autoSVal>", autoSellValue, 10):gsub("<tpTVal>", tpThrough or "nil", 10)
             queue_on_teleport(s)
             tpRemote:InvokeServer(tpThrough, {})
-            Rayfield:Destroy()
         end,
     })
 
@@ -391,10 +393,13 @@ local Dropdown = MainTab:CreateDropdown({
    end,
 })
 
+local clickedAutoChest = false
+
 local chestBtn = MainTab:CreateButton({
     Name = "Auto Chest ALL WORLDS",
     Callback = function()
-        task.spawn(function() Rayfield:Destroy() end)
+        if clickedAutoChest then return end
+        clickedAutoChest = true
         loadstring(game:HttpGet('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/autochest'))()
     end,
 })
