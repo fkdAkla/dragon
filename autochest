@@ -95,7 +95,8 @@ genv.initFuncs.init()
 local updMousePosFunc = genv.funcs._updateMousePosition
 
 local player = game.Players.LocalPlayer
-local hrp = player.Character.HumanoidRootPart
+
+local hrp = player.Character:WaitForChild("HumanoidRootPart")
 
 if not beforeInited then
 local ups = debug.getupvalues(updMousePosFunc)
@@ -112,7 +113,7 @@ oldMouseP = hookfunction(updMousePosFunc, function(p_u_139, p140)
         local v143 = 50
         v141.MaxDistance = v142 + math.abs(v143)
 
-        local newPos = genv.FoodPos or (hrp.CFrame * CFrame.new(0,0,-10)).Position
+        local newPos = genv.FoodPos or hrp and (hrp.CFrame * CFrame.new(0,0,-10)).Position
         p_u_139.LastMousePosition = newPos
         local v144 = p_u_139:_clampPosition((p_u_139:_getTargetPosition(p_u_139.LastMousePosition)))
         p_u_139.Position = v144
