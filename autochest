@@ -1,1 +1,147 @@
-blank
+local mainPlaceId = 4728805070
+if game.PlaceId == mainPlaceId then return end
+
+
+local genv = getgenv()
+
+local vu = game:GetService("VirtualUser")
+
+local afkEvent = game.ReplicatedStorage:WaitForChild("AFKEvent",5)
+if afkEvent then afkEvent:Destroy() end
+
+require(game.ReplicatedStorage:WaitForChild("_replicationFolder"):WaitForChild("DragonClassClient")) 
+
+local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
+
+local worldIds = {
+    Grassland = 3475419198,
+    Jungle = 3475422608,
+    Volcano = 3487210751,
+    Tundra = 3623549100,
+    Ocean = 3737848045,
+    Desert = 3752680052,
+    Fantasy = 4174118306,
+    Main = mainPlaceId
+}
+
+local currWorld = getgenv().worldNum or 1
+--genv.FoodPos
+
+local worldOrder = {3475419198,3475422608,3487210751,3623549100,3737848045,3752680052,4174118306, mainPlaceId}
+
+
+local treasureFolder = workspace:WaitForChild("Interactions"):WaitForChild("Nodes"):WaitForChild("Treasure")
+
+genv.funcs = genv.funcs or {}
+genv.initFuncs = genv.initFuncs or {}
+genv.currentHooking = genv.currentHooking or {}
+
+local currentHooking = genv.currentHooking
+
+local funcs = genv.funcs
+
+genv.neededFuncs = {"_updateMousePosition",
+    "GetEntityToControl",
+    "CanEntityDoAction"
+    --"_canAimAtPosition",
+    --"_getAutoTargetPosition",
+    --"_update"
+}
+if not genv.initFuncs.getFunc then
+    genv.initFuncs.getFunc = (function(fName)
+        --if not genv.currGc then genv.currGc = getgc() end
+        
+        for i, v in getgc() do
+            
+            if type(v) ~= "function" then continue end
+            
+            local f = debug.info(v, "n") == fName and v or nil
+            if f then
+                print("Found "..fName.." function!")
+                return f
+            end
+        end
+    end)
+
+end
+
+
+if not genv.initFuncs.init then
+    genv.initFuncs.init = (function()
+    
+        for i, v in genv.neededFuncs do
+            local f = genv.initFuncs.getFunc(v)
+            if not f then warn('not found '..v) continue end
+            genv.funcs[debug.info(f, "n")] = f
+        end
+    
+    end)
+
+end
+
+genv.initFuncs.init()
+
+local updMousePosFunc = genv.funcs._updateMousePosition
+
+local player = game.Players.LocalPlayer
+local hrp = player.Character.HumanoidRootPart
+
+local ups = debug.getupvalues(updMousePosFunc)
+
+local oldMouseP
+oldMouseP = hookfunction(updMousePosFunc, function(p_u_139, p140)
+    -- upvalues: (copy) v_u_19, (ref) v_u_28, (copy) v_u_23, (copy) v_u_12, (copy) v_u_22, (ref) v_u_29
+    if genv.currentHooking._updateMousePosition then
+        if not p_u_139.IsLocalPlayer then return end
+        local v_u_19, v_u_28, v_u_23, v_u_12, v_u_22, v_u_29 = unpack(ups)
+        p_u_139.BaseMaxBreathDistance = p_u_139.MaxBreathDistance + (p_u_139.Dragon.Flying and (p_u_139.MaxBreathDistance * v_u_19.FireBreathDistanceWhileFlyingMultiplier or 0) or 0)
+        local v141 = v_u_28
+        local v142 = p_u_139.BaseMaxBreathDistance
+        local v143 = 50
+        v141.MaxDistance = v142 + math.abs(v143)
+
+        local newPos = genv.FoodPos or (hrp.CFrame * CFrame.new(0,0,-10)).Position
+        p_u_139.LastMousePosition = newPos
+        local v144 = p_u_139:_clampPosition((p_u_139:_getTargetPosition(p_u_139.LastMousePosition)))
+        p_u_139.Position = v144
+
+            p_u_139.BreathImpactPart.BP.Position = v144
+            p_u_139.BreathImpactPart.BG.CFrame = CFrame.new(Vector3.new(0, 0, 0), v144 - v_u_28.UnitRay.Origin)
+            if p140 then
+                p_u_139.BreathImpactPart.Position = v144
+            end
+            
+            return true
+    end
+    return oldMouseP(p_u_139, p140)
+end)
+
+for _, v in treasureFolder do
+    local model = v:FindFirstChildWhichIsA("Model")
+    if not model then continue end
+    
+    if model.HumanoidRootPart.Dead.Value then continue end
+    player.Character:PivotTo(model)
+    
+    genv.FoodPos = model.HumanoidRootPart.Position
+    
+    local fire = genv.funcs.GetEntityToControl()
+    
+    fire:_setAttack(true, "Fire")
+    
+    task.wait(0.5)
+    fire:_setAttack(false)
+    genv.FoodPos = nil
+end
+
+if worldOrder[currWorld+1] then
+    local tpTo = worldOrder[currWorld+1]
+    local s = [===[
+        task.wait(15)
+        getgenv().worldNum = currWorld+1
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/autochest'))()
+    ]===]
+    queue_on_teleport(s)
+else
+    loadstring(game:HttpGet('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack'))()
+end
