@@ -124,6 +124,7 @@ oldMouseP = hookfunction(updMousePosFunc, function(p_u_139, p140)
     return oldMouseP(p_u_139, p140)
 end)
 
+genv.currentHooking._updateMousePosition = true
 for _, v in treasureFolder:GetChildren() do
     local model = v:FindFirstChildWhichIsA("Model")
     if not model then continue end
@@ -156,5 +157,6 @@ if worldOrder[currWorld+1] then
     tpRemote:InvokeServer(tpTo, {})
 else
     genv.worldNum = nil
+    genv.currentHooking._updateMousePosition = nil
     loadstring(game:HttpGet('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack'))()
 end
