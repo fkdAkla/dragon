@@ -143,7 +143,7 @@ for _, v in treasureFolder:GetChildren() do
     genv.FoodPos = nil
 end
 
-task.wait(5)
+task.wait(3)
 
 if worldOrder[currWorld+1] then
     local tpTo = worldOrder[currWorld+1]
