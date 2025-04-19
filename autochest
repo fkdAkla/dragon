@@ -1,5 +1,5 @@
 local mainPlaceId = 4728805070
-if game.PlaceId == mainPlaceId then return end
+--if game.PlaceId == mainPlaceId then return end
 local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
 
 if game.PlaceId ~= 3475397644 and not getgenv().worldNum then
