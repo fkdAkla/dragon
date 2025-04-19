@@ -88,6 +88,8 @@ if not genv.initFuncs.init then
 
 end
 
+local beforeInited = genv.inited
+
 genv.initFuncs.init()
 
 local updMousePosFunc = genv.funcs._updateMousePosition
@@ -95,6 +97,7 @@ local updMousePosFunc = genv.funcs._updateMousePosition
 local player = game.Players.LocalPlayer
 local hrp = player.Character.HumanoidRootPart
 
+if not beforeInited then
 local ups = debug.getupvalues(updMousePosFunc)
 
 local oldMouseP
@@ -124,6 +127,7 @@ oldMouseP = hookfunction(updMousePosFunc, function(p_u_139, p140)
     end
     return oldMouseP(p_u_139, p140)
 end)
+end
 
 genv.currentHooking._updateMousePosition = true
 local fire
