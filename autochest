@@ -133,13 +133,16 @@ for _, v in treasureFolder:GetChildren() do
     if not model then continue end
     
     if model.HumanoidRootPart.Dead.Value then continue end
-    player.Character:PivotTo(model:GetPivot())
+    local thr = task.spawn(function()
+        repeat task.wait() player.Character:PivotTo(model.HumanoidRootPart.CFrame) until model.HumanoidRootPart.Dead.Value
+    end)
+    player.Character:PivotTo(model.HumanoidRootPart.CFrame)
     
     genv.FoodPos = model.HumanoidRootPart.Position
     
     fire.Breath:Fire()
     
-    task.wait(0.5)
+    task.wait(1)
     fire.Breath:Stop()
     genv.FoodPos = nil
 end
