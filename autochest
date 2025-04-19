@@ -2,7 +2,7 @@ local mainPlaceId = 4728805070
 if game.PlaceId == mainPlaceId then return end
 local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
 
-if game.PlaceId ~= 3475397644 then
+if game.PlaceId ~= 3475397644 and not getgenv().worldNum then
     local s = [===[
         task.wait(10)
         loadstring(game:HttpGet('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/autochest'))()
@@ -142,6 +142,8 @@ for _, v in treasureFolder:GetChildren() do
     genv.FoodPos = nil
 end
 
+task.wait(5)
+
 if worldOrder[currWorld+1] then
     local tpTo = worldOrder[currWorld+1]
     local s = [===[
@@ -153,5 +155,6 @@ if worldOrder[currWorld+1] then
     queue_on_teleport(s)
     tpRemote:InvokeServer(tpTo, {})
 else
+    genv.worldNum = nil
     loadstring(game:HttpGet('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack'))()
 end
