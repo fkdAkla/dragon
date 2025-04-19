@@ -128,6 +128,7 @@ genv.currentHooking._updateMousePosition = true
 local fire
 repeat wait() fire = genv.funcs.GetEntityToControl() until fire
 setfpscap(30)
+local count = 0
 for _, v in treasureFolder:GetChildren() do
     local model = v:FindFirstChildWhichIsA("Model")
     if not model then continue end
@@ -144,9 +145,10 @@ for _, v in treasureFolder:GetChildren() do
     fire.Breath:Stop()
     task.wait(0.5)
     genv.FoodPos = nil
+    count += 1
 end
 
-task.wait(5)
+task.wait(count>0 and 7)
 
 if worldOrder[currWorld+1] then
     local tpTo = worldOrder[currWorld+1]
