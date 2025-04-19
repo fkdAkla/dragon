@@ -133,7 +133,6 @@ end
 local fire
 repeat wait() fire = genv.funcs.GetEntityToControl() until fire
 
-local count = 0
 for _, v in treasureFolder:GetChildren() do
     local model = v:FindFirstChildWhichIsA("Model")
     if not model then continue end
@@ -151,11 +150,9 @@ for _, v in treasureFolder:GetChildren() do
     fire.Breath:Stop()
     task.wait(0.5)
     genv.FoodPos = nil
-    count += 1
 end
 
-local toWait = count>0 and 7 or 3
-task.wait(toWait)
+task.wait(7)
 
 if worldOrder[currWorld+1] then
     local tpTo = worldOrder[currWorld+1]
