@@ -227,10 +227,12 @@ local function farm()
             
             camera.CameraType = Enum.CameraType.Scriptable
             
-            camera.CFrame = desiredCameraCfr
+            
             
             --camera.CameraSubject = v["5"]:FindFirstChildWhichIsA("MeshPart")
             local hb = v.Hitbox
+            camera.CFrame = CFrame.lookAt(hb.Position + Vector3.new(0, 40,0), hb.Position)
+
             --camera.CameraSubject = hb
             genv.FoodPos = hb.Position
             
