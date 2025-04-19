@@ -125,6 +125,9 @@ oldMouseP = hookfunction(updMousePosFunc, function(p_u_139, p140)
 end)
 
 genv.currentHooking._updateMousePosition = true
+local fire
+repeat wait() fire = genv.funcs.GetEntityToControl() until fire
+setfpscap(30)
 for _, v in treasureFolder:GetChildren() do
     local model = v:FindFirstChildWhichIsA("Model")
     if not model then continue end
@@ -134,12 +137,10 @@ for _, v in treasureFolder:GetChildren() do
     
     genv.FoodPos = model.HumanoidRootPart.Position
     
-    local fire = genv.funcs.GetEntityToControl()
-    
-    fire:_setAttack(true, "Fire")
+    fire.Breath:Fire()
     
     task.wait(0.5)
-    fire:_setAttack(false)
+    fire.Breath:Stop()
     genv.FoodPos = nil
 end
 
