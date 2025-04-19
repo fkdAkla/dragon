@@ -162,6 +162,7 @@ if worldOrder[currWorld+1] then
     ]===]
     s = s:gsub("currWorld", currWorld)
     queue_on_teleport(s)
+    wait()
     tpRemote:InvokeServer(tpTo, {})
 else
     genv.worldNum = nil
