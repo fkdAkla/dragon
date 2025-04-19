@@ -130,8 +130,7 @@ oldMouseP = hookfunction(updMousePosFunc, function(p_u_139, p140)
 end)
 end
 
-local fire
-repeat wait() fire = genv.funcs.GetEntityToControl() until fire
+local fire = genv.funcs.GetEntityToControl()
 
 for _, v in treasureFolder:GetChildren() do
     local model = v:FindFirstChildWhichIsA("Model")
