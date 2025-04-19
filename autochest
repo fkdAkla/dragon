@@ -129,7 +129,7 @@ for _, v in treasureFolder:GetChildren() do
     if not model then continue end
     
     if model.HumanoidRootPart.Dead.Value then continue end
-    player.Character:PivotTo(model)
+    player.Character:PivotTo(model:GetPivot())
     
     genv.FoodPos = model.HumanoidRootPart.Position
     
