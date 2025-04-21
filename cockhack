@@ -78,6 +78,8 @@ local ups = debug.getupvalues(updMousePosFunc)
 
 local autoSellValue = genv.autoSellValue or 0
 
+local tpDelay = genv.tpDelay or 5
+
 local shopPlaceId = 3475397644
 local mainPlaceId = 4728805070
 
@@ -113,6 +115,7 @@ task.spawn(function()
 getgenv().AutoFarm = <AutoFVal>
 getgenv().autoSellValue = <autoSVal>
 getgenv().tpThrough = <tpTVal>
+getgenv().tpDelay = <tpDelay>
 task.wait(10)
 loadstring(game:HttpGet('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack'))()
 end)
@@ -143,22 +146,22 @@ for i, v in toSell do
     for i, v in toSell do
         remote:FireServer({ItemName = v, Amount = resourcesFolder[v].Value})
     end
-    task.wait(1)
+    task.wait(<tpDelay>)
     
     local tpThrough = <tpTVal>
     
     warn(tpThrough, typeof(tpThrough))
     if not tpThrough then
-        queue_on_teleport("getgenv().AutoFarm = <AutoFVal> getgenv().autoSellValue = <autoSVal> task.wait(20) loadstring(game:HttpGet(('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack')))()")
+        queue_on_teleport("getgenv().AutoFarm = <AutoFVal> getgenv().autoSellValue = <autoSVal> getgenv().tpDelay = <tpDelay> task.wait(10) loadstring(game:HttpGet(('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack')))()")
         wait()
         tpRemote:InvokeServer(tpThrough, {})
     else
-        queue_on_teleport([=[ task.wait(10) queue_on_teleport([[<partOfCode1>]]) wait() game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote"):InvokeServer(4728805070, {}) ]=])
+        queue_on_teleport([=[ task.wait(10+<tpDelay>) queue_on_teleport([[<partOfCode1>]]) wait() game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote"):InvokeServer(4728805070, {}) ]=])
         wait()
         tpRemote:InvokeServer(tpThrough, {})
     end
 ]==]      
-        s = s:gsub("<partOfCode1>", cmdText):gsub("<AutoFVal>", tostring(genv.AutoFarm), 10):gsub("<autoSVal>", autoSellValue, 10):gsub("<tpTVal>", tpThrough or "nil", 10)
+        s = s:gsub("<partOfCode1>", cmdText):gsub("<AutoFVal>", tostring(genv.AutoFarm), 10):gsub("<autoSVal>", autoSellValue, 10):gsub("<tpTVal>", tpThrough or "nil", 10):gsub("<tpDelay>", tpDelay, 10)
         queue_on_teleport(s)
         tpRemote:InvokeServer(shopPlaceId, {})
     end)
@@ -351,6 +354,7 @@ else
     local Button = MainTab:CreateButton({
         Name = "Teleport to Wasteland and AutoFarm food",
         Callback = function()
+            if not tpThrough then return end
             if clickedTpWasteland then return end
             clickedTpWasteland = true
             local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
@@ -361,7 +365,7 @@ else
                 queue_on_teleport([==[ task.wait(10) queue_on_teleport([[<partOfCode1>]]) wait() game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote"):InvokeServer(4728805070, {}) ]==])
                 tpRemote:InvokeServer(tpThrough, {})
                 ]===]
-            s = s:gsub("<partOfCode1>", cmdText):gsub("<AutoFVal>", tostring(true), 10):gsub("<autoSVal>", autoSellValue, 10):gsub("<tpTVal>", tpThrough or "nil", 10)
+            s = s:gsub("<partOfCode1>", cmdText):gsub("<AutoFVal>", tostring(true), 10):gsub("<autoSVal>", autoSellValue, 10):gsub("<tpTVal>", tpThrough or "nil", 10):gsub("<tpDelay>", tpDelay)
             queue_on_teleport(s)
             tpRemote:InvokeServer(tpThrough, {})
         end,
@@ -392,6 +396,18 @@ local Dropdown = MainTab:CreateDropdown({
    Callback = function(Options)
        if Options[1] == "None" then tpThrough = nil return end
        tpThrough = worldIds[Options[1]]
+   end,
+})
+
+local tpDelaySlider = MainTab:CreateSlider({
+   Name = "Tp Delay (for auto sale)",
+   Range = {5, 180},
+   Increment = 5,
+   Suffix = "Seconds",
+   CurrentValue = tpDelay,
+   Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       tpDelay = Value
    end,
 })
 
