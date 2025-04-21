@@ -264,7 +264,7 @@ local function farm()
     while not _G.stopped do
         task.wait()
         if not genv.FoodPos then continue end
-        task.wait(0.5)
+        task.wait(0.55)
         --if genv.funcs.CanEntityDoAction(fire, "_setAttack", "Fire") then
         --fire:_setAttack(true, "Fire")
         fire.Breath:Fire()
