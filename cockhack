@@ -113,6 +113,7 @@ local desiredCameraCfr = CFrame.new(314.103821, 69.2530136, 100, 0, 1, -0, 0.5, 
 
 local cmdText = [[
 task.spawn(function()
+print("START")
 getgenv().AutoFarm = <AutoFVal>
 getgenv().autoSellValue = <autoSVal>
 getgenv().tpThrough = <tpTVal>
@@ -131,6 +132,7 @@ for i, v in toSell do
         genv.isTeleporting = true
         local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
         local s = [==[
+print("START")
     local shopPlaceId = 3475397644
     local mainPlaceId = 4728805070
     if game.PlaceId ~= shopPlaceId then return end
@@ -153,11 +155,11 @@ for i, v in toSell do
     
     warn(tpThrough, typeof(tpThrough))
     if not tpThrough then
-        queue_on_teleport("getgenv().AutoFarm = <AutoFVal> getgenv().autoSellValue = <autoSVal> getgenv().tpDelay = <tpDelay> task.wait(10) loadstring(game:HttpGet(('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack')))()")
+        queue_on_teleport("print('START') getgenv().AutoFarm = <AutoFVal> getgenv().autoSellValue = <autoSVal> getgenv().tpDelay = <tpDelay> task.wait(10) loadstring(game:HttpGet(('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack')))()")
         wait()
         tpRemote:InvokeServer(tpThrough, {})
     else
-        queue_on_teleport([=[ task.wait(10+<tpDelay>) queue_on_teleport([[<partOfCode1>]]) wait() game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote"):InvokeServer(4728805070, {}) ]=])
+        queue_on_teleport([=[print("START") task.wait(10+<tpDelay>) queue_on_teleport([[<partOfCode1>]]) wait() game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote"):InvokeServer(4728805070, {}) ]=])
         wait()
         tpRemote:InvokeServer(tpThrough, {})
     end
@@ -363,7 +365,7 @@ else
                 local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
                 local tpThrough = <tpTVal>
                 
-                queue_on_teleport([==[ task.wait(10) queue_on_teleport([[<partOfCode1>]]) wait() game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote"):InvokeServer(4728805070, {}) ]==])
+                queue_on_teleport([==[print("START") task.wait(10) queue_on_teleport([[<partOfCode1>]]) wait() game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote"):InvokeServer(4728805070, {}) ]==])
                 tpRemote:InvokeServer(tpThrough, {})
                 ]===]
             s = s:gsub("<partOfCode1>", cmdText):gsub("<AutoFVal>", tostring(true), 10):gsub("<autoSVal>", autoSellValue, 10):gsub("<tpTVal>", tpThrough or "nil", 10):gsub("<tpDelay>", tpDelay)
