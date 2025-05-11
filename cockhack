@@ -96,7 +96,7 @@ local worldIds = {
     Prehistoric = 4869039553
 }
 
-local fruitRecvDeadline = 60*3
+local fruitRecvDeadline = 60*4
 
 local lastFruitRecvTime = time()
 
