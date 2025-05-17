@@ -29,7 +29,9 @@ local funcs = genv.funcs
 
 genv.neededFuncs = {"_updateMousePosition",
     "GetEntityToControl",
-    "CanEntityDoAction"
+    "CanEntityDoAction",
+    "_castDamageRays",
+    "GetEntityFromHit"
     --"_canAimAtPosition",
     --"_getAutoTargetPosition",
     --"_update"
@@ -96,9 +98,6 @@ local worldIds = {
     Prehistoric = 4869039553
 }
 
-local fruitRecvDeadline = 60*4
-
-local lastFruitRecvTime = time()
 
 local tpThrough = genv.tpThrough
 
@@ -173,7 +172,7 @@ for i, v in toSell do
     val.Changed:Connect(function()
         if autoSellValue == 0 then return end
         if genv.isTeleporting then return end
-        lastFruitRecvTime = time()
+
         if val.Value < autoSellValue then return end
         autoSellTp()
     end)
@@ -208,6 +207,33 @@ oldMouseP = hookfunction(updMousePosFunc, function(p_u_139, p140)
     end
     return oldMouseP(p_u_139, p140)
 end)
+
+local dmgraysUps = debug.getupvalues(genv.funcs._castDamageRays)
+local oldCastDmgRays
+oldCastDmgRays = hookfunction(genv.funcs._castDamageRays, function(p_u_152)
+    if genv.currentHooking._updateMousePosition then
+        local v_u_24, v_u_19, v_u_8 = unpack(dmgraysUps)
+        if not p_u_152.IsLocalPlayer then return end
+        
+        if p_u_152._nextHit <= tick() then
+            local v_u_153 = {genv.FoodHitbox}
+
+            if v_u_19.DragonBreathHitCallback then
+                task.spawn(v_u_19.DragonBreathHitCallback, v_u_153)
+            end
+            local v164 = v_u_8.GetEntitiesFromHits(v_u_153, false)
+            if #v164 > 0 then
+                p_u_152._nextHit = tick() + 0.5
+                v_u_8.RegisterHits("Breath", p_u_152.Dragon, v164)
+            end
+        end
+        return
+    end
+    return oldCastDmgRays(p_u_152)
+end)
+
+
+
 local camera = workspace.Camera
 local function farm()
     _G.stopped = false
@@ -251,6 +277,7 @@ local function farm()
 
             --camera.CameraSubject = hb
             genv.FoodPos = hb.Position
+            genv.FoodHitbox = hb
             
             while task.wait() do
                 if _G.stopped then c:Disconnect() return end
@@ -261,10 +288,7 @@ local function farm()
                 
                 player.Character:PivotTo(tPos)--CFrame.new(tPos, mousePos))
 
-                if autoSellValue ~= 0 and time() - lastFruitRecvTime >= fruitRecvDeadline then
-                    autoSellTp()
-                    return
-                end
+               
                 if deadVal.Value then fire:_setAttack(false) genv.FoodPos = nil break end
             end
                 
