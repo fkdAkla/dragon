@@ -376,6 +376,7 @@ if game.PlaceId == mainPlaceId then
        Callback = function(Value)
            if Value then
                genv.currentHooking._updateMousePosition = true
+               game:GetService("RunService"):Set3dRenderingEnabled(false)
                farm()
             else
                 _G.stopped = true
