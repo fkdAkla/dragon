@@ -115,7 +115,6 @@ local tpOnWaiting = nil
 local desiredCameraCfr = CFrame.new(314.103821, 69.2530136, 100, 0, 1, -0, 0.5, 1, -0.5, 0.380629182, 1, 0.894421339)
 
 local cmdText = [[
-task.spawn(function()
 print("START")
 getgenv().AutoFarm = <AutoFVal>
 getgenv().autoSellValue = <autoSVal>
@@ -123,7 +122,6 @@ getgenv().tpThrough = <tpTVal>
 getgenv().tpDelay = <tpDelay>
 task.wait(10)
 loadstring(game:HttpGet('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack'))()
-end)
 ]]
 
 local function autoSellTp()
