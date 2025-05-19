@@ -7,7 +7,7 @@ local vu = game:GetService("VirtualUser")
 local afkEvent = game.ReplicatedStorage:WaitForChild("AFKEvent",5)
 if afkEvent then afkEvent:Destroy() end
 
-require(game.ReplicatedStorage:WaitForChild("_replicationFolder"):WaitForChild("DragonClassClient")) 
+--require(game.ReplicatedStorage:WaitForChild("_replicationFolder"):WaitForChild("DragonClassClient")) 
 
 local player = game.Players.LocalPlayer
 
