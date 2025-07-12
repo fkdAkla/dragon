@@ -374,14 +374,14 @@ if game.PlaceId == mainPlaceId then
        Callback = function(Value)
            if Value then
                genv.currentHooking._updateMousePosition = true
-               game:GetService("RunService"):Set3dRenderingEnabled(false)
+               --game:GetService("RunService"):Set3dRenderingEnabled(false)
                farm()
             else
                 _G.stopped = true
                 genv.AutoFarm = false
                 genv.currentHooking._updateMousePosition = nil
                 camera.CameraType = Enum.CameraType.Custom
-                game:GetService("RunService"):Set3dRenderingEnabled(true)
+                --game:GetService("RunService"):Set3dRenderingEnabled(true)
                 player.Character:PivotTo(tpOnWaiting)
                 --camera.CameraSubject = player.Character
             end
