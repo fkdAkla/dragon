@@ -15,68 +15,19 @@ _G.stopped = false
 
 local food = game.Workspace.Interactions.Nodes.Food --"LargeFoodNode".BillboardPart
 local genv = getgenv()
+genv.currentHooking = {}
 local player = game.Players.LocalPlayer
 
---getgenv().TargetNode = food.LargeFoodNode1
+--getgenv().TargetNode = food.LargeFoodNode1 not needed
 
-genv.funcs = genv.funcs or {}
-genv.initFuncs = genv.initFuncs or {}
-genv.currentHooking = genv.currentHooking or {}
+local replFolder = game:GetService("ReplicatedStorage")._replicationFolder
 
-local currentHooking = genv.currentHooking
-
-local funcs = genv.funcs
-
-genv.neededFuncs = {"_updateMousePosition",
-    "GetEntityToControl",
-    "CanEntityDoAction",
-    "_castDamageRays",
-    "GetEntityFromHit"
-    --"_canAimAtPosition",
-    --"_getAutoTargetPosition",
-    --"_update"
-}
-if not genv.initFuncs.getFunc then
-    genv.initFuncs.getFunc = (function(fName)
-        --if not genv.currGc then genv.currGc = getgc() end
-        
-        for i, v in getgc() do
-            
-            if type(v) ~= "function" then continue end
-            
-            local f = debug.info(v, "n") == fName and v or nil
-            if f then
-                print("Found "..fName.." function!")
-                return f
-            end
-        end
-    end)
-
-end
-
-
-if not genv.initFuncs.init then
-    genv.initFuncs.init = (function()
-        if genv.inited then return end
-        for i, v in genv.neededFuncs do
-            local f = genv.initFuncs.getFunc(v)
-            if not f then warn('not found '..v) continue end
-            genv.funcs[debug.info(f, "n")] = f
-        end
-        
-        genv.inited = true
-    end)
-
-end
-
-genv.initFuncs.init()
-
-local updMousePosFunc = genv.funcs._updateMousePosition
+local dragonControlsClient = require(replFolder:WaitForChild("DragonControlsClient"))
+local dragonBreathClass = require(replFolder:WaitForChild("DragonBreathClass"))
 
 local player = game.Players.LocalPlayer
 local hrp = player.Character.HumanoidRootPart
 
-local ups = debug.getupvalues(updMousePosFunc)
 
 local autoSellValue = genv.autoSellValue or 0
 
@@ -178,10 +129,16 @@ end
 
 --if true then return end
 
+local updMousePosFunc = dragonBreathClass._updateMousePosition
+
+task.spawn(function ()
+    local ups = debug.getupvalues(updMousePosFunc)
+
 local oldMouseP
 oldMouseP = hookfunction(updMousePosFunc, function(p_u_139, p140)
     -- upvalues: (copy) v_u_19, (ref) v_u_28, (copy) v_u_23, (copy) v_u_12, (copy) v_u_22, (ref) v_u_29
     if genv.currentHooking._updateMousePosition then
+
         if not p_u_139.IsLocalPlayer then return end
         local v_u_19, v_u_28, v_u_23, v_u_12, v_u_22, v_u_29 = unpack(ups)
         p_u_139.BaseMaxBreathDistance = p_u_139.MaxBreathDistance + (p_u_139.Dragon.Flying and (p_u_139.MaxBreathDistance * v_u_19.FireBreathDistanceWhileFlyingMultiplier or 0) or 0)
@@ -205,8 +162,9 @@ oldMouseP = hookfunction(updMousePosFunc, function(p_u_139, p140)
     end
     return oldMouseP(p_u_139, p140)
 end)
+end)
 
-local dmgraysUps = debug.getupvalues(genv.funcs._castDamageRays)
+--[[local dmgraysUps = debug.getupvalues(genv.funcs._castDamageRays)
 local oldCastDmgRays
 oldCastDmgRays = hookfunction(genv.funcs._castDamageRays, function(p_u_152)
     if genv.currentHooking._updateMousePosition then
@@ -228,20 +186,20 @@ oldCastDmgRays = hookfunction(genv.funcs._castDamageRays, function(p_u_152)
         return
     end
     return oldCastDmgRays(p_u_152)
-end)
+end)]]
 
 
 
 local camera = workspace.Camera
 local function farm()
     _G.stopped = false
-    local fire = genv.funcs.GetEntityToControl()
+    local fire = dragonControlsClient:GetEntityToControl()
     
     if not fire then return end
     
     genv.AutoFarm = true
     
-    if not tpOnWaiting then tpOnWaiting = player.Character:GetPivot() * CFrame.new(0,5,0) end
+    --if not tpOnWaiting then tpOnWaiting = player.Character:GetPivot() * CFrame.new(0,5,0) end
     local c
     c = camera.ChildAdded:Connect(function(child)
         local handle = child:FindFirstChild("Handle")
@@ -265,35 +223,36 @@ local function farm()
             
             if deadVal.Value then continue end
             
-            camera.CameraType = Enum.CameraType.Scriptable
+            --camera.CameraType = Enum.CameraType.Scriptable
             
             
             
             --camera.CameraSubject = v["5"]:FindFirstChildWhichIsA("MeshPart")
             local hb = v.Hitbox
-            camera.CFrame = CFrame.lookAt(hb.Position + Vector3.new(0, 40,0), hb.Position)
+            local bPart = v.BillboardPart
+            --camera.CFrame = CFrame.lookAt(hb.Position + Vector3.new(0, 40,0), hb.Position)
 
             --camera.CameraSubject = hb
             genv.FoodPos = hb.Position
-            genv.FoodHitbox = hb
+            --genv.FoodHitbox = hb
             
             while task.wait() do
                 if _G.stopped then c:Disconnect() return end
                 --local mousePos = mouse.Hit.Position
                 
                 --local tPos = v["2"]:FindFirstChildWhichIsA("MeshPart").CFrame
-                local tPos = hb.CFrame * CFrame.new(-15, 0, 0)
+                local tPos = bPart.CFrame * CFrame.new(-30, 0, 10)
                 
                 player.Character:PivotTo(tPos)--CFrame.new(tPos, mousePos))
 
                
-                if deadVal.Value then fire:_setAttack(false) genv.FoodPos = nil break end
+                if deadVal.Value then fire:_setAttack(false, "Fire") genv.FoodPos = nil break end
             end
                 
             
         end
         
-        player.Character:PivotTo(tpOnWaiting)
+        --player.Character:PivotTo(tpOnWaiting)
         
     end
     
@@ -301,18 +260,13 @@ local function farm()
     
     while not _G.stopped do
         task.wait()
-        if not genv.FoodPos then continue end
-        task.wait(0.55)
+        if not genv.FoodPos then if fire.Breath.Firing then fire:_setAttack(false, "Fire") end continue end
+        task.wait(2)
         --if genv.funcs.CanEntityDoAction(fire, "_setAttack", "Fire") then
-        --fire:_setAttack(true, "Fire")
-        fire.Breath:Fire()
+        fire:_setAttack(true, "Fire")
         --end
         
-        task.wait(0.5)
-        
         --if genv.funcs.CanEntityDoAction(fire, "_setAttack") then
-        --fire:_setAttack(false)
-        fire.Breath:Stop()
         --end
     end
     
@@ -382,7 +336,7 @@ if game.PlaceId == mainPlaceId then
                 genv.currentHooking._updateMousePosition = nil
                 camera.CameraType = Enum.CameraType.Custom
                 --game:GetService("RunService"):Set3dRenderingEnabled(true)
-                player.Character:PivotTo(tpOnWaiting)
+                --player.Character:PivotTo(tpOnWaiting)
                 --camera.CameraSubject = player.Character
             end
        end,
@@ -458,6 +412,15 @@ local chestBtn = MainTab:CreateButton({
         if clickedAutoChest then return end
         clickedAutoChest = true
         loadstring(game:HttpGet('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/autochest'))()
+    end,
+})
+
+local noMobsBtn = MainTab:CreateButton({
+    Name = "REMOVE MOBS",
+    Callback = function()
+        for i, v in workspace.MobFolder:GetChildren() do
+            v:Destroy()
+        end
     end,
 })
 
