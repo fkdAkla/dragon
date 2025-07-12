@@ -415,15 +415,6 @@ local chestBtn = MainTab:CreateButton({
     end,
 })
 
-local noMobsBtn = MainTab:CreateButton({
-    Name = "REMOVE MOBS",
-    Callback = function()
-        for i, v in workspace.MobFolder:GetChildren() do
-            v:Destroy()
-        end
-    end,
-})
-
 local performanceTab = Window:CreateTab("Performance", "battery-charging")
 
 performanceTab:CreateSlider({
@@ -438,6 +429,10 @@ performanceTab:CreateSlider({
        setfpscap(Value)
    end,
 })
+
+for i, v in workspace.MobFolder:GetChildren() do
+    v:Destroy()
+end
 
 if genv.AutoFarm and Toggle then
     task.spawn(function()
