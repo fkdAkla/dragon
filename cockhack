@@ -162,11 +162,10 @@ oldMouseP = hookfunction(updMousePosFunc, function(p_u_139, p140)
     end
     return oldMouseP(p_u_139, p140)
 end)
-end)
 
---[[local dmgraysUps = debug.getupvalues(genv.funcs._castDamageRays)
+local dmgraysUps = debug.getupvalues(dragonBreathClass._castDamageRays)
 local oldCastDmgRays
-oldCastDmgRays = hookfunction(genv.funcs._castDamageRays, function(p_u_152)
+oldCastDmgRays = hookfunction(dragonBreathClass._castDamageRays, function(p_u_152)
     if genv.currentHooking._updateMousePosition then
         local v_u_24, v_u_19, v_u_8 = unpack(dmgraysUps)
         if not p_u_152.IsLocalPlayer then return end
@@ -186,7 +185,9 @@ oldCastDmgRays = hookfunction(genv.funcs._castDamageRays, function(p_u_152)
         return
     end
     return oldCastDmgRays(p_u_152)
-end)]]
+end)
+
+end)
 
 
 
@@ -234,7 +235,7 @@ local function farm()
 
             --camera.CameraSubject = hb
             genv.FoodPos = hb.Position
-            --genv.FoodHitbox = hb
+            genv.FoodHitbox = hb
             
             while task.wait() do
                 if _G.stopped then c:Disconnect() return end
