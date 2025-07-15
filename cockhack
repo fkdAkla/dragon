@@ -463,6 +463,10 @@ for i, v in workspace.MobFolder:GetChildren() do
     v:Destroy()
 end
 
+workspace.MobFolder.ChildAdded:Connect(function(child)
+child:Destroy() 
+end) 
+
 if genv.AutoFarm and Toggle then
     task.spawn(function()
         task.wait(1)
