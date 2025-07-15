@@ -1,5 +1,13 @@
 local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua'))()
 
+repeat task.wait() until game.CoreGui:FindFirstChild('RobloxPromptGui') and game.CoreGui.RobloxPromptGui:FindFirstChild("promptOverlay")
+
+local ts = game:GetService("TeleportService")
+
+local po = game.CoreGui.RobloxPromptGui.promptOverlay
+
+local constTimeDiff = 20*60
+
 --https://docs.sirius.menu/rayfield/interaction/interactive-elements#creating-an-adaptive-input-textbox 
 
 local vu = game:GetService("VirtualUser")
@@ -15,6 +23,7 @@ _G.stopped = false
 
 local food = game.Workspace.Interactions.Nodes.Food --"LargeFoodNode".BillboardPart
 local genv = getgenv()
+genv.Time = genv.Time or os.time() + constTimeDiff
 genv.currentHooking = {}
 local player = game.Players.LocalPlayer
 
@@ -54,7 +63,7 @@ local tpThrough = genv.tpThrough
 
 
 --local sellRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SellItemRemote")
-    
+
 local sellArgs = {"ItemName", "Amount"}
 local toSell = {"JuniperBerry", "Dragonfruit", "Lime"}
 
@@ -67,6 +76,7 @@ local desiredCameraCfr = CFrame.new(314.103821, 69.2530136, 100, 0, 1, -0, 0.5, 
 
 local cmdText = [[
 print("START")
+getgenv().Time = <EndTime>
 getgenv().AutoFarm = <AutoFVal>
 getgenv().autoSellValue = <autoSVal>
 getgenv().tpThrough = <tpTVal>
@@ -74,6 +84,20 @@ getgenv().tpDelay = <tpDelay>
 task.wait(10)
 loadstring(game:HttpGet('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack'))()
 ]]
+
+local function formatCmd(s)
+    s = s:gsub("<partOfCode1>", cmdText):gsub("<AutoFVal>", tostring(genv.AutoFarm), 10):gsub("<autoSVal>", autoSellValue, 10):gsub("<tpTVal>", tpThrough or "nil", 10):gsub("<tpDelay>", tpDelay, 10):gsub("<EndTime>", tostring(genv.Time), 10)
+    return s
+end
+
+po.ChildAdded:Connect(function(child)
+    if child.Name == "ErrorPrompt" or child.Name == "Failed" then
+        task.wait(3)
+        local s = formatCmd(cmdText)
+        queue_on_teleport(cmdText)
+        ts:Teleport(game.PlaceId)
+    end
+end)
 
 local function autoSellTp()
     genv.isTeleporting = true
@@ -102,7 +126,7 @@ print("START")
     
     warn(tpThrough, typeof(tpThrough))
     if not tpThrough then
-        queue_on_teleport("print('START') getgenv().AutoFarm = <AutoFVal> getgenv().autoSellValue = <autoSVal> getgenv().tpDelay = <tpDelay> task.wait(10) loadstring(game:HttpGet(('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack')))()")
+        queue_on_teleport("print('START') getgenv().Time = <EndTime> getgenv().AutoFarm = <AutoFVal> getgenv().autoSellValue = <autoSVal> getgenv().tpDelay = <tpDelay> task.wait(10) loadstring(game:HttpGet(('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack')))()")
         wait()
         tpRemote:InvokeServer(tpThrough, {})
     else
@@ -111,7 +135,7 @@ print("START")
         tpRemote:InvokeServer(tpThrough, {})
     end
 ]==]      
-        s = s:gsub("<partOfCode1>", cmdText):gsub("<AutoFVal>", tostring(genv.AutoFarm), 10):gsub("<autoSVal>", autoSellValue, 10):gsub("<tpTVal>", tpThrough or "nil", 10):gsub("<tpDelay>", tpDelay, 10)
+        s = formatCmd(s)
         queue_on_teleport(s)
         tpRemote:InvokeServer(shopPlaceId, {})
 end
@@ -281,7 +305,7 @@ end)
 vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
 
 local Window = Rayfield:CreateWindow({
-   Name = "Cockhack",
+   Name = "EBLO.HACK",
    Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
    LoadingTitle = "Rayfield Interface Suite",
    LoadingSubtitle = "by Sirius",
@@ -356,10 +380,12 @@ else
                 local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
                 local tpThrough = <tpTVal>
                 
-                queue_on_teleport([==[print("START") task.wait(10) queue_on_teleport([[<partOfCode1>]]) wait() game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote"):InvokeServer(4728805070, {}) ]==])
-                tpRemote:InvokeServer(tpThrough, {})
+                task.wait(10)
+                
+                queue_on_teleport([==[print("START") task.wait(10) <partOfCode1> ]==])
+                tpRemote:InvokeServer(4728805070, {})
                 ]===]
-            s = s:gsub("<partOfCode1>", cmdText):gsub("<AutoFVal>", tostring(true), 10):gsub("<autoSVal>", autoSellValue, 10):gsub("<tpTVal>", tpThrough or "nil", 10):gsub("<tpDelay>", tpDelay)
+            s = formatCmd(s)
             queue_on_teleport(s)
             tpRemote:InvokeServer(tpThrough, {})
         end,
@@ -448,6 +474,14 @@ if genv.tpThrough then
         local found = (function() for i, v in worldIds do if v == genv.tpThrough then return i end end end)()
         Dropdown:Set({found})
     end)
+end
+
+
+while wait() do
+    if genv.Time - os.time() > 0 then continue end
+    genv.Time = os.time() + constTimeDiff
+    game.Players.LocalPlayer:Kick("MEOW MEOW MEOW")
+    break
 end
 
 --task.wait(10)
