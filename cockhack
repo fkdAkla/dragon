@@ -1,12 +1,12 @@
+repeat task.wait() until game.CoreGui:FindFirstChild('RobloxPromptGui') and game.CoreGui.RobloxPromptGui:FindFirstChild("promptOverlay")
 local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua'))()
 
-repeat task.wait() until game.CoreGui:FindFirstChild('RobloxPromptGui') and game.CoreGui.RobloxPromptGui:FindFirstChild("promptOverlay")
 
 local ts = game:GetService("TeleportService")
 
 local po = game.CoreGui.RobloxPromptGui.promptOverlay
 
-local constTimeDiff = 20*60
+local constTimeDiff = 1*60
 
 --https://docs.sirius.menu/rayfield/interaction/interactive-elements#creating-an-adaptive-input-textbox 
 
@@ -75,10 +75,13 @@ local tpOnWaiting = nil
 local desiredCameraCfr = CFrame.new(314.103821, 69.2530136, 100, 0, 1, -0, 0.5, 1, -0.5, 0.380629182, 1, 0.894421339)
 
 local cmdText = [[
-print("START")
+--print("START")
 getgenv().Time = <EndTime>
+print("time loaded")
 getgenv().AutoFarm = <AutoFVal>
+print("autofval")
 getgenv().autoSellValue = <autoSVal>
+print("autosval")
 getgenv().tpThrough = <tpTVal>
 getgenv().tpDelay = <tpDelay>
 task.wait(10)
@@ -94,7 +97,7 @@ po.ChildAdded:Connect(function(child)
     if child.Name == "ErrorPrompt" or child.Name == "Failed" then
         task.wait(3)
         local s = formatCmd(cmdText)
-        queue_on_teleport(cmdText)
+        queue_on_teleport(s)
         ts:Teleport(game.PlaceId)
     end
 end)
@@ -103,7 +106,7 @@ local function autoSellTp()
     genv.isTeleporting = true
         local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
         local s = [==[
-print("START")
+--print("START")
     local shopPlaceId = 3475397644
     local mainPlaceId = 4728805070
     if game.PlaceId ~= shopPlaceId then return end
