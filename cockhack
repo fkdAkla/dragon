@@ -96,8 +96,8 @@ end
 po.ChildAdded:Connect(function(child)
     if child.Name == "ErrorPrompt" or child.Name == "Failed" then
         task.wait(3)
-        local s = formatCmd(cmdText)
-        queue_on_teleport(s)
+
+        queue_on_teleport(formatCmd(cmdText))
         ts:Teleport(game.PlaceId)
     end
 end)
