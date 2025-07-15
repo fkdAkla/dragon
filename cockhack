@@ -268,7 +268,7 @@ local function farm()
                 --local mousePos = mouse.Hit.Position
                 
                 --local tPos = v["2"]:FindFirstChildWhichIsA("MeshPart").CFrame
-                local tPos = bPart.CFrame * CFrame.new(-30, 0, 10)
+                local tPos = bPart.CFrame * CFrame.new(-30, -30, 10)
                 
                 player.Character:PivotTo(tPos)--CFrame.new(tPos, mousePos))
 
@@ -465,7 +465,8 @@ for i, v in workspace.MobFolder:GetChildren() do
 end
 
 workspace.MobFolder.ChildAdded:Connect(function(child)
-child:Destroy() 
+    task.wait(1)
+    child:Destroy() 
 end) 
 
 if genv.AutoFarm and Toggle then
