@@ -6,7 +6,7 @@ local ts = game:GetService("TeleportService")
 
 local po = game.CoreGui.RobloxPromptGui.promptOverlay
 
-local constTimeDiff = 1*60
+local constTimeDiff = 20*60
 
 --https://docs.sirius.menu/rayfield/interaction/interactive-elements#creating-an-adaptive-input-textbox 
 
