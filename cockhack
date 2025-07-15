@@ -1,4 +1,5 @@
 repeat task.wait() until game.CoreGui:FindFirstChild('RobloxPromptGui') and game.CoreGui.RobloxPromptGui:FindFirstChild("promptOverlay")
+repeat task.wait() until game.Players.LocalPlayer:GetAttribute("ClientInitiated")
 local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua'))()
 
 
