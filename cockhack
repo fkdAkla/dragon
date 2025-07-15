@@ -387,6 +387,7 @@ else
                 queue_on_teleport([==[print("START") task.wait(10) <partOfCode1> ]==])
                 tpRemote:InvokeServer(4728805070, {})
                 ]===]
+            genv.AutoFarm = true
             s = formatCmd(s)
             queue_on_teleport(s)
             tpRemote:InvokeServer(tpThrough, {})
