@@ -89,7 +89,7 @@ local Window = Rayfield:CreateWindow({
    }
 })
 
-local MainTab = Window:CreateTab("Target", 4483362458) -- Title, Image
+local Tab = Window:CreateTab("Target", 4483362458) -- Title, Image
 
 local Dropdown = Tab:CreateDropdown({
    Name = "Players",
@@ -148,7 +148,7 @@ local newT = {"None"}
 for i, v in game.Players:GetPlayers() do
     if plr == game.Players.LocalPlayer then continue end
     table.insert(newT, v.Name)
-end
+end)
 Dropdown:Refresh(newT)
 --[[Taunt function: 0xdc6aee063451e696
 Slam function: 0xed57bc2dfb4a2d16
