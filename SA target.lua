@@ -142,13 +142,13 @@ game.Players.PlayerRemoving:Connect(function(plr)
         table.insert(newT, v.Name)
     end
     Dropdown:Refresh(newT)
-end
+end)
 
 local newT = {"None"}
 for i, v in game.Players:GetPlayers() do
     if plr == game.Players.LocalPlayer then continue end
     table.insert(newT, v.Name)
-end)
+end
 Dropdown:Refresh(newT)
 --[[Taunt function: 0xdc6aee063451e696
 Slam function: 0xed57bc2dfb4a2d16
