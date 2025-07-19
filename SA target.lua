@@ -4,8 +4,6 @@ local genv = getgenv()
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
-genv.running = true
-
 local function startTarget(once)
     genv.running = true
     while task.wait() do
@@ -99,6 +97,7 @@ local Dropdown = Tab:CreateDropdown({
    Flag = "Dropdown1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
    Callback = function(Options)
        if Options[1] == "None" then genv.target = nil return end
+       print("KDSAKDSAKDS",Options[1])
        genv.target = Options[1]
    end,
 })
@@ -129,7 +128,7 @@ local Toggle = Tab:CreateToggle({
 game.Players.PlayerAdded:Connect(function(plr)
     local newT = {"None"}
     for i, v in game.Players:GetPlayers() do
-        if plr == game.Players.LocalPlayer then continue end
+        if v == game.Players.LocalPlayer then continue end
         table.insert(newT, v.Name)
     end
     Dropdown:Refresh(newT)
@@ -138,7 +137,7 @@ end)
 game.Players.PlayerRemoving:Connect(function(plr)
     local newT = {"None"}
     for i, v in game.Players:GetPlayers() do
-        if plr == game.Players.LocalPlayer then continue end
+        if v == game.Players.LocalPlayer then continue end
         table.insert(newT, v.Name)
     end
     Dropdown:Refresh(newT)
@@ -146,10 +145,11 @@ end)
 
 local newT = {"None"}
 for i, v in game.Players:GetPlayers() do
-    if plr == game.Players.LocalPlayer then continue end
+    if v == game.Players.LocalPlayer then continue end
     table.insert(newT, v.Name)
 end
 Dropdown:Refresh(newT)
+Dropdown:Set({"None"})
 --[[Taunt function: 0xdc6aee063451e696
 Slam function: 0xed57bc2dfb4a2d16
 Untimestop function: 0xef4f4f5c8ec1c1f6
