@@ -45,6 +45,7 @@ local function startTarget(once)
         game.Players.LocalPlayer.Character:PivotTo(CFrame.new(myPivot.X, -498.6, myPivot.Z))
         task.wait(0.1)
         replicatesignal(game.Players.LocalPlayer.Kill)
+        if once then return end
         game.Players.LocalPlayer.CharacterAdded:Wait()
         task.wait(0.35)
     end
