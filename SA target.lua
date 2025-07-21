@@ -42,7 +42,7 @@ local function startTarget(once)
         
         char:PivotTo(targetChar:GetPivot() + Vector3.new(targetChar.Humanoid.MoveDirection))
         
-        task.wait(0.15)
+        task.wait(0.2)
         
         repeat task.wait() until targetChar:FindFirstChild("Stand")
         
@@ -344,6 +344,16 @@ local KeybindTpTarget = Tab:CreateKeybind({
    Flag = "Keybind2", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
    Callback = function(Keybind)
        tpTarget()
+   end,
+})
+
+local KeybindLongTS = Tab:CreateKeybind({
+   Name = "15s timestop",
+   CurrentKeybind = "F",
+   HoldToInteract = false,
+   Flag = "Keybind3", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Keybind)
+       game.ReplicatedStorage.Main.Timestop:FireServer(15, "jotaroova")
    end,
 })
 
