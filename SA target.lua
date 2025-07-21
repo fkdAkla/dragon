@@ -1,15 +1,25 @@
 local genv = getgenv()
 
+
+local defaultSpawnDelay = 350
+local defaultLocation = "Portal" --genv defined lower.
+genv.spawndelay = defaultSpawnDelay
 --fcs.hito("Bloodsuck", char["Right Arm"], targetChar["Right Arm"].CFrame, 100, 100)
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
+local remote = game:GetService("ReplicatedStorage"):WaitForChild("Main"):WaitForChild("Input")
+
+local player = game.Players.LocalPlayer
 local function startTarget(once)
     genv.running = true
     while task.wait() do
         if not genv.running then return end
         if once then genv.running = false end
+        
+        repeat task.wait() until game.Lighting.TS.Value == false
         local target = genv.target
+        if not target then continue end
         
         target = game.Players:FindFirstChild(target)
     
@@ -25,30 +35,83 @@ local function startTarget(once)
         
         if not targetChar then continue end
         
+        repeat task.wait() until not target or (target.Character and target.Character:FindFirstChild("HumanoidRootPart") and not target.Character.HumanoidRootPart.Anchored)
+        
+        if not target then continue end
         local char = game.Players.LocalPlayer.Character
         
-        char:PivotTo(targetChar:GetPivot())
+        char:PivotTo(targetChar:GetPivot() + Vector3.new(targetChar.Humanoid.MoveDirection))
         
-        task.wait(0.25)
-        game:GetService("ReplicatedStorage"):WaitForChild("Main"):WaitForChild("Input"):FireServer(
-        "Damage",
-        "Bloodsuck",
-        nil,
-        nil,
-        targetChar.Humanoid,
-        targetChar:GetPivot()
-    )
-        task.wait(0.25)
+        task.wait(0.15)
+        
+        repeat task.wait() until targetChar:FindFirstChild("Stand")
+        
+        remote:FireServer("Damage","Bloodsuck",nil,nil,targetChar.Humanoid,targetChar:GetPivot())
+        
+        task.wait(0.2)
         
         local myPivot = char:GetPivot()
         
-        game.Players.LocalPlayer.Character:PivotTo(CFrame.new(myPivot.X, -498.6, myPivot.Z))
+        repeat
+            task.wait()
+            char:PivotTo(CFrame.new(myPivot.X, -498, myPivot.Z))
+        until not char:FindFirstChild("HumanoidRootPart")
         task.wait(0.5)
-        replicatesignal(game.Players.LocalPlayer.Kill)
+        --replicatesignal(game.Players.LocalPlayer.Kill)
         if once then return end
         game.Players.LocalPlayer.CharacterAdded:Wait()
-        task.wait(0.35)
+        task.wait(genv.spawndelay/1000) --0.35
     end
+end
+
+local strafing = false
+local function startStrafe()
+    local circle = 0
+    local radius = 8
+    if genv.c then genv.c:Disconnect() end
+    genv.c = game:GetService("RunService").Heartbeat:Connect(function()
+        circle += 0.5
+        
+        local target = game.Players:FindFirstChild(target)
+        
+        local tChar = target and target.Character
+        if not tChar then return end
+        workspace.CurrentCamera.CameraSubject = tChar
+        local tHrp = tChar:FindFirstChild("HumanoidRootPart")
+        
+        local hum = tChar:FindFirstChild("Humanoid")
+        
+        if not hum or not tHrp then return end
+        if hum.Health <= 0 then return end
+        
+        local pivot = tHrp.CFrame
+        local cfr = pivot * CFrame.new(math.sin(circle)*radius, 0, math.cos(circle)*radius)
+        player.Character.HumanoidRootPart.CFrame = CFrame.new(cfr.Position, pivot.Position)
+    end)
+end
+
+local function tpTarget()
+    if not genv.target then return end
+    if genv.running then return end
+    local target = game.Players:FindFirstChild(genv.target)
+    if not target then return end
+    target = target.Character
+
+    local pivot = target.HumanoidRootPart.CFrame
+    
+    local cfr = pivot
+    
+    local player = game.Players.LocalPlayer
+    
+    player.Character.HumanoidRootPart.CFrame = cfr
+    
+    task.wait(0.2)
+    
+    remote:FireServer("Damage", "Bloodsuck", nil, nil, target.Humanoid, target:GetPivot())
+    
+    task.wait(0.2)
+    
+    player.Character.HumanoidRootPart.CFrame = genv.location or pivot
 end
 
 local Window = Rayfield:CreateWindow({
@@ -65,7 +128,7 @@ local Window = Rayfield:CreateWindow({
    DisableBuildWarnings = false, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
 
    ConfigurationSaving = {
-      Enabled = true,
+      Enabled = false,
       FolderName = nil, -- Create a custom folder for your hub/game
       FileName = "Big Hub"
    },
@@ -88,9 +151,9 @@ local Window = Rayfield:CreateWindow({
    }
 })
 
-local Tab = Window:CreateTab("Target", 4483362458) -- Title, Image
+local Tab = Window:CreateTab("Main", 4483362458) -- Title, Image
 
-local Dropdown = Tab:CreateDropdown({
+local DropdownPlayers = Tab:CreateDropdown({
    Name = "Players",
    Options = {"None"},
    CurrentOption = {"Option 1"},
@@ -98,23 +161,124 @@ local Dropdown = Tab:CreateDropdown({
    Flag = "Dropdown1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
    Callback = function(Options)
        if Options[1] == "None" then genv.target = nil return end
-       print("KDSAKDSAKDS",Options[1])
        genv.target = Options[1]
    end,
 })
 
-local Button = Tab:CreateButton({
-   Name = "Kill Target",
-   Callback = function()
-       if not genv.target then return end
-       if genv.running then return end
-       
-       startTarget(true)
+local locs = {
+    ["Farming zone"] = CFrame.new(-284.694275, 461.597198, -1486.00232, 0.455198199, 1.85057736e-09, 0.890390158, 4.58264822e-08, 1, -2.55064698e-08, -0.890390158, 5.24139452e-08, 0.455198199),
+    Portal = CFrame.new(1150.23743, 583.259888, -664.438965, 0.743843019, 1.89297804e-08, 0.668354332, 1.44191077e-08, 1, -4.4370676e-08, -0.668354332, 4.264189e-08, 0.743843019)
+}
+
+genv.location = locs[defaultLocation]
+
+local DropdownLocations = Tab:CreateDropdown({
+   Name = "Location to TP",
+   Options = {"None", "Farming zone", "Portal"},
+   CurrentOption = {defaultLocation},
+   MultipleOptions = false,
+   Flag = "Dropdown2", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Options)
+       genv.location = locs[Options[1]]
    end,
 })
 
-local Toggle = Tab:CreateToggle({
-   Name = "Loop Kill",
+Tab:CreateDivider()
+
+local ButtonKill = Tab:CreateButton({
+   Name = "Kill Target [VTW, Anubis(Strafe)]",
+   Callback = function()
+        if not genv.target then return end
+        if genv.running then return end
+       
+        if player.Backpack:FindFirstChild("Anubis") then
+            local target = game.Players:FindFirstChild(genv.target)
+            if not target then return end
+            target = target.Character
+            for i = 1,15 do
+                remote:FireServer("Damage", "Swing", nil, nil, target.Humanoid)
+                remote:FireServer("Damage", "StrongSlash", nil, nil, target.Humanoid)
+                remote:FireServer("Damage", "SpecialSlash", nil, nil, target.Humanoid)
+                task.wait(0.1)
+            end
+        else
+            startTarget(true)
+        end
+       
+   end,
+})
+
+local buttonVTWFun = Tab:CreateButton({
+   Name = "Fun thing vtw",
+   Callback = function()
+        if not genv.target then return end
+        if genv.running then return end
+        local target = game.Players:FindFirstChild(genv.target)
+        if not target then return end
+        target = target.Character
+
+        local pivot = target.HumanoidRootPart.CFrame
+        
+        local cfr = pivot * CFrame.new(0, 0, 3)
+        
+        local player = game.Players.LocalPlayer
+        
+        player.Character.HumanoidRootPart.CFrame = CFrame.new(cfr.Position, pivot.Position)
+        
+        task.wait(0.2)
+        
+        remote:FireServer("Damage", "DonutPunch", nil, nil, target.Humanoid, target:GetPivot())
+        
+        task.wait(2)
+        
+        player.Character.HumanoidRootPart.CFrame = genv.location or pivot * CFrame.new(0,3000,0)
+   end,
+})
+
+local buttonVTWTP = Tab:CreateButton({
+   Name = "TP target [VTW]",
+   Callback = function()
+        tpTarget()
+   end,
+})
+
+local ButtonTWOHMoves = Tab:CreateButton({
+   Name = "Hit all moves [TWOH]",
+   Callback = function()
+        local target = genv.target and game.Players:FindFirstChild(genv.target)
+        if not target then return end
+        target = target.Character
+        remote:FireServer("Damage","Overwrite",nil,nil,target.Humanoid,target:GetPivot())
+    	
+        remote:FireServer("Damage","HeavyPunch",nil,nil,target.Humanoid,target:GetPivot())
+    
+        remote:FireServer("Damage","Slam",nil,nil,target.Humanoid,target:GetPivot())
+        remote:FireServer("Damage","Punch",nil,nil,target.Humanoid,target:GetPivot())
+        
+        task.delay(0.7,function()
+            remote:FireServer("Damage","Punch",nil,nil,target.Humanoid,target:GetPivot())
+        end)
+    
+        remote:FireServer("Alternate","Knife")
+   end,
+})
+
+Tab:CreateDivider()
+
+local Slider = Tab:CreateSlider({
+   Name = "Spawn Delay",
+   Range = {200, 1000},
+   Increment = 10,
+   Suffix = "ms",
+   CurrentValue = defaultSpawnDelay,
+   Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       genv.spawndelay = Value
+   end,
+})
+
+local ToggleLoopKill = Tab:CreateToggle({
+   Name = "Loop Kill [VTW]",
    CurrentValue = false,
    Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
    Callback = function(Value)
@@ -126,13 +290,70 @@ local Toggle = Tab:CreateToggle({
    end,
 })
 
+
+local ToggleStrafe = Tab:CreateToggle({
+   Name = "Target Strafe",
+   CurrentValue = false,
+   Flag = "Toggle2", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       strafing = Value
+       if Value then
+           startStrafe()
+        else
+            if genv.c then genv.c:Disconnect() end
+            workspace.CurrentCamera.CameraSubject = player.Character
+        end
+   end,
+})
+
+local ToggleSelfHeal = Tab:CreateToggle({
+   Name = "Self Heal [Crazy Diamond]",
+   CurrentValue = false,
+   Flag = "Toggle3", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       if Value then
+           genv.selfheal = true
+           while genv.selfheal do
+               task.wait(0.1)
+               if not player.Backpack:FindFirstChild("CrazyDiamond") then continue end
+               if not player.Character:FindFirstChild("Humanoid") then continue end
+               remote:FireServer("Damage", "Punch", nil, nil, player.Character.Humanoid, player.Character:GetPivot(), true)
+           end
+           return
+       end
+       genv.selfheal = nil
+   end,
+})
+
+Tab:CreateDivider()
+
+local Keybindstrafe = Tab:CreateKeybind({
+   Name = "Toggle Strafe",
+   CurrentKeybind = "L",
+   HoldToInteract = false,
+   Flag = "Keybind1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Keybind)
+       ToggleStrafe:Set(not strafing)
+   end,
+})
+
+local KeybindTpTarget = Tab:CreateKeybind({
+   Name = "TP target [VTW]",
+   CurrentKeybind = "Comma",
+   HoldToInteract = false,
+   Flag = "Keybind2", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Keybind)
+       tpTarget()
+   end,
+})
+
 game.Players.PlayerAdded:Connect(function(plr)
     local newT = {"None"}
     for i, v in game.Players:GetPlayers() do
         if v == game.Players.LocalPlayer then continue end
         table.insert(newT, v.Name)
     end
-    Dropdown:Refresh(newT)
+    DropdownPlayers:Refresh(newT)
 end)
 
 game.Players.PlayerRemoving:Connect(function(plr)
@@ -141,7 +362,7 @@ game.Players.PlayerRemoving:Connect(function(plr)
         if v == game.Players.LocalPlayer then continue end
         table.insert(newT, v.Name)
     end
-    Dropdown:Refresh(newT)
+    DropdownPlayers:Refresh(newT)
 end)
 
 local newT = {"None"}
@@ -149,8 +370,8 @@ for i, v in game.Players:GetPlayers() do
     if v == game.Players.LocalPlayer then continue end
     table.insert(newT, v.Name)
 end
-Dropdown:Refresh(newT)
-Dropdown:Set({"None"})
+DropdownPlayers:Refresh(newT)
+DropdownPlayers:Set({"None"})
 --[[Taunt function: 0xdc6aee063451e696
 Slam function: 0xed57bc2dfb4a2d16
 Untimestop function: 0xef4f4f5c8ec1c1f6
