@@ -88,7 +88,7 @@ local function startStrafe()
         if not hum or not tHrp then return end
         if hum.Health <= 0 then if genv.tptolastpos then player.Character:PivotTo(genv.lastpos) end return end
         
-        local pivot = tHrp.CFrame * CFrame.new(0, -7, 0)
+        local pivot = tHrp.CFrame * CFrame.new(0, -8, 0)
         local cfr = pivot * CFrame.new(math.sin(circle)*radius, 0, math.cos(circle)*radius)
         player.Character.HumanoidRootPart.CFrame = CFrame.new(cfr.Position, pivot.Position)
     end)
