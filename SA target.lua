@@ -3,7 +3,11 @@ local genv = getgenv()
 
 local defaultSpawnDelay = 350
 local defaultLocation = "Portal" --genv defined lower.
+local defaultTpToLastPos = true
+genv.tptolastpos = defaultTpToLastPos
 genv.spawndelay = defaultSpawnDelay
+genv.voice = "dio"
+genv.tslength = 15
 --fcs.hito("Bloodsuck", char["Right Arm"], targetChar["Right Arm"].CFrame, 100, 100)
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
@@ -82,9 +86,9 @@ local function startStrafe()
         local hum = tChar:FindFirstChild("Humanoid")
         
         if not hum or not tHrp then return end
-        if hum.Health <= 0 then return end
+        if hum.Health <= 0 then if genv.tptolastpos then player.Character:PivotTo(genv.lastpos) end return end
         
-        local pivot = tHrp.CFrame
+        local pivot = tHrp.CFrame * CFrame.new(0, -7, 0)
         local cfr = pivot * CFrame.new(math.sin(circle)*radius, 0, math.cos(circle)*radius)
         player.Character.HumanoidRootPart.CFrame = CFrame.new(cfr.Position, pivot.Position)
     end)
@@ -156,7 +160,7 @@ local Tab = Window:CreateTab("Main", 4483362458) -- Title, Image
 local DropdownPlayers = Tab:CreateDropdown({
    Name = "Players",
    Options = {"None"},
-   CurrentOption = {"Option 1"},
+   CurrentOption = {"None"},
    MultipleOptions = false,
    Flag = "Dropdown1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
    Callback = function(Options)
@@ -183,6 +187,17 @@ local DropdownLocations = Tab:CreateDropdown({
    end,
 })
 
+local DropdownTSVoice = Tab:CreateDropdown({
+   Name = "Timestop voice",
+   Options = {"dio", "diooh", "dioova", "shadowdio", "jotaro", "jotaroova", "sptw"},
+   CurrentOption = genv.voice or "dio",
+   MultipleOptions = false,
+   Flag = "Dropdown2", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Options)
+       genv.voice = Options[1]
+   end,
+})
+
 Tab:CreateDivider()
 
 local ButtonKill = Tab:CreateButton({
@@ -195,7 +210,7 @@ local ButtonKill = Tab:CreateButton({
             local target = game.Players:FindFirstChild(genv.target)
             if not target then return end
             target = target.Character
-            for i = 1,15 do
+            for i = 1,20 do
                 remote:FireServer("Damage", "Swing", nil, nil, target.Humanoid)
                 remote:FireServer("Damage", "StrongSlash", nil, nil, target.Humanoid)
                 remote:FireServer("Damage", "SpecialSlash", nil, nil, target.Humanoid)
@@ -265,7 +280,7 @@ local ButtonTWOHMoves = Tab:CreateButton({
 
 Tab:CreateDivider()
 
-local Slider = Tab:CreateSlider({
+local SliderSpawnDelay = Tab:CreateSlider({
    Name = "Spawn Delay",
    Range = {200, 1000},
    Increment = 10,
@@ -274,6 +289,18 @@ local Slider = Tab:CreateSlider({
    Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
    Callback = function(Value)
        genv.spawndelay = Value
+   end,
+})
+
+local SliderTSLength = Tab:CreateSlider({
+   Name = "TS Length",
+   Range = {1, 15},
+   Increment = 1,
+   Suffix = "s",
+   CurrentValue = genv.tslength or 15,
+   Flag = "Slider2", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       genv.tslength = Value
    end,
 })
 
@@ -298,18 +325,29 @@ local ToggleStrafe = Tab:CreateToggle({
    Callback = function(Value)
        strafing = Value
        if Value then
+           genv.lastpos = player.Character:GetPivot()
            startStrafe()
         else
             if genv.c then genv.c:Disconnect() end
+            if genv.tptolastpos then player.Character:PivotTo(genv.lastpos) end
             workspace.CurrentCamera.CameraSubject = player.Character
         end
+   end,
+})
+
+local ToggleTpToLastPos = Tab:CreateToggle({
+   Name = "Tp to last pos",
+   CurrentValue = defaultTpToLastPos,
+   Flag = "Toggle3", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       genv.tptolastpos = Value
    end,
 })
 
 local ToggleSelfHeal = Tab:CreateToggle({
    Name = "Self Heal [Crazy Diamond]",
    CurrentValue = false,
-   Flag = "Toggle3", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Flag = "Toggle4", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
    Callback = function(Value)
        if Value then
            genv.selfheal = true
@@ -348,12 +386,12 @@ local KeybindTpTarget = Tab:CreateKeybind({
 })
 
 local KeybindLongTS = Tab:CreateKeybind({
-   Name = "15s timestop",
+   Name = "Custom timestop",
    CurrentKeybind = "F",
    HoldToInteract = false,
    Flag = "Keybind3", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
    Callback = function(Keybind)
-       game.ReplicatedStorage.Main.Timestop:FireServer(15, "jotaroova")
+       game.ReplicatedStorage.Main.Timestop:FireServer(genv.tslength, genv.voice)
    end,
 })
 
