@@ -27,13 +27,13 @@ local function onCharAdded()
 end
 
 for i, v in workspace["Spawned Items"]:GetChildren() do
-    if (v.Name:match("Arrow") or v.Name:match("Rokakaka Fruit")) and v.Name:match("_") then continue end
     local child = v
+    if (child.Name:match("Arrow") or child.Name:match("Rokakaka Fruit")) and not child.Name:match("True") and not child.Name:match("Hell") and not child.Name:match("Requiem") then continue end
     child:PivotTo(player.Character:GetPivot())
 end
 
 workspace["Spawned Items"].ChildAdded:Connect(function(child)
-    if (child.Name:match("Arrow") or child.Name:match("Rokakaka Fruit")) and child.Name:match("_") then return end
+    if (child.Name:match("Arrow") or child.Name:match("Rokakaka Fruit")) and not child.Name:match("True") and not child.Name:match("Hell") and not child.Name:match("Requiem") then return end
     task.wait(0.5)
 
     local ti = child:FindFirstChild("TouchInterest", true)
