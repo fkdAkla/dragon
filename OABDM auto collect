@@ -2,17 +2,16 @@ local player = game.Players.LocalPlayer
 workspace.ChildAdded:Connect(function(child)
     if child:IsA("Tool") and child.Name ~= "Arrow" and child.Name ~= "Rokakaka Fruit" then
         if child:GetPivot().Y <= 2900 then return end
-        local ti
-        local currT = os.time()
-        repeat
-            task.wait()
-            ti = child:FindFirstChild("TouchInterest", true)
-        until ti or not child or not child.Parent or os.time() - currT >= 5
-        
-        if os.time() - currT >= 5 then return end
-        firetouchinterest(player.Character.Head, ti.Parent, true)
-        task.wait(0.1)
-        firetouchinterest(player.Character.Head, ti.Parent, false)
+        task.wait(0.5)
+
+        for i, v in child:GetDescendants() do
+            if v:IsA("TouchInterest") then
+                firetouchinterest(player.Character.Head, v.Parent, true)
+                task.wait(0.1)
+                firetouchinterest(player.Character.Head, v.Parent, false)
+            end
+        end
+        if child then child:SetAttribute("collected", true) end
     end
 end)
 
