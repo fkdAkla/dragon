@@ -1,11 +1,6 @@
-repeat task.wait() until game.CoreGui:FindFirstChild('RobloxPromptGui') and game.CoreGui.RobloxPromptGui:FindFirstChild("promptOverlay")
 repeat task.wait() until game.Players.LocalPlayer:GetAttribute("ClientInitiated")
 local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua'))()
 
-
-local ts = game:GetService("TeleportService")
-
-local po = game.CoreGui.RobloxPromptGui.promptOverlay
 
 local constTimeDiff = 20*60
 
@@ -93,14 +88,6 @@ local function formatCmd(s)
     return s
 end
 
-po.ChildAdded:Connect(function(child)
-    if child.Name == "ErrorPrompt" or child.Name == "Failed" then
-        task.wait(3)
-
-        queue_on_teleport(formatCmd(cmdText))
-        ts:Teleport(game.PlaceId)
-    end
-end)
 
 local function autoSellTp()
     genv.isTeleporting = true
@@ -485,13 +472,6 @@ if genv.tpThrough then
     end)
 end
 
-
-while wait() do
-    if genv.Time - os.time() > 0 then continue end
-    genv.Time = os.time() + constTimeDiff
-    game.Players.LocalPlayer:Kick("MEOW MEOW MEOW")
-    break
-end
 
 --task.wait(10)
 
