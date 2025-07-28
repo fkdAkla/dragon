@@ -1,0 +1,78 @@
+local player = game.Players.LocalPlayer
+
+local genv = getgenv()
+
+local folder = workspace.Interactable
+local function getsand()
+    local sands = {}
+    for i, v in folder:GetChildren() do
+        if v:IsA("MeshPart") and v.Transparency == 0 then
+            table.insert(sands, v)
+        end
+    end
+    return sands
+end
+
+local function buy_trowel()
+    game:GetService("ReplicatedStorage"):WaitForChild("Purchase"):FireServer("Trowel")
+end
+
+local function equip_trowel()
+    if player.Character:FindFirstChild("Trowel") then return end
+    
+    local trowel = player.Backpack:FindFirstChild("Trowel")
+    
+    if not trowel then buy_trowel() trowel = player.Backpack:WaitForChild("Trowel") task.wait(0.1) end
+    
+    player.Character.Humanoid:EquipTool(trowel)
+end
+
+local function use_trowel()
+    local trowel = player.Character:FindFirstChild("Trowel")
+    if not trowel then equip_trowel() end
+    
+    trowel:Activate()
+    task.wait(0.1)
+    if trowel.Parent == player.Character then trowel:Deactivate() end
+end
+
+local function farm()
+    if genv.running then genv.running = nil return end
+    genv.running = true
+    
+    player:WaitForChild("Backpack").ChildAdded:Connect(function(child)
+        if not genv.running then return end
+        if child.Name == "Rokakaka Fruit" or child.Name == "Arrow" then
+            task.wait(0.3)
+            child:Destroy()
+        end
+        
+        if child.Name == "Banknote" then
+            task.wait(0.3)
+            child.Parent = player.Character
+        end
+    end)
+    
+    while true do
+        task.wait()
+        if not genv.running then return end
+        
+        local sand
+        repeat
+            task.wait(0.3)
+            sand = getsand()
+        until #sand > 0
+        
+        for i, v in sand do
+            if not genv.running then return end
+            player.Character:PivotTo(v:GetPivot())
+            task.wait(0.3)
+            equip_trowel()
+            task.wait(0.1)
+            use_trowel()
+            task.wait(5)
+        end
+    end
+end
+
+farm()
