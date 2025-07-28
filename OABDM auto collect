@@ -24,6 +24,7 @@ local function onCharAdded()
         end
     end)
     player:WaitForChild("Backpack").ChildAdded:Connect(function(child)
+        if not child:IsA("Tool") then return end
         child:SetAttribute("collected", true)
     end)
 end
