@@ -19,10 +19,12 @@ end)
 local function onCharAdded()
     player.Character.ChildAdded:Connect(function(child)
         if child:IsA("Tool") and not child:GetAttribute("collected") then
-            child:SetAttribute("collected", true)
             task.wait(0.2)
             child.Parent = player.Backpack
         end
+    end)
+    player:WaitForChild("Backpack").ChildAdded:Connect(function(child)
+        child:SetAttribute("collected", true)
     end)
 end
 
