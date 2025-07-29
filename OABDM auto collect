@@ -1,5 +1,11 @@
 local player = game.Players.LocalPlayer
 workspace.ChildAdded:Connect(function(child)
+    if child.Name == "Sparda" then
+      local detector = child:WaitForChild("HumanoidRootPart"):WaitForChild("ClickDetector")
+      task.wait(1)
+      fireclickdetector(detector)
+      return
+  end
     if child:IsA("Tool") and child.Name ~= "Arrow" and child.Name ~= "Rokakaka Fruit" then
         if child:GetPivot().Y <= 2900 then return end
         local ti
