@@ -1,0 +1,8 @@
+workspace.ChildAdded:Connect(function(child)
+  if child.Name == "Sparda" then
+      local detector = child:WaitForChild("HumanoidRootPart"):WaitForChild("ClickDetector")
+      task.wait(1)
+      fireclickdetector(detector)
+  end
+end)
+--fireclickdetector(workspace.Sparda.HumanoidRootPart.ClickDetector)
