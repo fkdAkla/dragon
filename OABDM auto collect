@@ -16,6 +16,8 @@ workspace.ChildAdded:Connect(function(child)
         until ti or not child or not child.Parent or os.time() - currT >= 5
         
         if os.time() - currT >= 5 then return end
+
+        child:SetAttribute("tagged", true)
         firetouchinterest(player.Character.Head, ti.Parent, true)
         task.wait(0.1)
         firetouchinterest(player.Character.Head, ti.Parent, false)
@@ -24,7 +26,7 @@ end)
 
 local function onCharAdded()
     player.Character.ChildAdded:Connect(function(child)
-        if child:IsA("Tool") and not child:GetAttribute("collected") then
+        if child:IsA("Tool") and child:GetAttribute("tagged") and not child:GetAttribute("collected") then
             task.wait(0.2)
             child.Parent = player.Backpack
         end
