@@ -266,7 +266,7 @@ Tab:CreateDivider()
 local ButtonFarmZone = Tab:CreateButton({
    Name = "TP to farm zone",
    Callback = function()
-       player.Character:PivotTo(workspace.Map["ABD Map"].farmingzonetp.CFrame)
+       player.Character:PivotTo(workspace.Map["ABD Map"].farmingzonetp.CFrame + Vector3.new(0,10,0))
    end,
 })
 
