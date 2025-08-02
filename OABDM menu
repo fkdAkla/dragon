@@ -153,6 +153,15 @@ local ToggleAutoStand = Tab:CreateToggle({
    end,
 })
 
+local ToggleAutoUse = Tab:CreateToggle({
+   Name = "Auto Use",
+   CurrentValue = false,
+   Flag = "Toggle2", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       genv.autouse = Value
+   end,
+})
+
 
 Tab:CreateDivider()
 
@@ -228,14 +237,6 @@ local ToggleStrafe = Tab:CreateToggle({
    end,
 })
 
-local ToggleAutoUse = Tab:CreateToggle({
-   Name = "Auto Use",
-   CurrentValue = false,
-   Flag = "Toggle2", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
-   Callback = function(Value)
-       genv.autouse = Value
-   end,
-})
 
 local Invincibility = Tab:CreateToggle({
    Name = "Invincibility (can't get up)",
