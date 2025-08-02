@@ -162,6 +162,15 @@ local ToggleAutoUse = Tab:CreateToggle({
    end,
 })
 
+local ToggleBringArrow = Tab:CreateToggle({
+   Name = "Bring arrow/roka (oncharadded)",
+   CurrentValue = false,
+   Flag = "Toggle6", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       genv.bringar = Value
+   end,
+})
+
 
 Tab:CreateDivider()
 
@@ -320,9 +329,11 @@ local function oncharadded()
     player.Character.ChildAdded:Connect(function(child)
         if not genv.autouse then return end
         if child.Name == "Arrow" then
+            if genv.bringar and not child:GetAttribute("got") then child:SetAttribute("got", true) return end
             game:GetService("ReplicatedStorage"):WaitForChild("Arrow"):FireServer()
         end
         if child.Name == "Rokakaka Fruit" then
+            if genv.bringar and not child:GetAttribute("got") then child:SetAttribute("got", true) return end
             local args = {
         	player.Character["Rokakaka Fruit"],
         	{
@@ -334,6 +345,19 @@ local function oncharadded()
             game:GetService("ReplicatedStorage"):WaitForChild("R-Edits"):WaitForChild("Events"):WaitForChild("Items"):WaitForChild("ItemUse"):FireServer(unpack(args))
     end
     end)
+    
+    if genv.bringar then
+        task.wait(0.5)
+        for i, v in workspace:GetChildren() do
+            if v.Name == "Arrow" or v.Name == "Rokakaka Fruit" then
+                local ti = v:FindFirstChild("TouchInterest", true)
+                if not ti then continue end
+                
+                firetouchinterest(player.Character.Head, ti.Parent, 0)
+            end
+        end
+        return
+    end
     
     if not genv.autostand then return end
     task.wait(1)
