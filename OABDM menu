@@ -340,7 +340,9 @@ local function oncharadded()
         local ti = workspace["Rokakaka Fruit"]:FindFirstChild("TouchInterest", true)
         firetouchinterest(player.Character.Head, ti.Parent, 0)
     else
-        local ti = workspace.Arrow:FindFirstChild("TouchInterest", true)
+        local tool = workspace:WaitForChild("Arrow")
+        local ti = tool:FindFirstChild("TouchInterest", true)
+        if not ti then tool:PivotTo(player.Character:GetPivot()) return end
         firetouchinterest(player.Character.Head, ti.Parent, 0)
     end
 end
