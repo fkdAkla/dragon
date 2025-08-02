@@ -37,7 +37,7 @@ local function onCharAdded()
 end
 
 local function check(child)
-    if (child.Name:match("Arrow") or child.Name:match("Rokakaka Fruit")) and not child.Name:match("True") and not child.Name:match("Hell") then return end
+    if (child.Name:match("Arrow") or child.Name:match("Rokakaka Fruit")) and not child.Name:match("True") and not child.Name:match("Hell") and not child.Name:lower():match("beta") then return end
     return true
 end
 
