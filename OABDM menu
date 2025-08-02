@@ -58,6 +58,7 @@ local function equip_trowel()
     if not trowel then
         buy_trowel()
         player.Character:WaitForChild("Trowel")
+        task.wait(0.1)
         return
     end
     
