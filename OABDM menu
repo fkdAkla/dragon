@@ -55,7 +55,11 @@ local function equip_trowel()
     
     local trowel = player.Backpack:FindFirstChild("Trowel")
     
-    if not trowel then buy_trowel() trowel = player.Backpack:WaitForChild("Trowel") task.wait(0.1) end
+    if not trowel then
+        buy_trowel()
+        trowel = player.Character:WaitForChild("Trowel", 0.3)
+        task.wait(0.1)
+    end
     
     player.Character.Humanoid:EquipTool(trowel)
 end
