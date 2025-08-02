@@ -34,6 +34,8 @@ local function startStrafe()
     end)
 end
 
+local folder = workspace.Interactable
+
 local function getsand()
     local sands = {}
     for i, v in folder:GetChildren() do
