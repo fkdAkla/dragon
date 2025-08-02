@@ -459,7 +459,7 @@ local function oncharadded()
     task.wait(0.4)
     if player:GetAttribute("AbilityID") ~= 1 and player:GetAttribute("AbilityID") ~= genv.id then
         local ti = workspace["Rokakaka Fruit"]:FindFirstChild("TouchInterest", true)
-        firetouchinterest(player.Character.Head, ti.Parent, 0)
+        firetouchinterest(player.Character:WaitForChild("Head"), ti.Parent, 0)
         task.wait()
         firetouchinterest(player.Character.Head, ti.Parent, 1)
     else
@@ -467,7 +467,7 @@ local function oncharadded()
         local tool = workspace:WaitForChild("Arrow")
         local ti = tool:FindFirstChild("TouchInterest", true)
         if not ti then tool:PivotTo(player.Character:GetPivot()) return end
-        firetouchinterest(player.Character.Head, ti.Parent, 0)
+        firetouchinterest(player.Character:WaitForChild("Head"), ti.Parent, 0)
         task.wait()
         firetouchinterest(player.Character.Head, ti.Parent, 1)
     end
