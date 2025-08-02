@@ -326,14 +326,19 @@ local function oncharadded()
     if genv.invincibility then
         genv.inv()
     end
+    
+    player:WaitForChild("Backpack").ChildAdded:Connect(function(child)
+        if not child:IsA("Tool") then return end
+        child:SetAttribute("got", true)
+    end)
     player.Character.ChildAdded:Connect(function(child)
         if not genv.autouse then return end
         if child.Name == "Arrow" then
-            if genv.bringar and not child:GetAttribute("got") then child:SetAttribute("got", true) return end
+            if genv.bringar and not child:GetAttribute("got") then return end
             game:GetService("ReplicatedStorage"):WaitForChild("Arrow"):FireServer()
         end
         if child.Name == "Rokakaka Fruit" then
-            if genv.bringar and not child:GetAttribute("got") then child:SetAttribute("got", true) return end
+            if genv.bringar and not child:GetAttribute("got") then return end
             local args = {
         	player.Character["Rokakaka Fruit"],
         	{
@@ -360,7 +365,7 @@ local function oncharadded()
     end
     
     if not genv.autostand then return end
-    task.wait(1)
+    task.wait(0.4)
     if player:GetAttribute("AbilityID") ~= 1 and player:GetAttribute("AbilityID") ~= genv.id then
         local ti = workspace["Rokakaka Fruit"]:FindFirstChild("TouchInterest", true)
         firetouchinterest(player.Character.Head, ti.Parent, 0)
