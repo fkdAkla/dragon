@@ -341,6 +341,7 @@ local function oncharadded()
         local ti = workspace["Rokakaka Fruit"]:FindFirstChild("TouchInterest", true)
         firetouchinterest(player.Character.Head, ti.Parent, 0)
     else
+        if player:GetAttribute("AbilityID") == genv.id then ToggleAutoStand:Set(false) end
         local tool = workspace:WaitForChild("Arrow")
         local ti = tool:FindFirstChild("TouchInterest", true)
         if not ti then tool:PivotTo(player.Character:GetPivot()) return end
