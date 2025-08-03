@@ -13,9 +13,9 @@ workspace.ChildAdded:Connect(function(child)
         repeat
             task.wait()
             ti = child:FindFirstChild("TouchInterest", true)
-        until ti or not child or not child.Parent or os.time() - currT >= 5
+        until ti or not child or not child.Parent or os.time() - currT >= 2
         
-        if os.time() - currT >= 5 then return end
+        if os.time() - currT >= 2 then return end
 
         firetouchinterest(player.Character.Head, ti.Parent, true)
         task.wait(0.1)
@@ -54,9 +54,9 @@ workspace["Spawned Items"].ChildAdded:Connect(function(child)
     repeat
         task.wait()
         ti = child:FindFirstChild("TouchInterest", true)
-    until ti or not child or not child.Parent or os.time() - currT >= 5
+    until ti or not child or not child.Parent or os.time() - currT >= 1
         
-    if os.time() - currT >= 5 then return end
+    if os.time() - currT >= 1 then return end
 
     firetouchinterest(player.Character.Head, ti.Parent, true)
     task.wait(0.1)
