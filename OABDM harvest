@@ -1,7 +1,23 @@
 local player = game.Players.LocalPlayer
 
+local URStandIDS = {
+[1] = "Standless";
+[2] = "StarPlatinum";
+[3] = "StarPlatinumTW";
+[4] = "TheWorld";
+[5] = "CrazyDiamond";
+[6] = "KillerQueen";
+[7] = "GoldExperience";
+[8] = "GoldExperienceRequiem";
+[9] = "KingCrimson";
+[10] = "DoppioKingCrimson";
+[11] = "TheWorldAlternateUniverse";
+
+}
+
+
 local stands = { 
-	
+  
 [1] = "Standless";
 [2] = "StarPlatinum";
 [3] = "StarPlatinumTW";
@@ -119,7 +135,52 @@ local stands = {
 [696928111011] = "TheEldritchHorrorStand";
 [69420420420420696969691] = "tix";
 [32879487923879478923472378478991] = "BinaryPot";
-}-- when making stands, add stands in this format [standID] = "nameofstandscript";]]--
+[1214] = "WOU",
+[5112] = "FrostedBear5",
+[21323] = "GaleKnight",
+[9251] = "ChronosSentinel",
+[1334] = "Reference",
+[347234322] = "NFlushedCrimsonAU",
+[477] = "SilverChariot",
+[2314] = "Bear5",
+[1110001101001] = "BinaryPot",
+[519] = "NewShadowTheWorld",
+[10022] = "MLGSniper",
+[466] = "TheEmperorStand",
+[455] = "TheHand",
+[220615] = "Skeleton",
+[100005] = "PossessedSC",
+[135] = "Metallica",
+[10070] = "NewMarioOU",
+[99000] = "Beeboopp",
+[2442] = "VolcanicKCR",
+[518] = "InitialDiamond",
+[555] = "DTWOVA",
+[100001] = "Karate",
+[66] = "KillerQueenRequiem",
+[69699] = "SPTWFB",
+[170205] = "Dante",
+[111111] = "Father",
+[5555] = "DTWEQ",
+[3366] = "TRUERWOVA",
+[1100] = "DarkWorldAct2",
+[15916] = "Joker",
+[100004] = "Caesar",
+[100003] = "Joseph",
+[2028] = "ShadowPotPlatinum",
+[155] = "Pan",
+[8632] = "Kenshiro",
+[4774] = "SCOVA",
+[220615] = "Skeleton",
+[418] = "AbnormalZombie",
+[100000] = "SPTWR",
+[1122] = "XCHARA",
+[609070] = "Slenderman",
+[499] = "RevertedSonic",
+[4444] = "TuskAct4",
+[99000] = "BeepBoop",
+[464] = "AfricaTW"
+}
 
 local genv = getgenv()
 local blNames = {"Client", "LBerserk", "LuigiReset", "ResetBerserkLighting"}
