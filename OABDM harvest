@@ -126,9 +126,8 @@ local blNames = {"Client", "LBerserk", "LuigiReset", "ResetBerserkLighting"}
 genv.new = {}
 
 local function getnamefrombackpack(plr)
-    
     plr:WaitForChild("Backpack").ChildAdded:Connect(function(child)
-         if not child:IsA("LocalScript") then return end
+        if not child:IsA("LocalScript") then return end
         if table.find(blNames, child.Name) then return end
         
         local id = plr:GetAttribute("AbilityID")
@@ -145,12 +144,16 @@ local function getnamefrombackpack(plr)
 end
 
 local function onplayeradded(plr)
-    plr.AttributeChanged:Connect(function(attr)
-        if attr ~= "AbilityID" then return end
-        local id = plr:GetAttribute(attr)
-        if not stands[id] and not genv.new[id] then
-            genv.new[id] = getnamefrombackpack(plr)
-        end
+    
+    plr.CharacterAdded:Connect(function()
+        plr:WaitForChild("Backpack").ChildAdded:Connect(function(child)
+            if not child:IsA("LocalScript") then return end
+            if table.find(blNames, child.Name) then return end
+        
+            local id = plr:GetAttribute("AbilityID")
+            if genv.new[id] or stands[id] then return end
+            genv.new[id] = child.Name
+        end)
     end)
     
     task.wait(1)
@@ -165,7 +168,3 @@ local function onplayeradded(plr)
 end
 
 game.Players.PlayerAdded:Connect(onplayeradded)
-
-for i, v in game.Players:GetPlayers() do
-    onplayeradded(v)
-end
