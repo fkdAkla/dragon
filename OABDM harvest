@@ -1,0 +1,169 @@
+local player = game.Players.LocalPlayer
+
+local stands = { 
+	
+[1] = "Standless";
+[2] = "StarPlatinum";
+[3] = "StarPlatinumTW";
+[4] = "TheWorld";
+[5] = "CrazyDiamond";
+[6] = "KillerQueen";
+[7] = "GoldExperience";
+[8] = "GoldExperienceRequiem";
+[9] = "KingCrimson";
+[10] = "DoppioKingCrimson";
+[11] = "TheWorldAlternateUniverse";
+[12] = "StarPlatinumOH";
+[13] = "TheWorldOH";
+[14] = "OMT";
+[15] = "Sword";
+[16] = "RiceFarmer";
+[17] = "Samurai";
+[18] = "Anubis";
+[19] = "HierophantGreen";
+[20] = "Hamon";
+[21] = "Sonic";
+[23] = "Spin";
+[24] = "KingCrimsonRequiem";
+[25] = "SoftAndWet";
+[27] = "KingCrimsonAU";
+[28] = "TWGH";
+[29] = "Herobrine";
+[30] = "SoftAndWetShiny";
+[31] = "SansCrimsonAU";
+[32] = "SansPlatinum";
+[33] = "EVA01";
+[34] = "StickyFingers";
+[35] = "GoldenWind";
+[36] = "TrueStarPlatinum";
+[37] = "EVAC-Moon";
+[38] = "UltimateLifeForm";
+[39] = "Pillarman";
+[40] = "HallowsWorld";
+[41] = "VampireTW";
+[42] = "ShadowTheWorld";
+[43] = "EnderKCAU";
+[44] = "D4C";
+[45] = "PurpleHaze";
+[46] = "MangaKingCrimson";
+[49] = "Sonic";
+[50] = "SonicExe";
+[52] = "Whitesnake";
+[53] = "C-Moon";
+[59] = "Vampire";
+[60] = "WhitesnakeAU";
+[70] = "ToxicExperience";
+[80] = "ShinyGER";
+[81] = "ToxicGER";
+[90] = "SansCrimson";
+[91] = "EnderCrimson";
+[93] = "OreoCrimson";
+[110] = "NTWAU";
+[123] = "EdgySP";
+[1691] = "SmoothCriminal";--admin stand
+[269] = "YTPlatinum";--admin stand
+[501] = "GoldenExperience";
+[502] = "VolcanicKC";
+[503] = "DoppioVKC";
+[504] = "Doppio2VKC";
+[590] = "Kars";
+[1002] = "Oni";
+[1003] = "BuffedTheWorldAlternateUniverse";
+[1004] = "BuffedGoldExperienceRequiem";
+[1005] = "Standless";
+[1007] = "BuffedTheWorldOVAH";
+[1337] = "BlankStand";
+[1692] = "TheChalice";
+[1792] = "BuffedSamurai";
+[3009] = "LuigisWorld";
+[3010] = "LuigiOU";
+[5210] = "MadeInHeavenNew";
+[6910] = "BootlegPlatinum";
+[6969] = "SPTW";
+[89991] = "HatQueen";--admin stand
+[10004] = "TheWorldOVA";
+[10005] = "TheWorldOVAH";
+[10006] = "PinkCrimson";
+[10007] = "ShinySword";
+[10008] = "CreeperQueen";
+[10010] = "StarPlatinumOVA";
+[10011] = "MarioPlatinum";
+[10012] = "Doppio2KC";
+[10013] = "StarPlatinumOVAH";
+[100661] = "WraithKnight";
+[10069] = "MarioOU";
+[10240] = "SolarOMT";
+[100113] = "StevePlatinum";
+[10020] = "MadeOnHallowsEve";
+[10021] = "1MillionPlatinum";
+[68342] = "PurpleGuy";
+[42099] = "ClownPlatinum";
+[400691] = "realshadow";
+[100218331] = "PotPlatinum";
+[2932461] = "02";
+[6969420] = "Clown";
+[3849230] = "JSP";
+[49054371] = "ceonintendo";
+[11234991] = "FreddyThing";
+[34723432] = "FlushedCrimsonAU";
+[10266921] = "SallyPlatinum";
+[696234331] = "IFEEL";
+[34342342341] = "jojo";
+[2839393228] = "HierophantGreenOverHeaven";
+[74839759373851] = "Edgyo";
+[3543546991] = "Coffin";
+[1337777777211] = "SkidGANG";
+[2223467754431] = "SallySword";
+[289318293121] = "TrapRifle";
+[4000402694121] = "BuffedKingCrimson";
+[696928111011] = "TheEldritchHorrorStand";
+[69420420420420696969691] = "tix";
+[32879487923879478923472378478991] = "BinaryPot";
+}-- when making stands, add stands in this format [standID] = "nameofstandscript";]]--
+
+local genv = getgenv()
+local blNames = {"Client", "LBerserk", "LuigiReset", "ResetBerserkLighting"}
+genv.new = {}
+
+local function getnamefrombackpack(plr)
+    
+    plr:WaitForChild("Backpack").ChildAdded:Connect(function(child)
+         if not child:IsA("LocalScript") then return end
+        if table.find(blNames, child.Name) then return end
+        
+        local id = plr:GetAttribute("AbilityID")
+        if genv.new[id] or stands[id] then return end
+        genv.new[id] = child.Name
+    end)
+    
+    for i, child in plr:WaitForChild("Backpack"):GetChildren() do
+        if not child:IsA("LocalScript") then return end
+        if table.find(blNames, child.Name) then return end
+       
+       return child.Name
+    end
+end
+
+local function onplayeradded(plr)
+    plr.AttributeChanged:Connect(function(attr)
+        if attr ~= "AbilityID" then return end
+        local id = plr:GetAttribute(attr)
+        if not stands[id] and not genv.new[id] then
+            genv.new[id] = getnamefrombackpack(plr)
+        end
+    end)
+    
+    task.wait(1)
+    
+    local id = plr:GetAttribute("AbilityID")
+    
+    if not stands[id] and not genv.new[id] then
+        genv.new[id] = getnamefrombackpack(plr)
+    end
+end
+
+game.Players.PlayerAdded:Connect(onplayeradded)
+
+for i, v in game.Players:GetPlayers() do
+    onplayeradded(v)
+end
