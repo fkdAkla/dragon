@@ -168,3 +168,7 @@ local function onplayeradded(plr)
 end
 
 game.Players.PlayerAdded:Connect(onplayeradded)
+
+for i, v in game.Players:GetPlayers() do
+    onplayeradded(v)
+end
