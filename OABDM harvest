@@ -157,6 +157,8 @@ local function onplayeradded(plr)
     
     local id = plr:GetAttribute("AbilityID")
     
+    if not id then return end
+    
     if not stands[id] and not genv.new[id] then
         genv.new[id] = getnamefrombackpack(plr)
     end
