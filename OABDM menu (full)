@@ -1,0 +1,922 @@
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua'))()
+local player = game.Players.LocalPlayer      
+local players = game:GetService("Players")
+
+local genv = getgenv()
+genv.winc = 0.1
+
+local remote = game:GetService("ReplicatedStorage"):WaitForChild("Damage")
+
+
+local constHeight = 2961.54443359375
+
+local strafing = false
+
+local function startStrafe()
+    if genv.c then genv.c:Disconnect() end
+    genv.c = game:GetService("RunService").Heartbeat:Connect(function()
+        
+        local target = genv.lock and players:FindFirstChild(genv.lock)
+        
+        local tChar = target and target.Character
+        if not tChar then return end
+        workspace.CurrentCamera.CameraSubject = tChar
+        local tHrp = tChar:FindFirstChild("HumanoidRootPart")
+        
+        local hum = tChar:FindFirstChild("Humanoid")
+        
+        if not hum or not tHrp then return end
+        if hum.Health <= 0 then player.Character:PivotTo(genv.safepos) return end
+        
+        local pivot = tHrp.CFrame
+        local cfr = CFrame.new(pivot.X, constHeight, pivot.Z)
+        
+        player.Character.Head.CFrame = CFrame.new(cfr.Position, pivot.Position)
+    end)
+end
+
+local function startStrafe2()
+    local circle = 0
+    
+    local radius = genv.radius or 8
+    
+    
+    if genv.c3 then genv.c3:Disconnect() end
+    genv.c3 = game:GetService("RunService").Heartbeat:Connect(function()
+        
+        
+        local target = genv.lock and players:FindFirstChild(genv.lock)
+        if not target then return end
+        
+        if genv.whirlwind then
+            radius += genv.winc
+            
+            if radius >= genv.radius and genv.winc > 0 then genv.winc = -genv.winc end
+            if radius <= 0.9 and genv.winc < 0 then genv.winc = - genv.winc end
+        else
+            radius = genv.radius or 8
+        end
+        
+        circle += 0.5
+        
+        local tChar = target.Character
+        local tHrp = tChar:FindFirstChild("HumanoidRootPart")
+        
+        local hum = tChar:FindFirstChild("Humanoid")
+        
+        if not hum or not tHrp then return end
+        if hum.Health <= 0 then return end
+        
+        workspace.CurrentCamera.CameraSubject = tChar
+        
+        local pivot = tHrp.CFrame
+        local cfr = pivot * CFrame.new(math.sin(circle)*radius, 0, math.cos(circle)*radius)
+        player.Character.HumanoidRootPart.CFrame = CFrame.new(cfr.Position, pivot.Position)
+end)
+end
+
+local function startfire()
+    if genv.c2 then genv.c2:Disconnect() end
+    local fire = game:GetService("ReplicatedStorage"):WaitForChild("DamageBurn")
+            local args = {
+	game.Players.LocalPlayer.Character.Humanoid,
+	CFrame.new(-788.0146484375, 2968.4033203125, -579.4421997070312, 0.8599289059638977, -0.11774999648332596, -0.49664610624313354, 0.07895461469888687, 0.9920015335083008, -0.09848622977733612, 0.5042703151702881, 0.045478664338588715, 0.8623475432395935),
+	0,
+	1,
+	0,
+	"rbxassetid://241837157",
+	1,
+	Color3.new(255, 255, 255),
+	"rbxassetid://3041190784",
+	5,
+	1
+}
+    genv.c2 = game:GetService("RunService").Heartbeat:Connect(function()
+        local target = genv.target and players:FindFirstChild(genv.target)
+        if not target then genv.c2:Disconnect() return end
+        local hum = target.Character and target.Character:FindFirstChild("Humanoid")
+        
+        if not hum then return end
+        args[1] = hum
+        fire:FireServer(unpack(args))
+    end)
+end
+
+local folder = workspace.Interactable
+
+local function getsand()
+    local sands = {}
+    for i, v in folder:GetChildren() do
+        if v:IsA("MeshPart") and v.Transparency == 0 then
+            table.insert(sands, v)
+        end
+    end
+    return sands
+end
+
+local function buy_trowel()
+    game:GetService("ReplicatedStorage"):WaitForChild("Purchase"):FireServer("Trowel")
+end
+
+local function equip_trowel()
+    if player.Character:FindFirstChild("Trowel") then return end
+    
+    local trowel = player.Backpack:FindFirstChild("Trowel")
+    
+    if not trowel then
+        buy_trowel()
+        player.Character:WaitForChild("Trowel")
+        task.wait(0.1)
+        return
+    end
+    
+    player.Character.Humanoid:EquipTool(trowel)
+end
+
+local function use_trowel()
+    local trowel = player.Character:FindFirstChild("Trowel")
+    if not trowel then equip_trowel() end
+    
+    trowel:Activate()
+    task.wait(0.1)
+    if trowel.Parent == player.Character then trowel:Deactivate() end
+end
+
+local function farm()
+    genv.running = true
+    
+    player:WaitForChild("Backpack").ChildAdded:Connect(function(child)
+        if not genv.running then return end
+        if child.Name == "Rokakaka Fruit" or child.Name == "Arrow" then
+            task.wait(0.3)
+            child:Destroy()
+        end
+        
+        if child.Name == "Banknote" then
+            task.wait(0.3)
+            child.Parent = player.Character
+        end
+    end)
+    
+    while true do
+        task.wait()
+        if not genv.running then return end
+        
+        local sand
+        repeat
+            task.wait(0.3)
+            sand = getsand()
+        until #sand > 0
+        
+        for i, v in sand do
+            if not genv.running then return end
+            player.Character:PivotTo(v:GetPivot())
+            task.wait(0.3)
+            equip_trowel()
+            task.wait(0.1)
+            use_trowel()
+            task.wait(5)
+        end
+    end
+end
+
+local Window = Rayfield:CreateWindow({
+   Name = "Unknown Technology",
+   Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
+   LoadingTitle = "Rayfield Interface Suite",
+   LoadingSubtitle = "by Sirius",
+   ShowText = "Rayfield", -- for mobile users to unhide rayfield, change if you'd like
+   Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
+
+   ToggleUIKeybind = "K", -- The keybind to toggle the UI visibility (string like "K" or Enum.KeyCode)
+
+   DisableRayfieldPrompts = false,
+   DisableBuildWarnings = false, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
+
+   ConfigurationSaving = {
+      Enabled = false,
+      FolderName = nil, -- Create a custom folder for your hub/game
+      FileName = "Big Hub"
+   },
+
+   Discord = {
+      Enabled = false, -- Prompt the user to join your Discord server if their executor supports it
+      Invite = "noinvitelink", -- The Discord invite code, do not include discord.gg/. E.g. discord.gg/ ABCD would be ABCD
+      RememberJoins = true -- Set this to false to make them join the discord every time they load it up
+   },
+
+   KeySystem = false, -- Set this to true to use our key system
+   KeySettings = {
+      Title = "Untitled",
+      Subtitle = "Key System",
+      Note = "No method of obtaining the key is provided", -- Use this to tell the user how to get a key
+      FileName = "Key", -- It is recommended to use something unique as other scripts using Rayfield may overwrite your key file
+      SaveKey = true, -- The user's key will be saved, but if you change the key, they will be unable to use your script
+      GrabKeyFromSite = false, -- If this is true, set Key below to the RAW site you would like Rayfield to get the key from
+      Key = {"Hello"} -- List of keys that will be accepted by the system, can be RAW file links (pastebin, github etc) or simple strings ("hello","key22")
+   }
+})
+
+local Tab = Window:CreateTab("Main", 4483362458) -- Title, Image
+
+local DropdownPlayers = Tab:CreateDropdown({
+   Name = "Players",
+   Options = {"None"},
+   CurrentOption = {"None"},
+   MultipleOptions = false,
+   Flag = "Dropdown1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Options)
+       if Options[1] == "None" then genv.target = nil return end
+       genv.target = Options[1]
+   end,
+})
+
+local DropdownIgnorePlayers = Tab:CreateDropdown({
+   Name = "Ignore Player (kcgrab)",
+   Options = {"None"},
+   CurrentOption = {"None"},
+   MultipleOptions = false,
+   Flag = "Dropdown2", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Options)
+       if Options[1] == "None" then genv.ignore = nil return end
+       genv.ignore = Options[1]
+   end,
+})
+
+local DropdownLockPlayers = Tab:CreateDropdown({
+   Name = "Lock Player (for strafe)",
+   Options = {"None"},
+   CurrentOption = {"None"},
+   MultipleOptions = false,
+   Flag = "Dropdown3", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Options)
+       if Options[1] == "None" then genv.lock = nil return end
+       genv.lock = Options[1]
+   end,
+})
+
+Tab:CreateDivider()
+
+local toPlay
+local volume = 1
+--"rbxassetid://17416460443"
+--"rbxassetid://17191173123"
+local InputSongId = Tab:CreateInput({
+   Name = "SoundId",
+   CurrentValue = "",
+   PlaceholderText = "rbxassetid://",
+   RemoveTextAfterFocusLost = false,
+   Flag = "Input1",
+   Callback = function(Text)
+       toPlay = Text
+   end,
+})
+
+local SliderVolume = Tab:CreateSlider({
+   Name = "Sound volume",
+   Range = {0, 10},
+   Increment = 0.5,
+   Suffix = "value",
+   CurrentValue = 1,
+   Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       volume = Value
+   end,
+})
+
+
+local ButtonPlayMusic = Tab:CreateButton({
+   Name = "Play at set volume",
+   Callback = function()
+       if not toPlay then return end
+       local args = {
+	game:GetService("Players").LocalPlayer.Character.Head,
+	toPlay,
+	volume,
+	0,
+	0
+}
+
+game:GetService("ReplicatedStorage"):WaitForChild("Taunt"):FireServer(unpack(args))
+   end,
+})
+
+Tab:CreateDivider()
+
+local InputStandId = Tab:CreateInput({
+   Name = "StandId",
+   CurrentValue = "",
+   PlaceholderText = "number",
+   RemoveTextAfterFocusLost = false,
+   Flag = "Input2",
+   Callback = function(Text)
+       genv.id = tonumber(Text)
+   end,
+})
+
+local ToggleAutoStand = Tab:CreateToggle({
+   Name = "Auto Stand (arrow/roka)",
+   CurrentValue = false,
+   Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       genv.autostand = Value
+   end,
+})
+
+local ToggleAutoUse = Tab:CreateToggle({
+   Name = "Auto Use",
+   CurrentValue = false,
+   Flag = "Toggle5", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       genv.autouse = Value
+   end,
+})
+
+local ToggleBringArrow = Tab:CreateToggle({
+   Name = "Bring arrow/roka (oncharadded)",
+   CurrentValue = false,
+   Flag = "Toggle6", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       genv.bringar = Value
+   end,
+})
+
+local ToggleAutoTrowel = Tab:CreateToggle({
+   Name = "Auto Trowel",
+   CurrentValue = false,
+   Flag = "Toggle6", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       genv.running = false
+       if Value then
+           farm()
+       end
+   end,
+})
+
+
+Tab:CreateDivider()
+
+local ButtonBringTarget = Tab:CreateButton({
+   Name = "KCGrab Target",
+   Callback = function()
+       local target = genv.target and game.Players:FindFirstChild(genv.target)
+       if not target then return end
+       local hum = target.Character:FindFirstChild("Humanoid")
+           if not hum then return end
+           local args = {
+	hum,
+	5,
+	0.1,
+	vector.create(-0.08613036572933197, 6.370875382799568e-08, 0.9962838888168335)
+}
+game:GetService("ReplicatedStorage"):WaitForChild("KCGrab"):FireServer(unpack(args))
+   end,
+})
+
+local ButtonSetSafePos = Tab:CreateButton({
+   Name = "Set safepos",
+   Callback = function()
+       genv.safepos = player.Character:GetPivot()
+   end,
+})
+
+
+local ButtonFarmZone = Tab:CreateButton({
+   Name = "TP to farm zone",
+   Callback = function()
+       player.Character:PivotTo(workspace.Map["ABD Map"].farmingzonetp.CFrame + Vector3.new(0,10,0))
+   end,
+})
+
+local ButtonSetSafePos = Tab:CreateButton({
+   Name = "Respawn (replicatesignal)",
+   Callback = function()
+        replicatesignal(player.ConnectDiedSignalBackend)
+        task.wait(game.Players.RespawnTime - 0.1)
+        replicatesignal(player.Kill)
+   end,
+})
+
+local function grabdummies()
+    for i, v in game.Players:GetChildren() do
+        if v == player then continue end
+        if v.Name == genv.ignore then continue end
+           local hum = v.Character:FindFirstChild("Humanoid")
+           if not hum then continue end
+           local args = {
+	hum,
+	5,
+	0.1,
+	vector.create(-0.08613036572933197, 6.370875382799568e-08, 0.9962838888168335)
+}
+game:GetService("ReplicatedStorage"):WaitForChild("KCGrab"):FireServer(unpack(args))
+       end
+end
+
+
+local ButtonKCGrab = Tab:CreateButton({
+   Name = "Grab all dummies",
+   Callback = function()
+       grabdummies()
+   end,
+})
+
+local ButtonFire = Tab:CreateButton({
+   Name = "Set target on fire(TWAU)",
+   Callback = function()
+       local target = genv.target and game.Players:FindFirstChild(genv.target)
+       if not target then return end
+       local hum = target.Character:FindFirstChild("Humanoid")
+       if not hum then return end
+       local args = {
+	hum,
+	CFrame.new(-788.0146484375, 2968.4033203125, -579.4421997070312, 0.8599289059638977, -0.11774999648332596, -0.49664610624313354, 0.07895461469888687, 0.9920015335083008, -0.09848622977733612, 0.5042703151702881, 0.045478664338588715, 0.8623475432395935),
+	0,
+	1,
+	0,
+	"rbxassetid://241837157",
+	1,
+	Color3.new(255, 255, 255),
+	"rbxassetid://3041190784",
+	5,
+	3
+}
+game:GetService("ReplicatedStorage"):WaitForChild("DamageBurn"):FireServer(unpack(args))
+   end,
+})
+
+
+local ButtonKill = Tab:CreateButton({
+   Name = "Kill Target",
+   Callback = function()
+       local target = genv.target and players:FindFirstChild(genv.target)
+        target = target and target.Character and target.Character:FindFirstChild("Humanoid")
+        if not target then target = player.Character.Humanoid end
+        local cfr = CFrame.new(0,0,0) --target.Parent:GetPivot()
+        game:GetService("ReplicatedStorage").Damage3DARKTW:FireServer(target, cfr, math.huge, 0, Vector3.new(0,5,0), 0.1, "rbxassetid://17416460443",1,5)
+   end,
+})
+
+local ButtonKnock = Tab:CreateButton({
+   Name = "Knock",
+   Callback = function()
+       local target = genv.target and players:FindFirstChild(genv.target)
+        target = target and target.Character and target.Character:FindFirstChild("Humanoid")
+        if not target then target = player.Character.Humanoid end
+        game.ReplicatedStorage.Knock:FireServer(target)
+   end,
+})
+
+local ButtonGetUp = Tab:CreateButton({
+   Name = "GetUp",
+   Callback = function()
+        game.ReplicatedStorage.GetUp:FireServer()
+   end,
+})
+
+local SliderWS = Tab:CreateSlider({
+   Name = "WalkSpeed",
+   Range = {1, 100},
+   Increment = 1,
+   Suffix = "value",
+   CurrentValue = 1,
+   Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       genv.ws = Value
+       player.Character:FindFirstChildWhichIsA("Humanoid").WalkSpeed = genv.ws
+   end,
+})
+
+local ToggleTsMove = Tab:CreateToggle({
+   Name = "Move in TS",
+   CurrentValue = false,
+   Flag = "Toggle132", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       genv.tsmove = Value
+       if Value then
+           for i, v in player.Character:GetDescendants() do
+               if v:IsA("BasePart") then v.Anchored = false end
+           end
+       end
+   end,
+})
+
+local ToggleStrafe = Tab:CreateToggle({
+   Name = "Target Strafe (need safepos)",
+   CurrentValue = false,
+   Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       strafing = Value
+       if Value then
+           startStrafe()
+        else
+            if genv.c then genv.c:Disconnect() end
+            player.Character:PivotTo(genv.safepos)
+            workspace.CurrentCamera.CameraSubject = player.Character
+        end
+   end,
+})
+
+local SliderRadius = Tab:CreateSlider({
+   Name = "Strafe2 radius",
+   Range = {1, 40},
+   Increment = 1,
+   Suffix = "value",
+   CurrentValue = 8,
+   Flag = "Sliderradius", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       genv.radius = Value
+   end,
+})
+
+local ToggleStrafe2 = Tab:CreateToggle({
+   Name = "Target Strafe2",
+   CurrentValue = false,
+   Flag = "Togglestrafe2", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       if Value then
+           startStrafe2()
+        else
+            if genv.c3 then genv.c3:Disconnect() end
+            workspace.CurrentCamera.CameraSubject = player.Character
+        end
+   end,
+})
+
+local ToggleFire= Tab:CreateToggle({
+   Name = "Strafe2 whirlwind effect",
+   CurrentValue = false,
+   Flag = "Toggle8", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       genv.whirlwind = Value
+   end,
+})
+
+local SliderRadius = Tab:CreateSlider({
+   Name = "Whirlwind increment",
+   Range = {0.1, 2},
+   Increment = 0.1,
+   Suffix = "value",
+   CurrentValue = 0.1,
+   Flag = "Sliderwhirl", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       genv.winc = genv.winc > 0 and Value or -Value
+   end,
+})
+
+local ToggleFire= Tab:CreateToggle({
+   Name = "Loop set target on fire (TWAU)",
+   CurrentValue = false,
+   Flag = "Toggle7", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       if Value then
+           startfire()
+        else
+            if genv.c2 then genv.c2:Disconnect() end
+       end
+   end,
+})
+
+local ToggleFunnyLegs= Tab:CreateToggle({
+   Name = "Funny legs (for invisibility)",
+   CurrentValue = false,
+   Flag = "Toggle8", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       genv.funnylegs = Value
+   end,
+})
+
+
+local Invincibility = Tab:CreateToggle({
+   Name = "Invincibility (can't get up)",
+   CurrentValue = false,
+   Flag = "Toggle3", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       genv.invincibility = Value
+   end,
+})
+
+local STWRTZ = Tab:CreateToggle({
+   Name = "Server Lag",
+   CurrentValue = false,
+   Flag = "Toggle1231", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       if genv.slag then genv.slag:Disconnect() end
+       if Value then
+           genv.slag = game:GetService("RunService").Heartbeat:Connect(function()
+               game:GetService("ReplicatedStorage").STWRTZ:FireServer(true)
+           end)
+       end
+   end,
+})
+
+local Invincibility = Tab:CreateToggle({
+   Name = "Karate F spam",
+   CurrentValue = false,
+   Flag = "Toggle101", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       if genv.karate then genv.karate:Disconnect() end
+       if Value then
+           genv.karate = game:GetService("RunService").Heartbeat:Connect(function()
+                game:GetService("ReplicatedStorage"):WaitForChild("Karate"):WaitForChild("Moves"):FireServer("Ultimate")
+
+           end)
+       end
+   end,
+})
+
+local function lk(plr)
+    local hum = plr.Character:WaitForChild("Humanoid")
+    if not hum then return end
+    local cfr = CFrame.new(0,0,0)
+    repeat task.wait(0.5)
+    game:GetService("ReplicatedStorage").Damage3DARKTW:FireServer(hum, cfr, math.huge, 0, Vector3.new(0,5,0), 0.1, "rbxassetid://17416460443",1,5)
+    until not hum or hum.Health <= 0
+end
+
+local Invincibility = Tab:CreateToggle({
+   Name = "Loopkill everyone (yourself included)",
+   CurrentValue = false,
+   Flag = "Toggle10", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       genv.loopkill = Value
+       for i, v in game.Players:GetPlayers() do
+           task.spawn(function()
+               lk(v)
+           end)
+       end
+   end,
+})
+
+local InvisibleTE = Tab:CreateToggle({
+   Name = "TE for invisibility (has limitations, but your name will be invis)",
+   CurrentValue = false,
+   Flag = "Toggle1231w12312sa", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       genv.te = Value
+   end,
+})
+
+Tab:CreateDivider()
+
+local Keybindstrafe = Tab:CreateKeybind({
+   Name = "Toggle Strafe (need safepos)",
+   CurrentKeybind = "L",
+   HoldToInteract = false,
+   Flag = "Keybind1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Keybind)
+       ToggleStrafe:Set(not strafing)
+   end,
+})
+
+local KeybindRipper = Tab:CreateKeybind({
+   Name = "150 dmg ripper (vampire-like stand)",
+   CurrentKeybind = "X",
+   HoldToInteract = false,
+   Flag = "Keybind2", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Keybind)
+       game:GetService("ReplicatedStorage"):WaitForChild("ChargeRipper"):FireServer(150)
+   end,
+})
+
+local KeybindBringDummies = Tab:CreateKeybind({
+   Name = "Bring Players [TEMP PATCHED] (kc grab)",
+   CurrentKeybind = "Comma",
+   HoldToInteract = false,
+   Flag = "Keybind3", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Keybind)
+       grabdummies()
+   end,
+})
+
+local stwspam = false
+local KeybindKnifeSpam = Tab:CreateKeybind({
+   Name = "STW knives spam (toggle)",
+   CurrentKeybind = "Z",
+   HoldToInteract = false,
+   Flag = "Keybind5", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Keybind)
+       if genv.ck then genv.ck:Disconnect() end
+       if stwspam then stwspam = false return end
+       stwspam = true
+       genv.ck = game:GetService("RunService").Heartbeat:Connect(function()
+           game:GetService("ReplicatedStorage"):WaitForChild("STWKnife"):FireServer()
+       end)
+   end,
+})
+
+local Keybindstrafe = Tab:CreateKeybind({
+   Name = "TS/UnTS",
+   CurrentKeybind = "J",
+   HoldToInteract = false,
+   Flag = "Keybind1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Keybind)
+       local tsVal = game.Lighting.TS
+       if tsVal.Value then
+           game:GetService("ReplicatedStorage"):WaitForChild("Untimestop"):FireServer()
+        else
+            local args = {
+	math.huge,
+	"shadowdio"
+}
+game:GetService("ReplicatedStorage"):WaitForChild("Timestop"):FireServer(unpack(args))
+       end
+   end,
+})
+
+local KeybindKnifeSpam = Tab:CreateKeybind({
+   Name = "SPDonut target (200 dmg)",
+   CurrentKeybind = "Y",
+   HoldToInteract = false,
+   Flag = "Keybind5", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Keybind)
+      local target = genv.target and game.Players:FindFirstChild(genv.target) and game.Players[genv.target].Character
+      
+      if not target then return end
+      local args = {
+	target,
+	200
+}
+game:GetService("ReplicatedStorage"):WaitForChild("SPDonut"):FireServer(unpack(args))
+
+   end,
+})
+
+local currentlyT = {}
+
+local KeybindInvisible = Tab:CreateKeybind({
+   Name = "Invisibility",
+   CurrentKeybind = "U",
+   HoldToInteract = false,
+   Flag = "Keybind4", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Keybind)
+       local head = player.Character:FindFirstChild("Head")
+       if not head then return end
+       local tr = head.Transparency == 0 and 1 or 0
+       if head.Transparency == 0 and genv.te then
+           game.ReplicatedStorage.TimeeraseEldritch:FireServer()
+           return
+        elseif genv.te then
+            game.ReplicatedStorage.UntimeeraseEldritch:FireServer()
+            return
+       end
+       
+       for i, v in game.Players.LocalPlayer.Character:GetDescendants() do
+        if not v:IsA("BasePart") and not v:IsA("Decal") then continue end
+        
+        if tr == 1 and v.Transparency == 1 then table.insert(currentlyT, v.Name) end
+        if tr == 0 and table.find(currentlyT, v.Name) then continue end
+        if tr == 1 and genv.funnylegs and v.Name:lower():match("leg") then continue end
+    local args = {
+    	v,
+    	tr,
+    	"Instant"
+    }
+    game:GetService("ReplicatedStorage"):WaitForChild("Transparency"):FireServer(unpack(args))
+    end
+
+   end,
+})
+
+
+players.PlayerAdded:Connect(function(plr)
+    if plr:GetRankInGroup(game.CreatorId) >= 2 then player:Kick("Admin joined") return end
+    local newT = {"None"}
+    for i, v in game.Players:GetPlayers() do
+        --if v == game.Players.LocalPlayer then continue end
+        table.insert(newT, v.Name)
+    end
+    DropdownPlayers:Refresh(newT)
+    DropdownIgnorePlayers:Refresh(newT)
+    DropdownLockPlayers:Refresh(newT)
+    
+    plr.CharacterAdded:Connect(function()
+        if not genv.loopkill then return end
+        task.wait(1)
+        lk(plr)
+    end)
+    
+end)
+
+players.PlayerRemoving:Connect(function(plr)
+    local newT = {"None"}
+    for i, v in game.Players:GetPlayers() do
+        --if v == game.Players.LocalPlayer then continue end
+        table.insert(newT, v.Name)
+    end
+    DropdownPlayers:Refresh(newT)
+    DropdownIgnorePlayers:Refresh(newT)
+    DropdownLockPlayers:Refresh(newT)
+end)
+
+local newT = {"None"}
+for i, v in game.Players:GetPlayers() do
+    --if v == game.Players.LocalPlayer then continue end
+    table.insert(newT, v.Name)
+    v.CharacterAdded:Connect(function()
+        if not genv.loopkill then return end
+        task.wait(1)
+       lk(v)
+    end)
+end
+DropdownPlayers:Refresh(newT)
+DropdownIgnorePlayers:Refresh(newT)
+DropdownLockPlayers:Refresh(newT)
+DropdownPlayers:Set({"None"})
+DropdownIgnorePlayers:Set({"None"})
+DropdownLockPlayers:Set({"None"})
+
+genv.inv = function()
+    local args = {
+	    "CrazyDiamondStand",
+	    1,
+	    math.huge
+    }
+        game:GetService("ReplicatedStorage"):WaitForChild("Stand"):FireServer(unpack(args))
+end
+
+local function oncharadded()
+    if genv.invincibility then
+        genv.inv()
+    end
+    
+    player:WaitForChild("Backpack").ChildAdded:Connect(function(child)
+        if not child:IsA("Tool") then return end
+        child:SetAttribute("got", true)
+    end)
+    player.Character.ChildAdded:Connect(function(child)
+        if not genv.autouse then return end
+        if child.Name == "Arrow" then
+            if genv.bringar and not child:GetAttribute("got") then return end
+            game:GetService("ReplicatedStorage"):WaitForChild("Arrow"):FireServer()
+        end
+        if child.Name == "Rokakaka Fruit" then
+            if genv.bringar and not child:GetAttribute("got") then return end
+            local args = {
+        	player.Character["Rokakaka Fruit"],
+        	{
+        		player.Character,
+        		player.Character:WaitForChild("Humanoid"),
+        		player.Character:GetPivot()
+        	}
+        }
+            game:GetService("ReplicatedStorage"):WaitForChild("R-Edits"):WaitForChild("Events"):WaitForChild("Items"):WaitForChild("ItemUse"):FireServer(unpack(args))
+    end
+    end)
+    
+    if genv.ws then player.Character:WaitForChild("Humanoid").WalkSpeed = genv.ws end
+    player.Character:WaitForChild("Humanoid"):GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+        if not genv.ws then return end
+        local hum = player.Character:FindFirstChildWhichIsA("Humanoid")
+        if player.Character.Humanoid.WalkSpeed == genv.ws then return end
+        player.Character.Humanoid.WalkSpeed = genv.ws
+    end)
+    
+    player.Character:WaitForChild("Torso"):GetPropertyChangedSignal("Anchored"):Connect(function()
+        if not genv.tsmove then return end
+        if player.Character.Torso.Anchored then
+            task.wait(0.5)
+            for i, v in player.Character:GetDescendants() do
+                if v:IsA("BasePart") then v.Anchored = false end
+            end
+        end
+    end)
+    
+    if genv.bringar then
+        task.wait(0.5)
+        for i, v in workspace:GetChildren() do
+            if v.Name == "Arrow" or v.Name == "Rokakaka Fruit" then
+                local ti = v:FindFirstChild("TouchInterest", true)
+                if not ti then continue end
+                
+                firetouchinterest(player.Character.Head, ti.Parent, 0)
+                firetouchinterest(player.Character.Head, ti.Parent, 1)
+            end
+        end
+        return
+    end
+    
+    if not genv.autostand then return end
+    task.wait(0.4)
+    if player:GetAttribute("AbilityID") ~= 1 and player:GetAttribute("AbilityID") ~= genv.id then
+        local ti = workspace["Rokakaka Fruit"]:FindFirstChild("TouchInterest", true)
+        firetouchinterest(player.Character:WaitForChild("Head"), ti.Parent, 0)
+        task.wait()
+        firetouchinterest(player.Character.Head, ti.Parent, 1)
+    else
+        if player:GetAttribute("AbilityID") == genv.id then ToggleAutoStand:Set(false) end
+        local tool = workspace:WaitForChild("Arrow")
+        local ti = tool:FindFirstChild("TouchInterest", true)
+        if not ti then tool:PivotTo(player.Character:GetPivot()) return end
+        firetouchinterest(player.Character:WaitForChild("Head"), ti.Parent, 0)
+        task.wait()
+        firetouchinterest(player.Character.Head, ti.Parent, 1)
+    end
+end
+
+if not genv.oncharadded then
+    player.CharacterAdded:Connect(function()
+        genv.oncharadded()
+    end)
+end
+genv.oncharadded = oncharadded
