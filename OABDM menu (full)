@@ -255,6 +255,7 @@ local DropdownLockPlayers = Tab:CreateDropdown({
    end,
 })
 
+
 Tab:CreateDivider()
 
 local toPlay
@@ -353,6 +354,175 @@ local ToggleAutoTrowel = Tab:CreateToggle({
    end,
 })
 
+local function check(child)
+    if (child.Name:match("Arrow") or child.Name:match("Rokakaka Fruit")) and not child.Name:match("Requiem") and not child.Name:match("Hell") and not child.Name:lower():match("beta") then return end
+    return true
+end
+
+local function bringbanknotes()
+    for i, v in workspace["Spawned Items"]:GetChildren() do
+    local child = v
+    if not child.Name:lower():match("banknote") then continue end
+    if not check(child) then continue end
+    child:PivotTo(player.Character:GetPivot())
+end
+end
+
+
+workspace["Spawned Items"].ChildAdded:Connect(function(child)
+    if not check(child) then return end
+    if not genv.bringbanknotes then return end
+    
+    if not child.Name:lower():match("banknote") then return end
+    local ti
+    local currT = os.time()
+    repeat
+        task.wait()
+        ti = child:FindFirstChild("TouchInterest", true)
+    until ti or not child or not child.Parent or os.time() - currT >= 1
+        
+    if os.time() - currT >= 1 then return end
+
+    firetouchinterest(player.Character.Head, ti.Parent, true)
+    task.wait(0.1)
+    firetouchinterest(player.Character.Head, ti.Parent, false)
+end)
+
+local ToggleAutoTrowel = Tab:CreateToggle({
+   Name = "Bring banknotes",
+   CurrentValue = false,
+   Flag = "Togglebnotes", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       genv.bringbanknotes = Value
+       if Value then
+           bringbanknotes()
+       end
+   end,
+})
+
+local player = game.Players.LocalPlayer
+local spawnlocv = workspace.BossesSpawnArea.VegitoSpawnLocation
+workspace.ChildAdded:Connect(function(child)
+    if child.Name == "Super Vegito" or child.Name == "Viste" then
+        if not genv.autoboss then return end
+        
+        if child.Name == "Super Vegito" and (child:GetPivot().Position - spawnlocv.Position).Magnitude >= 40 then task.wait(7) end
+        if child.Name == "Super Vegito" and (child:GetPivot().Position - spawnlocv.Position).Magnitude >= 40 then return end
+        task.wait(7)
+        local target = child:WaitForChild("Humanoid")
+        local prevpos = player.Character:GetPivot()
+        task.spawn(function()
+            local lp
+            repeat
+                task.wait()
+                lp = target.Parent:GetPivot()
+                player.Character:PivotTo(lp - Vector3.new(0,10,0))
+            until target.Health <= 0 or not genv.autoboss
+            player.Character:PivotTo(lp)
+        end)
+        repeat task.wait(0.3)
+        game:GetService("ReplicatedStorage").Damage:FireServer(target, target.Parent:GetPivot(), 80, 0, Vector3.new(0,5,0), 0.1, "rbxassetid://17416460443",1,5)
+        until target.Health <= 0 or not genv.autoboss
+        task.wait(3)
+        player.Character:PivotTo(prevpos)
+    end
+    if child.Name == "ZeniObtainer" then
+        local detector = child:WaitForChild("ClickDetector")
+        task.wait(1)
+        fireclickdetector(detector)
+    end
+end)
+
+local ToggleAutoTrowel = Tab:CreateToggle({
+   Name = "Auto Boss (Vegito/Viste)",
+   CurrentValue = false,
+   Flag = "Togglebvegito", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Value)
+       genv.autoboss = Value
+       if Value then
+           local veg = workspace:FindFirstChild("Super Vegito")
+           local target
+           if veg then
+                target = veg:WaitForChild("Humanoid")
+                task.spawn(function()
+            local lp
+            repeat
+                task.wait()
+                lp = target.Parent:GetPivot()
+                player.Character:PivotTo(lp - Vector3.new(0,10,0))
+            until target.Health <= 0
+            player.Character:PivotTo(lp)
+        end)
+        repeat task.wait(0.3)
+        game:GetService("ReplicatedStorage").Damage:FireServer(target, target.Parent:GetPivot(), 80, 0, Vector3.new(0,5,0), 0.1, "rbxassetid://17416460443",1,5)
+        until target.Health <= 0
+           end
+           
+           local viste = workspace:FindFirstChild("Viste")
+           if viste then
+               target = viste:WaitForChild("Humanoid")
+                task.spawn(function()
+            local lp
+            repeat
+                task.wait()
+                lp = target.Parent:GetPivot()
+                player.Character:PivotTo(lp - Vector3.new(0,10,0))
+            until target.Health <= 0
+            player.Character:PivotTo(lp)
+        end)
+        repeat task.wait(0.3)
+        game:GetService("ReplicatedStorage").Damage:FireServer(target, target.Parent:GetPivot(), 80, 0, Vector3.new(0,5,0), 0.1, "rbxassetid://17416460443",1,5)
+        until target.Health <= 0
+           end
+       end
+   end,
+})
+
+local uses = {}
+local items = {}
+
+
+local DropdownItems = Tab:CreateDropdown({
+   Name = "Items",
+   Options = {unpack((function()
+       local t1, t2 = game.ReplicatedStorage.DataCheck:InvokeServer()
+
+
+local actual = {}
+for i, v in t2 do
+    uses[i] = v.Uses
+    table.insert(actual, i)
+end
+return actual
+   end)())},
+   CurrentOption = {"None"},
+   MultipleOptions = true,
+   Flag = "Dropdown3", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Callback = function(Options)
+       items = Options
+   end,
+})
+
+local ButtonPrintuses = Tab:CreateButton({
+   Name = "Warn item uses",
+   Callback = function()
+       for _, name in items do
+           if not uses[name] then continue end
+           warn("--------------------------------"..name.."-------------------------------------")
+        for i, v in uses[name] do
+    warn(i, v)
+    end
+       end
+   end,
+})
+
+
+local ButtonBuyShinyArrow = Tab:CreateButton({
+   Name = "Buy Shiny Arrow",
+   Callback = function()
+        game:GetService("ReplicatedStorage"):WaitForChild("Purchase"):FireServer("Shiny Arrow")
+   end,
+})
 
 Tab:CreateDivider()
 
@@ -846,6 +1016,9 @@ local function oncharadded()
     end)
     player.Character.ChildAdded:Connect(function(child)
         if not genv.autouse then return end
+        if child.Name == "Shiny Arrow" then
+            game:GetService("ReplicatedStorage").ShinyArrow:FireServer()
+        end
         if child.Name == "Arrow" then
             if genv.bringar and not child:GetAttribute("got") then return end
             game:GetService("ReplicatedStorage"):WaitForChild("Arrow"):FireServer()
