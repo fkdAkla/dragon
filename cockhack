@@ -518,7 +518,7 @@ end
 task.wait(2)
 if autotp and not genv.auto and accounts[player.Name] then
     Dropdown:Set({accounts[player.Name]})
-    task.wait(1)
+    task.wait(2)
     tptowasteland()
  end
 --task.wait(10)
