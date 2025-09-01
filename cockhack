@@ -3,6 +3,11 @@ if getgenv().auto then return end
 repeat task.wait() until game.Players.LocalPlayer:GetAttribute("ClientInitiated")
 local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua'))()
 
+local accounts = {
+    RqhzBKxwxC = "Grassland"
+}
+
+local autotp = true
 
 local constTimeDiff = 20*60
 
@@ -308,7 +313,7 @@ local Window = Rayfield:CreateWindow({
    DisableBuildWarnings = false, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
 
    ConfigurationSaving = {
-      Enabled = true,
+      Enabled = false,
       FolderName = "DragonAdvThing", -- Create a custom folder for your hub/game
       FileName = "Cockhack"
    },
@@ -338,7 +343,7 @@ local Section = MainTab:CreateSection("Farm")
 local Label = MainTab:CreateLabel("Anti Afk is Enabled", 4483362458, nil, false) -- Title, Icon, Color, IgnoreTheme
 
 local clickedTpWasteland = false
-local ToggleAuto = MainTab:CreateToggle({
+--[[local ToggleAuto = MainTab:CreateToggle({
        Name = "Auto tp to wasteland (for autoexec)",
        CurrentValue = false,
        Flag = "ToggleAutoTP", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
@@ -348,7 +353,7 @@ local ToggleAuto = MainTab:CreateToggle({
             if clickedTpWasteland then return end
             clickedTpWasteland = true
             task.wait(5+ (genv.tpDelay or 5))
-            
+
             local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
             local s = [===[
                 getgenv().auto = true
@@ -366,6 +371,28 @@ local ToggleAuto = MainTab:CreateToggle({
             tpRemote:InvokeServer(tpThrough, {})
        end,
     })
+]]
+
+local function tptowasteland()
+    if not tpThrough then return end
+            if clickedTpWasteland then return end
+            clickedTpWasteland = true
+            local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
+            local s = [===[
+                getgenv().auto = true
+                local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
+                local tpThrough = <tpTVal>
+                
+                task.wait(10)
+                
+                queue_on_teleport([==[print("START") task.wait(10) <partOfCode1> ]==])
+                tpRemote:InvokeServer(4728805070, {})
+                ]===]
+            genv.AutoFarm = true
+            s = formatCmd(s)
+            queue_on_teleport(s)
+            tpRemote:InvokeServer(tpThrough, {})
+end
 
 local Toggle
 if game.PlaceId == mainPlaceId then
@@ -394,24 +421,7 @@ else
     local Button = MainTab:CreateButton({
         Name = "Teleport to Wasteland and AutoFarm food",
         Callback = function()
-            if not tpThrough then return end
-            if clickedTpWasteland then return end
-            clickedTpWasteland = true
-            local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
-            local s = [===[
-                getgenv().auto = true
-                local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
-                local tpThrough = <tpTVal>
-                
-                task.wait(10)
-                
-                queue_on_teleport([==[print("START") task.wait(10) <partOfCode1> ]==])
-                tpRemote:InvokeServer(4728805070, {})
-                ]===]
-            genv.AutoFarm = true
-            s = formatCmd(s)
-            queue_on_teleport(s)
-            tpRemote:InvokeServer(tpThrough, {})
+            tptowasteland()
         end,
     })
 
@@ -502,6 +512,10 @@ if genv.tpThrough then
         task.wait(1)
         local found = (function() for i, v in worldIds do if v == genv.tpThrough then return i end end end)()
         Dropdown:Set({found})
+        if autotp and accounts[player.Name] then
+            Dropdown:Set({accounts[player.Name]})
+            tptowasteland()
+        end
     end)
 end
 
