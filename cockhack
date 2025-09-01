@@ -1,3 +1,5 @@
+task.wait(1)
+if getgenv().auto then return end
 repeat task.wait() until game.Players.LocalPlayer:GetAttribute("ClientInitiated")
 local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua'))()
 
@@ -72,7 +74,7 @@ local desiredCameraCfr = CFrame.new(314.103821, 69.2530136, 100, 0, 1, -0, 0.5, 
 
 local cmdText = [[
 
-
+getgenv().auto = true
 
 getgenv().Time = <EndTime>
 getgenv().AutoFarm = <AutoFVal>
@@ -94,6 +96,7 @@ local function autoSellTp()
         local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
         local s = [==[
 --print("START")
+    getgenv().auto = true
     local shopPlaceId = 3475397644
     local mainPlaceId = 4728805070
     if game.PlaceId ~= shopPlaceId then return end
@@ -116,11 +119,11 @@ local function autoSellTp()
     
     warn(tpThrough, typeof(tpThrough))
     if not tpThrough then
-        queue_on_teleport("print('START') getgenv().Time = <EndTime> getgenv().AutoFarm = <AutoFVal> getgenv().autoSellValue = <autoSVal> getgenv().tpDelay = <tpDelay> task.wait(10) loadstring(game:HttpGet(('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack')))()")
+        queue_on_teleport("getgenv().auto = true print('START') getgenv().Time = <EndTime> getgenv().AutoFarm = <AutoFVal> getgenv().autoSellValue = <autoSVal> getgenv().tpDelay = <tpDelay> task.wait(10) loadstring(game:HttpGet(('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack')))()")
         wait()
         tpRemote:InvokeServer(tpThrough, {})
     else
-        queue_on_teleport([=[print("START") task.wait(10+<tpDelay>) queue_on_teleport([[<partOfCode1>]]) wait() game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote"):InvokeServer(4728805070, {}) ]=])
+        queue_on_teleport([=[getgenv().auto = true print("START") task.wait(10+<tpDelay>) queue_on_teleport([[<partOfCode1>]]) wait() game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote"):InvokeServer(4728805070, {}) ]=])
         wait()
         tpRemote:InvokeServer(tpThrough, {})
     end
@@ -305,9 +308,9 @@ local Window = Rayfield:CreateWindow({
    DisableBuildWarnings = false, -- Prevents Rayfield from warning when the script has a version mismatch with the interface
 
    ConfigurationSaving = {
-      Enabled = false,
-      FolderName = nil, -- Create a custom folder for your hub/game
-      FileName = "Big Hub"
+      Enabled = true,
+      FolderName = "DragonAdvThing", -- Create a custom folder for your hub/game
+      FileName = "Cockhack"
    },
 
    Discord = {
@@ -334,12 +337,42 @@ local Section = MainTab:CreateSection("Farm")
 
 local Label = MainTab:CreateLabel("Anti Afk is Enabled", 4483362458, nil, false) -- Title, Icon, Color, IgnoreTheme
 
+local clickedTpWasteland = false
+local ToggleAuto = MainTab:CreateToggle({
+       Name = "Auto tp to wasteland (for autoexec)",
+       CurrentValue = false,
+       Flag = "ToggleAutoTP", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+       Callback = function(Value)
+            if not Value then return end
+            if not tpThrough then return end
+            if clickedTpWasteland then return end
+            clickedTpWasteland = true
+            task.wait(5+ (genv.tpDelay or 5))
+            
+            local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
+            local s = [===[
+                getgenv().auto = true
+                local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
+                local tpThrough = <tpTVal>
+                
+                task.wait(10)
+                
+                queue_on_teleport([==[print("START") task.wait(10) <partOfCode1> ]==])
+                tpRemote:InvokeServer(4728805070, {})
+                ]===]
+            genv.AutoFarm = true
+            s = formatCmd(s)
+            queue_on_teleport(s)
+            tpRemote:InvokeServer(tpThrough, {})
+       end,
+    })
+
 local Toggle
 if game.PlaceId == mainPlaceId then
     Toggle = MainTab:CreateToggle({
        Name = "Food Farm",
        CurrentValue = false,
-       Flag = "Toggle1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+       Flag = "ToggleFarm", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
        Callback = function(Value)
            if Value then
                genv.currentHooking._updateMousePosition = true
@@ -358,7 +391,6 @@ if game.PlaceId == mainPlaceId then
     })
     
 else
-    local clickedTpWasteland = false
     local Button = MainTab:CreateButton({
         Name = "Teleport to Wasteland and AutoFarm food",
         Callback = function()
@@ -367,6 +399,7 @@ else
             clickedTpWasteland = true
             local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
             local s = [===[
+                getgenv().auto = true
                 local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
                 local tpThrough = <tpTVal>
                 
@@ -392,7 +425,7 @@ local Slider = MainTab:CreateSlider({
    Increment = 50,
    Suffix = "Value",
    CurrentValue = autoSellValue,
-   Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Flag = "SliderSellValue", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
    Callback = function(Value)
        autoSellValue = Value
    end,
@@ -403,7 +436,7 @@ local Dropdown = MainTab:CreateDropdown({
    Options = {"None","Grassland","Jungle","Volcano","Tundra","Ocean","Desert","Fantasy", "Prehistoric"},
    CurrentOption = {"None"},
    MultipleOptions = false,
-   Flag = "Dropdown1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Flag = "DropdownWorlds", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
    Callback = function(Options)
        if Options[1] == "None" then tpThrough = nil return end
        tpThrough = worldIds[Options[1]]
@@ -416,7 +449,7 @@ local tpDelaySlider = MainTab:CreateSlider({
    Increment = 5,
    Suffix = "Seconds",
    CurrentValue = tpDelay,
-   Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Flag = "SliderTpDelay", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
    Callback = function(Value)
        tpDelay = Value
    end,
@@ -441,7 +474,7 @@ performanceTab:CreateSlider({
    Increment = 5,
    Suffix = "FPS",
    CurrentValue = 0,
-   Flag = "Slider1", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
+   Flag = "SliderFPS", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
    Callback = function(Value)
        if Value == 0 then return end
        setfpscap(Value)
