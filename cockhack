@@ -41,7 +41,7 @@ local player = game.Players.LocalPlayer
 local hrp = player.Character.HumanoidRootPart
 
 
-local autoSellValue = genv.autoSellValue or 0
+local autoSellValue = genv.autoSellValue or 10000
 
 local tpDelay = genv.tpDelay or 5
 
@@ -516,7 +516,7 @@ if genv.tpThrough then
 end
 
 task.wait(2)
-if autotp and accounts[player.Name] then
+if autotp and not genv.auto and accounts[player.Name] then
     Dropdown:Set({accounts[player.Name]})
     task.wait(1)
     tptowasteland()
