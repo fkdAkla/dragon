@@ -41,7 +41,7 @@ local player = game.Players.LocalPlayer
 local hrp = player.Character.HumanoidRootPart
 
 
-local autoSellValue = genv.autoSellValue or 6000
+local autoSellValue = genv.autoSellValue or 9000
 
 local tpDelay = genv.tpDelay or 5
 
