@@ -512,14 +512,15 @@ if genv.tpThrough then
         task.wait(1)
         local found = (function() for i, v in worldIds do if v == genv.tpThrough then return i end end end)()
         Dropdown:Set({found})
-        if autotp and accounts[player.Name] then
-            Dropdown:Set({accounts[player.Name]})
-            tptowasteland()
-        end
     end)
 end
 
-
+task.wait(2)
+if autotp and accounts[player.Name] then
+    Dropdown:Set({accounts[player.Name]})
+    task.wait(1)
+    tptowasteland()
+ end
 --task.wait(10)
 
 --Rayfield:Destroy()
