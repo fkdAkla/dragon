@@ -3,9 +3,11 @@ if getgenv().auto then return end
 repeat task.wait() until game.Players.LocalPlayer:GetAttribute("ClientInitiated")
 local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua'))()
 
-local accounts = {
+--[[local accounts = {
     RqhzBKxwxC = "Grassland"
-}
+}]]
+
+local accounts = game:GetService("HttpService"):JSONDecode(readfile("dragonaccs.txt"))
 
 local autotp = true
 
