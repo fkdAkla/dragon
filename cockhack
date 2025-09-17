@@ -163,11 +163,11 @@ task.spawn(function ()
 
 
     repeat
-    if ups[1] and ups[2] then break end
+    if #ups >= 6 then break end
     warn("WRONG UPVALUES. RETRYING...")
     ups = debug.getupvalues(updMousePosFunc)
     task.wait(0.5)
-    until ups[1] and ups[2]
+    until #ups >= 6
     
 
 local oldMouseP
