@@ -3,6 +3,7 @@ if getgenv().auto and game.PlaceId ~= 4728805070 then return end
 repeat task.wait() until game.Players.LocalPlayer:GetAttribute("ClientInitiated")
 local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua'))()
 
+getgenv().started = true
 --[[local accounts = {
     RqhzBKxwxC = "Grassland"
 }]]
@@ -89,7 +90,9 @@ getgenv().autoSellValue = <autoSVal>
 getgenv().tpThrough = <tpTVal>
 getgenv().tpDelay = <tpDelay>
 task.wait(10)
-loadstring(game:HttpGet('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack'))()
+if not getgenv().started then
+    loadstring(game:HttpGet('https://raw.githubusercontent.com/fkdAkla/dragon/refs/heads/main/cockhack'))()
+end
 ]]
 
 local function formatCmd(s)
