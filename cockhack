@@ -158,6 +158,15 @@ local updMousePosFunc = dragonBreathClass._updateMousePosition
 task.spawn(function ()
     local ups = debug.getupvalues(updMousePosFunc)
 
+
+    repeat
+    if ups[1] and ups[2] then break end
+    warn("WRONG UPVALUES. RETRYING...)
+    ups = debug.getupvalues(updMousePosFunc)
+    task.wait(0.5)
+    until ups[1] and ups[2]
+    
+
 local oldMouseP
 oldMouseP = hookfunction(updMousePosFunc, function(p_u_139, p140)
     -- upvalues: (copy) v_u_19, (ref) v_u_28, (copy) v_u_23, (copy) v_u_12, (copy) v_u_22, (ref) v_u_29
