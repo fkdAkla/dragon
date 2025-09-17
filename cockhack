@@ -1,9 +1,10 @@
 task.wait(1)
 if getgenv().auto and game.PlaceId ~= 4728805070 then return end
+getgenv().started = true
+if game.PlaceId == 4728805070 then task.wait(20) end
 repeat task.wait() until game.Players.LocalPlayer:GetAttribute("ClientInitiated")
 local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua'))()
 
-getgenv().started = true
 --[[local accounts = {
     RqhzBKxwxC = "Grassland"
 }]]
@@ -160,15 +161,6 @@ local updMousePosFunc = dragonBreathClass._updateMousePosition
 
 task.spawn(function ()
     local ups = debug.getupvalues(updMousePosFunc)
-
-
-    repeat
-    if #ups >= 6 then break end
-    warn("WRONG UPVALUES. RETRYING...")
-    ups = debug.getupvalues(updMousePosFunc)
-    task.wait(0.5)
-    until #ups >= 6
-    
 
 local oldMouseP
 oldMouseP = hookfunction(updMousePosFunc, function(p_u_139, p140)
