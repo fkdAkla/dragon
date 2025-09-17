@@ -1,5 +1,5 @@
 task.wait(1)
-if getgenv().auto then return end
+if getgenv().auto and game.PlaceId ~= 4728805070 then return end
 repeat task.wait() until game.Players.LocalPlayer:GetAttribute("ClientInitiated")
 local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua'))()
 
