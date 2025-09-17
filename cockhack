@@ -45,7 +45,7 @@ local hrp = player.Character.HumanoidRootPart
 
 local autoSellValue = genv.autoSellValue or 9000
 
-local tpDelay = genv.tpDelay or 5
+local tpDelay = genv.tpDelay or 70
 
 local shopPlaceId = 3475397644
 local mainPlaceId = 4728805070
