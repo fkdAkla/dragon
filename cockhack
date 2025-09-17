@@ -164,7 +164,7 @@ task.spawn(function ()
 
     repeat
     if ups[1] and ups[2] then break end
-    warn("WRONG UPVALUES. RETRYING...)
+    warn("WRONG UPVALUES. RETRYING...")
     ups = debug.getupvalues(updMousePosFunc)
     task.wait(0.5)
     until ups[1] and ups[2]
