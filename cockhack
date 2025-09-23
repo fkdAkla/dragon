@@ -1,7 +1,8 @@
 task.wait(1)
-if getgenv().auto and game.PlaceId ~= 4728805070 then return end
+local mainid = 125804922932357
+if getgenv().auto and game.PlaceId ~= mainid then return end
 getgenv().started = true
-if game.PlaceId == 4728805070 then task.wait(20) end
+if game.PlaceId == mainid then task.wait(20) end
 repeat task.wait() until game.Players.LocalPlayer:GetAttribute("ClientInitiated")
 local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua'))()
 
@@ -50,7 +51,7 @@ local autoSellValue = genv.autoSellValue or 9000
 local tpDelay = genv.tpDelay or 70
 
 local shopPlaceId = 3475397644
-local mainPlaceId = 4728805070
+local mainPlaceId = mainid
 
 if game.PlaceId ~= mainPlaceId and game.PlaceId ~= shopPlaceId then return end
 
@@ -62,6 +63,7 @@ local worldIds = {
     Ocean = 3737848045,
     Desert = 3752680052,
     Fantasy = 4174118306,
+    Wasteland = 4728805070,
     Prehistoric = 4869039553
 }
 
@@ -72,7 +74,7 @@ local tpThrough = genv.tpThrough
 --local sellRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SellItemRemote")
 
 local sellArgs = {"ItemName", "Amount"}
-local toSell = {"JuniperBerry", "Dragonfruit", "Lime"}
+local toSell = {"KajiFruit", "MistSudachi", "Edamame"} --{"JuniperBerry", "Dragonfruit", "Lime"}
 
 local resourcesFolder = player:WaitForChild("Data"):WaitForChild("Resources")
 
@@ -109,7 +111,7 @@ local function autoSellTp()
 --print("START")
     getgenv().auto = true
     local shopPlaceId = 3475397644
-    local mainPlaceId = 4728805070
+    local mainPlaceId = 125804922932357
     if game.PlaceId ~= shopPlaceId then return end
     local remote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("SellItemRemote")
     local resourcesFolder = game.Players.LocalPlayer:WaitForChild("Data"):WaitForChild("Resources")
@@ -119,7 +121,7 @@ local function autoSellTp()
     [2] = {}
     }
     local tpRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote")
-    local toSell = {"JuniperBerry", "Dragonfruit", "Lime"}
+    local toSell = {"KajiFruit", "MistSudachi", "Edamame"}
     task.wait(5)
     for i, v in toSell do
         remote:FireServer({ItemName = v, Amount = resourcesFolder[v].Value})
@@ -134,7 +136,7 @@ local function autoSellTp()
         wait()
         tpRemote:InvokeServer(tpThrough, {})
     else
-        queue_on_teleport([=[getgenv().auto = true print("START") task.wait(10+<tpDelay>) queue_on_teleport([[<partOfCode1>]]) wait() game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote"):InvokeServer(4728805070, {}) ]=])
+        queue_on_teleport([=[getgenv().auto = true print("START") task.wait(10+<tpDelay>) queue_on_teleport([[<partOfCode1>]]) wait() game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("WorldTeleportRemote"):InvokeServer(125804922932357, {}) ]=])
         wait()
         tpRemote:InvokeServer(tpThrough, {})
     end
@@ -392,7 +394,7 @@ local function tptowasteland()
                 task.wait(10)
                 
                 queue_on_teleport([==[print("START") task.wait(10) <partOfCode1> ]==])
-                tpRemote:InvokeServer(4728805070, {})
+                tpRemote:InvokeServer(125804922932357, {})
                 ]===]
             genv.AutoFarm = true
             s = formatCmd(s)
@@ -449,7 +451,7 @@ local Slider = MainTab:CreateSlider({
 
 local Dropdown = MainTab:CreateDropdown({
    Name = "AutoSell: Teleport Through A World",
-   Options = {"None","Grassland","Jungle","Volcano","Tundra","Ocean","Desert","Fantasy", "Prehistoric"},
+   Options = {"None","Grassland","Jungle","Volcano","Tundra","Ocean","Desert","Fantasy", "Wasteland", "Prehistoric"},
    CurrentOption = {"None"},
    MultipleOptions = false,
    Flag = "DropdownWorlds", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving to ensure no overlaps
@@ -522,7 +524,7 @@ if genv.tpThrough then
 end
 
 task.wait(2)
-if autotp and not genv.auto and accounts[player.Name] then
+if autotp and game.PlaceId ~= mainid and not genv.auto and accounts[player.Name] then
     Dropdown:Set({accounts[player.Name]})
     task.wait(2)
     tptowasteland()
