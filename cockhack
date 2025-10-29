@@ -4,7 +4,7 @@ if getgenv().auto and game.PlaceId ~= mainid then return end
 getgenv().started = true
 if game.PlaceId == mainid then task.wait(20) end
 repeat task.wait() until game.Players.LocalPlayer:GetAttribute("ClientInitiated")
---local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua'))()
+--[=[local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua'))()]=]
 
 --[[local accounts = {
     RqhzBKxwxC = "Grassland"
@@ -419,7 +419,7 @@ local function togglef(Value)
        
 end
 
-local Toggle
+local Toggle = game.PlaceId == mainPlaceId
 --[=[if game.PlaceId == mainPlaceId then
     Toggle = MainTab:CreateToggle({
        Name = "Food Farm",
@@ -469,6 +469,7 @@ local Label2 = MainTab:CreateLabel("Auto Sell (Wasteland food)", 4483362458, nil
 local function set(t, v)
    if t == "World" then
       if v == "None" then tpThrough = nil else tpThrough = worldIds[v] end
+end
 end
 
 --[=[local Dropdown = MainTab:CreateDropdown({
