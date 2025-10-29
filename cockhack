@@ -4,7 +4,7 @@ if getgenv().auto and game.PlaceId ~= mainid then return end
 getgenv().started = true
 if game.PlaceId == mainid then task.wait(20) end
 repeat task.wait() until game.Players.LocalPlayer:GetAttribute("ClientInitiated")
---[=[local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua'))()]=]
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua'))()
 
 --[[local accounts = {
     RqhzBKxwxC = "Grassland"
@@ -310,7 +310,7 @@ end)
 
 vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
 
---[=[local Window = Rayfield:CreateWindow({
+local Window = Rayfield:CreateWindow({
    Name = "EBLO.HACK",
    Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
    LoadingTitle = "Rayfield Interface Suite",
@@ -348,7 +348,7 @@ local MainTab = Window:CreateTab("Main", "app-window") -- Title, Image
 
 local Section = MainTab:CreateSection("Farm")
 
-local Label = MainTab:CreateLabel("Anti Afk is Enabled", 4483362458, nil, false)]=] -- Title, Icon, Color, IgnoreTheme
+local Label = MainTab:CreateLabel("Anti Afk is Enabled", 4483362458, nil, false) -- Title, Icon, Color, IgnoreTheme
 
 local clickedTpWasteland = false
 --[[local ToggleAuto = MainTab:CreateToggle({
@@ -402,25 +402,8 @@ local function tptowasteland()
             tpRemote:InvokeServer(tpThrough, {})
 end
 
-local function togglef(Value) 
-   if Value then
-               genv.currentHooking._updateMousePosition = true
-               --game:GetService("RunService"):Set3dRenderingEnabled(false)
-               farm()
-            else
-                _G.stopped = true
-                genv.AutoFarm = false
-                genv.currentHooking._updateMousePosition = nil
-                camera.CameraType = Enum.CameraType.Custom
-                --game:GetService("RunService"):Set3dRenderingEnabled(true)
-                --player.Character:PivotTo(tpOnWaiting)
-                --camera.CameraSubject = player.Character
-            end
-       
-end
-
-local Toggle = game.PlaceId == mainPlaceId
---[=[if game.PlaceId == mainPlaceId then
+local Toggle
+if game.PlaceId == mainPlaceId then
     Toggle = MainTab:CreateToggle({
        Name = "Food Farm",
        CurrentValue = false,
@@ -452,9 +435,9 @@ else
 
 end
 
-local Label2 = MainTab:CreateLabel("Auto Sell (Wasteland food)", 4483362458, nil, false) -- Title, Icon, Color, IgnoreTheme]=]
+local Label2 = MainTab:CreateLabel("Auto Sell (Wasteland food)", 4483362458, nil, false) -- Title, Icon, Color, IgnoreTheme
 
---[[local Slider = MainTab:CreateSlider({
+local Slider = MainTab:CreateSlider({
    Name = "Auto Sell (0 = disable)",
    Range = {50, 10000},
    Increment = 50,
@@ -464,15 +447,9 @@ local Label2 = MainTab:CreateLabel("Auto Sell (Wasteland food)", 4483362458, nil
    Callback = function(Value)
        autoSellValue = Value
    end,
-})]]
+})
 
-local function set(t, v)
-   if t == "World" then
-      if v == "None" then tpThrough = nil else tpThrough = worldIds[v] end
-end
-end
-
---[=[local Dropdown = MainTab:CreateDropdown({
+local Dropdown = MainTab:CreateDropdown({
    Name = "AutoSell: Teleport Through A World",
    Options = {"None","Grassland","Jungle","Volcano","Tundra","Ocean","Desert","Fantasy", "Wasteland", "Prehistoric"},
    CurrentOption = {"None"},
@@ -520,7 +497,7 @@ performanceTab:CreateSlider({
        if Value == 0 then return end
        setfpscap(Value)
    end,
-})]=]
+})
 
 for i, v in workspace.MobFolder:GetChildren() do
     v:Destroy()
@@ -534,8 +511,7 @@ end)
 if genv.AutoFarm and Toggle then
     task.spawn(function()
         task.wait(1)
-togglef(true) 
-        --Toggle:Set(true)
+        Toggle:Set(true)
     end)
 end
 
@@ -543,15 +519,13 @@ if genv.tpThrough then
     task.spawn(function()
         task.wait(1)
         local found = (function() for i, v in worldIds do if v == genv.tpThrough then return i end end end)()
-       set("World", found) 
---Dropdown:Set({found}}
+        Dropdown:Set({found})
     end)
 end
 
 task.wait(2)
 if autotp and game.PlaceId ~= mainid and not genv.auto and accounts[player.Name] then
-    local world = accounts[player.Name]
-    set("World", world)    --Dropdown:Set({accounts[player.Name]})
+    Dropdown:Set({accounts[player.Name]})
     task.wait(2)
     tptowasteland()
  end
