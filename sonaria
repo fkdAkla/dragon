@@ -1,4 +1,4 @@
-print("ran") 
+print("ran")
 local genv = getgenv()
 genv.running = false
 genv.hookingCheckGround = nil
@@ -400,7 +400,7 @@ local function rmListener()
                 local csc = v:FindFirstChild("ConcealScent")
                 local tplayed = v:FindFirstChild("TimePlayed")
                 local attorh = v:FindFirstChild("AttackOrHealCreatureOrNPC")
-                local ea = v:FindFirstChild("EatFoodDrinkWater”)
+                local ea = v:FindFirstChild("EatFoodDrinkWater")
                 
                 if sniffv and not sniffv.Value then
                     local max = sniffv.TargetAmount.Value - sniffv.Amount.Value
