@@ -30,7 +30,7 @@ local args = {
 }
 game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("RestartSlotRemote"):InvokeServer(unpack(args))
 
---set_thread_identity(2)
+set_thread_identity(2)
 
 local thing = require(game:GetService("ReplicatedStorage")._replicationFolder.SaveSelectionClient)
 
@@ -468,7 +468,7 @@ initListeners = function()
 end
 
 
---set_thread_identity(4)
+set_thread_identity(4)
 local Window = Rayfield:CreateWindow({
    Name = "brainfuck",
    Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
@@ -506,11 +506,11 @@ local Window = Rayfield:CreateWindow({
    }
 })
 
---set_thread_identity(4)
+set_thread_identity(4)
 
 local Tab = Window:CreateTab("Main", 4483362458) -- Title, Image
 
---set_thread_identity(4)
+set_thread_identity(4)
 
 
 local ToggleAutoEat = Tab:CreateToggle({
@@ -573,7 +573,7 @@ local ButtonSafe = Tab:CreateButton({
     end
 })
 
---set_thread_identity(4)
+set_thread_identity(4)
 
 if genv.toggles.AutoEat then
     player.Character:PivotTo(safePos)
@@ -584,7 +584,7 @@ set_thread_identity(4)
 if genv.toggles.AutoEat then
     hungerListener()
 end
---set_thread_identity(4)
+set_thread_identity(4)
 
 
 --print(client:GetCurrentSlot().Water.Value, cData:GetWithModifiers("ThirstAppetite"))
