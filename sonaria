@@ -205,10 +205,11 @@ end
 
 cancelT()
 
-local function getClosestPart(parts)
+local function getClosestPart(parts, reg)
     local closest
     local dist
     for _, v in parts do
+        if getRegionFromPosition(v.Position) ~= reg then continue end
         if not closest then
             closest = v
             dist = (player.Character:GetPivot().Position - v.Position).Magnitude
@@ -273,7 +274,7 @@ local function eat()
         chr:StartEat(v)
         repeat task.wait() until mission and mission.Value or not chr.Eating or not v or v:GetAttribute("Value") == 0 or (player.Character:GetPivot().Position - v:GetPivot().Position).Magnitude >= 50
         chr:StopBlockingStates()
-        if foodRatio() >= 0.99 then break end
+        if foodRatio() >= 0.99 or (mission and mission.Value) then break end
     end
 
     
@@ -341,11 +342,12 @@ local function smoothMoveTo(locpos)
     --local distance = vec.Magnitude
                 
     --local direction = vec.Unit
-                
-    tpTween = game.TweenService:Create(player.Character.PrimaryPart, TweenInfo.new(5), {CFrame = CFrame.new(locpos)})
+    
+    player.Character:PivotTo(CFrame.new(locpos))
+    --[[tpTween = game.TweenService:Create(player.Character.PrimaryPart, TweenInfo.new(5), {CFrame = CFrame.new(locpos)})
     tpTween:Play()
                 
-    tpTween.Completed:Wait()
+    tpTween.Completed:Wait()]]
 end
 
 local desiredFoodLoc
@@ -482,7 +484,7 @@ local function rmListener()
                 
                 
                 if csc and not csc.Value then
-                    local mud = getClosestPart(interactions.Mud:GetChildren())
+                    local mud = getClosestPart(interactions.Mud:GetChildren(), region)
                     
                     if mud then
                         
@@ -510,14 +512,14 @@ local function rmListener()
                 if ea and not ea.Value then
                     
                     repeat
-                    task.wait()
+                    task.wait(0.5)
 
                         repeat task.wait() until player.Character
                         if foodRatio() > 0.7 then
                         killself()
                         task.wait(10)
                         end
-                        if (player.Character:GetPivot().Position - locpos).Magnitude > 100 then smoothMoveTo(locpos) end
+                        smoothMoveTo(locpos)
                         currState = states.None
 
                         repeat task.wait() until currState == states.Eating
@@ -696,6 +698,7 @@ end
 
 dgui:GetPropertyChangedSignal("Enabled"):Connect(function()
     if dgui.Enabled then
+        cancelT()
         task.wait(3)
         game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ClaimDeathRewardsRemote"):InvokeServer()
 
