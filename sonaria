@@ -24,23 +24,32 @@ local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/Siri
 
 local ignoreFood = {"Grass"}
 
-local args = {
-	"Slot1",
-	false
-}
-game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("RestartSlotRemote"):InvokeServer(unpack(args))
 
-set_thread_identity(2)
+local function restartAndSpawn()
 
-local thing = require(game:GetService("ReplicatedStorage")._replicationFolder.SaveSelectionClient)
 
-thing.Respawn("Slot1")
+    local args = {
+        "Slot1",
+        false
+    }
+    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("RestartSlotRemote"):InvokeServer(unpack(args))
+
+    set_thread_identity(2)
+
+    local thing = require(game:GetService("ReplicatedStorage")._replicationFolder.SaveSelectionClient)
+
+    thing.Respawn("Slot1")
+end
+
+restartAndSpawn()
 
 local clientCharacter = require(game:GetService("ReplicatedStorage")._replicationFolder.ClientCharacter)
 
 local oxygen = require(game:GetService("ReplicatedStorage")._replicationFolder.OxygenTracker)
 
 local weather = require(game:GetService("ReplicatedStorage")._replicationFolder.WeatherService)
+
+local _cData = require(game:GetService("ReplicatedStorage")._replicationFolder.CharacterData)
 
 genv.toggles = {
     infStamina = true,
@@ -72,6 +81,13 @@ if not genv.firstload then
         local args = {...}
         args[2] = "Clear Skies"
         return oldf3(unpack(args))
+    end)
+
+    local oldf4
+    oldf4 = hookfunction(_cData.AilmentCheck, function(p138, p139)
+        if p139 == "ImmuneToDisasters" then return true end
+
+        return oldf4(p138, p139)
     end)
     
     --[[local oldf4
@@ -205,6 +221,16 @@ local function getClosestPart(parts)
     return closest
 end
 
+local states = {
+    None = 0,
+    Eating = 1,
+    AutoRM = 2
+}
+
+local currState = states.None
+
+local targetRegion
+
 local function foodRatio()
     if not cData.GetWithModifiers then
         repeat
@@ -226,16 +252,28 @@ local function eat()
     for i, v in interactions.Food:GetChildren() do
         if table.find(ignoreFood, v.Name) then continue end
         if v:GetAttribute("Value") < 10 then continue end
+
+
+        local mission
+        if targetRegion and toggles.rmissions then
+            local region = getRegionFromPosition(v:GetPivot().Position)
+
+            if region ~= targetRegion then continue end
+
+            mission = rmissions[targetRegion]:FindFirstChild("EatFoodDrinkWater")
+        end
+        
         
         player.Character:PivotTo(v.PrimaryPart and v.PrimaryPart.CFrame or v:GetPivot() + Vector3.new(0,5,0))
         task.wait(0.5)
         chr:StartEat(v)
-        repeat task.wait() until not chr.Eating or not v or v:GetAttribute("Value") == 0 or (player.Character:GetPivot().Position - v:GetPivot().Position).Magnitude >= 50
+        repeat task.wait() until mission and mission.Value or not chr.Eating or not v or v:GetAttribute("Value") == 0 or (player.Character:GetPivot().Position - v:GetPivot().Position).Magnitude >= 50
         chr:StopBlockingStates()
         if foodRatio() >= 0.99 then break end
     end
+
     
-    player.Character:PivotTo(tempPos or safePos)
+    --player.Character:PivotTo(tempPos or safePos)
 end
 
 
@@ -250,23 +288,28 @@ local function hungerListener()
             
             local drankOrAte
             if ratioWater <= 0.8 then
-                cancelT()
-                if tempPos then player.Character:PivotTo(tempPos) end
+                local mission = targetRegion and rmissions[targetRegion]:FindFirstChild("EatFoodDrinkWater")
+                --cancelT()
+                ---if tempPos then player.Character:PivotTo(tempPos) end
                 chr:StopBlockingStates()
                 chr:StartDrink(lake)
-                repeat task.wait() until not chr.Eating
+                repeat task.wait() until mission and mission.Value or not chr.Eating
+                chr:StopBlockingStates()
                 drankOrAte = true
             end
             
             if ratioFood <= 0.8 then
-                if tempPos then player.Character:PivotTo(tempPos) end
-                cancelT()
+                --if tempPos then player.Character:PivotTo(tempPos) end
+                --cancelT()
+                repeat task.wait() until currState == states.None
+                currState = states.Eating
                 chr:StopBlockingStates()
                 eat()
                 drankOrAte = true
+                currState = states.None
             end
             
-            if drankOrAte then initListeners() end
+            --if drankOrAte then initListeners() end
         end
     end)
 end
@@ -292,8 +335,12 @@ local function rmListener()
             "DistanceTravelled"
         }
         local n = 0
+
+        
         while genv.running and genv.toggles.rmissions do
             task.wait(0.1)
+
+            currState = states.AutoRM
             for i, v in workspace.Interactions.ShoomPiles:GetChildren() do
                 if not v:FindFirstChild("Pebble") or v.Pebble.Transparency == 1 then continue end
                 local args = {
@@ -301,6 +348,9 @@ local function rmListener()
             	tonumber(v.Name:sub(#v.Name))
             }
             game.Players.LocalPlayer.Character:PivotTo(v:GetPivot()+Vector3.new(0,20,0))
+            local region = getRegionFromPosition(v:GetPivot().Position)
+
+            game:GetService("ReplicatedStorage").Remotes.ChangeRegionRemote:FireServer(region)
             task.wait(1)
             game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ShoomPileCollected"):InvokeServer(unpack(args))
             task.wait(1)
@@ -308,6 +358,7 @@ local function rmListener()
             n+=1
             warn('loop '..n)
             
+            currState = states.None
             
             for _, v in rmissions:GetChildren() do
                 local location = interactions.Regions:FindFirstChild(v.Name)
@@ -322,9 +373,12 @@ local function rmListener()
                 if not eligible then continue end
                 
                 
-                
+                repeat task.wait() until currState == states.None or currState == states.AutoRM
+
+                currState = states.AutoRM
                 --local height = player.Character:GetPivot().Y
-                local locpos = locposes[location.Name] and locposes[location.Name].Position or regions[location.Name].RegionCenterPosition
+                local locpos = locposes[location.Name] and locposes[location.Name].Position -- or regions[location.Name].RegionCenterPosition
+                if not locpos then warn("Locpos not found for", location.Name) continue end
                 local params = RaycastParams.new()
                 params.FilterType = Enum.RaycastFilterType.Include
                 params.FilterDescendantsInstances = {workspace.Terrain}
@@ -334,6 +388,8 @@ local function rmListener()
                 
                 warn("Location:", location.Name)
                 
+                targetRegion = v.Name
+
                 local startPos = player.Character:GetPivot().Position
                 local vec = locpos - player.Character:GetPivot().Position
                 
@@ -384,7 +440,7 @@ local function rmListener()
                 
                 
                 
-                task.wait(7)
+                task.wait(3)
                 
                 if region ~= v.Name then
                     continue
@@ -392,7 +448,7 @@ local function rmListener()
                 
                 genv.hookingCheckGround = nil
                 
-                tempPos = player.Character:GetPivot()
+                --tempPos = player.Character:GetPivot()
                 
                 
                 local sniffv = v:FindFirstChild("Sniff")
@@ -452,8 +508,11 @@ local function rmListener()
                         print("Finished mud for: "..v.Name)
                     end
                 end
+
+                currState = states.None
                 
-                repeat task.wait() until (not tplayed or tplayed.Value) and (not attorh or attorh.Value)
+                repeat task.wait() until (not ea or ea.Value) and (not tplayed or tplayed.Value) and (not attorh or attorh.Value)
+                
                 
             end
         end
@@ -467,6 +526,25 @@ initListeners = function()
     rmListener()
 end
 
+local dgui = player.PlayerGui:WaitForChild("DeathGui")
+dgui:GetPropertyChangedSignal("Enabled"):Connect(function()
+    if dgui.Enabled then
+        cancelT()
+        task.wait(3)
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ClaimDeathRewardsRemote"):InvokeServer()
+
+        local func = require(game:GetService("ReplicatedStorage")._replicationFolder.DeathClient).Close
+
+
+        func()
+
+        task.wait(1)
+
+        restartAndSpawn()
+        task.wait(5)
+        initListeners()
+    end
+end)
 
 set_thread_identity(4)
 local Window = Rayfield:CreateWindow({
@@ -570,6 +648,13 @@ local ButtonSafe = Tab:CreateButton({
    Name = "TP to safe place",
    Callback = function()
         player.Character:PivotTo(safePos)
+    end
+})
+
+local ButtonSelfDamage = Tab:CreateButton({
+   Name = "Self harm",
+   Callback = function()
+        game.ReplicatedStorage.Remotes.OxygenRemote:FireServer()
     end
 })
 
