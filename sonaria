@@ -517,7 +517,7 @@ local function rmListener()
                         killself()
                         task.wait(10)
                         end
-                        if (player.Character.Position - locpos).Magnitude > 100 then smoothMoveTo(locpos) end
+                        if (player.Character:GetPivot().Position - locpos).Magnitude > 100 then smoothMoveTo(locpos) end
                         currState = states.None
 
                         repeat task.wait() until currState == states.Eating
