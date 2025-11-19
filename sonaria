@@ -19,7 +19,7 @@ end
 
 print("Started script.")
 
-local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua'))()
+--local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua'))()
 
 
 local ignoreFood = {"Grass"}
@@ -39,6 +39,10 @@ local function restartAndSpawn()
     local thing = require(game:GetService("ReplicatedStorage")._replicationFolder.SaveSelectionClient)
 
     thing.Respawn("Slot1")
+end
+
+local function selfharm()
+    game.ReplicatedStorage.Remotes.OxygenRemote:FireServer()
 end
 
 restartAndSpawn()
@@ -232,7 +236,7 @@ local currState = states.None
 local targetRegion
 
 local function foodRatio()
-    if not cData.GetWithModifiers then
+    if not cData.GetWithModifiers or not chr.StopBlockingStates then
         repeat
             task.wait()
             client = wrapper:GetClient()
@@ -279,29 +283,33 @@ end
 
 local function hungerListener()
     task.spawn(function ()
-        if genv.toggles.AutoEat then
+        --[[if genv.toggles.AutoEat then
             player.Character:PivotTo(safePos)
-        end
+        end]]
         while genv.running and genv.toggles.AutoEat do
             task.wait()
             local ratioFood, ratioWater = foodRatio()
             
             local drankOrAte
-            if ratioWater <= 0.8 then
-                local mission = targetRegion and rmissions[targetRegion]:FindFirstChild("EatFoodDrinkWater")
+            if ratioWater <= 0.9 then
+                
                 --cancelT()
+
+                repeat task.wait() until currState == states.None
                 ---if tempPos then player.Character:PivotTo(tempPos) end
+                foodRatio()
                 chr:StopBlockingStates()
                 chr:StartDrink(lake)
-                repeat task.wait() until mission and mission.Value or not chr.Eating
+                repeat task.wait() until not chr.Eating
                 chr:StopBlockingStates()
                 drankOrAte = true
             end
             
-            if ratioFood <= 0.8 then
+            if ratioFood <= 0.9 then
                 --if tempPos then player.Character:PivotTo(tempPos) end
                 --cancelT()
-                repeat task.wait() until currState == states.None
+                repeat task.wait() until currState == states.None and targetRegion
+                foodRatio()
                 currState = states.Eating
                 chr:StopBlockingStates()
                 eat()
@@ -326,14 +334,48 @@ local function npcListener()
     end)
 end
 
+local function smoothMoveTo(locpos)
+    local startPos = player.Character:GetPivot().Position
+    local vec = locpos - player.Character:GetPivot().Position
+                
+    --local distance = vec.Magnitude
+                
+    --local direction = vec.Unit
+                
+    tpTween = game.TweenService:Create(player.Character.PrimaryPart, TweenInfo.new(5), {CFrame = CFrame.new(locpos)})
+    tpTween:Play()
+                
+    tpTween.Completed:Wait()
+end
+
+local desiredFoodLoc
+local dgui = player.PlayerGui:WaitForChild("DeathGui")
+
+local fixedLP = {}
+
+local function killself()
+    repeat
+        task.wait(0.1)
+        selfharm()
+    until dgui.Enabled
+end
+
 local function rmListener()
     threads.rmListener = task.spawn(function ()
         warn("Rmlistener")
+
+        targetRegion = nil
+        currState = states.AutoRM
         local todo = {
             "ConcealScent",
             "Sniff",
-            "DistanceTravelled"
+            "DistanceTravelled",
+            "TimePlayed",
+            "AttackOrHealCreatureOrNPC",
+            "EatFoodDrinkWater"
         }
+
+
         local n = 0
 
         
@@ -358,9 +400,136 @@ local function rmListener()
             n+=1
             warn('loop '..n)
             
-            currState = states.None
+           
+
+            for _, lPos in locposes do
+                task.wait()
+                local region = getRegionFromPosition(lPos.Position)
+
+                if not region then continue end
+
+                currState = states.AutoRM
+                fixedLP[region] = lPos
+
+                local v = rmissions[region]
+
+                local eligible
+                for _, k in v:GetChildren() do
+                    if not k.Value and table.find(todo, k.Name) then eligible = true break end
+                end
+                
+                if not eligible then continue end
+
+                print("eligible")
+                repeat task.wait() until currState == states.None or currState == states.AutoRM
+
+                
+                --local height = player.Character:GetPivot().Y
+                local locpos = lPos.Position
+                
+                
+                warn("Location:", region)
+                
+                targetRegion = v.Name
+
+                smoothMoveTo(locpos)
+                
+                
+                
+                task.wait(5)
+
+                --game:GetService("ReplicatedStorage").Remotes.ChangeRegionRemote:FireServer(v.Name)
+                
+                
+                genv.hookingCheckGround = nil
+                
+                --tempPos = player.Character:GetPivot()
+                
+                
+                local sniffv = v:FindFirstChild("Sniff")
+                local dtravel = v:FindFirstChild("DistanceTravelled")
+                local csc = v:FindFirstChild("ConcealScent")
+                local tplayed = v:FindFirstChild("TimePlayed")
+                local attorh = v:FindFirstChild("AttackOrHealCreatureOrNPC")
+                local ea = v:FindFirstChild("EatFoodDrinkWater")
+                
+                if sniffv and not sniffv.Value then
+                    local max = sniffv.TargetAmount.Value - sniffv.Amount.Value
+                    print("Started sniff for: "..v.Name)
+                    repeat
+                        sniff:Sniff()
+                        if sniffv.Value then break end
+                        
+                        task.wait(4)
+                    until sniffv.Value
+                    print("Finished sniff for: "..v.Name)
+                end
+                
+                if dtravel and not dtravel.Value then
+                    print("Started travel for: "..v.Name)
+                    local currPos = player.Character:GetPivot()
+                    repeat
+                        local rnd = Vector3.new(currPos.X, currPos.Y + 500, currPos.Z)
+                        
+                        local curr = dtravel.Amount.Value
+                        repeat task.wait() player.Character:PivotTo(CFrame.new(rnd)) until curr ~= dtravel.Amount.Value or dtravel.Value or getRegionFromPosition(player.Character:GetPivot().Position) ~= v.Name
+                        
+                        curr = dtravel.Amount.Value
+                        repeat task.wait() player.Character:PivotTo(currPos) until curr ~= dtravel.Amount.Value or dtravel.Value or getRegionFromPosition(player.Character:GetPivot().Position) ~= v.Name
+                    until dtravel.Value
+                    print("Finished travel for: "..v.Name)
+                end
+                
+                
+                if csc and not csc.Value then
+                    local mud = getClosestPart(interactions.Mud:GetChildren())
+                    
+                    if mud then
+                        
+                        print("Started mud for: "..v.Name)
+                        
+                        
+                        
+                        game.Players.LocalPlayer.Character:PivotTo(mud.CFrame + Vector3.new(0,15,0))
+                        
+                        --local max = csc.TargetAmount.Value - csc.Amount.Value
+                        task.wait(2)
+                        local startT = time()
+                        repeat
+                            task.wait(0.1)
+                            if time() - startT >= 5 then break end
+                            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Mud"):FireServer(mud)
+                        until csc.Value
+                        print("Finished mud for: "..v.Name)
+                    end
+                end
+
+                --currState = states.None
+                repeat task.wait() until (not tplayed or tplayed.Value) and (not attorh or attorh.Value)
+
+                if ea and not ea.Value then
+                    
+                    repeat
+                    task.wait()
+
+                        repeat task.wait() until player.Character
+                        if foodRatio() > 0.7 then
+                        killself()
+                        task.wait(10)
+                        end
+                        if (player.Character.Position - locpos).Magnitude > 100 then smoothMoveTo(locpos) end
+                        currState = states.None
+
+                        repeat task.wait() until currState == states.Eating
+                        repeat task.wait() until currState == states.None
+
+                        currState = states.AutoRM
+
+                    until ea.Value
+                end
+            end
             
-            for _, v in rmissions:GetChildren() do
+            --[=[for _, v in rmissions:GetChildren() do
                 local location = interactions.Regions:FindFirstChild(v.Name)
                 if not location then continue end
                 --if block[location.Name] then continue end
@@ -379,28 +548,16 @@ local function rmListener()
                 --local height = player.Character:GetPivot().Y
                 local locpos = locposes[location.Name] and locposes[location.Name].Position -- or regions[location.Name].RegionCenterPosition
                 if not locpos then warn("Locpos not found for", location.Name) continue end
-                local params = RaycastParams.new()
-                params.FilterType = Enum.RaycastFilterType.Include
-                params.FilterDescendantsInstances = {workspace.Terrain}
                 
                 
                 
                 
-                warn("Location:", location.Name)
+                
+                warn("Location:", location.Name, "Pos:", locpos)
                 
                 targetRegion = v.Name
 
-                local startPos = player.Character:GetPivot().Position
-                local vec = locpos - player.Character:GetPivot().Position
-                
-                local distance = vec.Magnitude
-                
-                local direction = vec.Unit
-                
-                tpTween = game.TweenService:Create(player.Character.PrimaryPart, TweenInfo.new(5), {CFrame = CFrame.new(locpos)})
-                tpTween:Play()
-                
-                tpTween.Completed:Wait()
+                smoothMoveTo(locpos)
                 
                 --[[local maxCount = math.floor(distance/50)
                 
@@ -436,11 +593,13 @@ local function rmListener()
                 
                 local region = getRegionFromPosition(player.Character:GetPivot().Position)
                 
-                warn(region == v.Name)
+                warn(region == v.Name, player.Character:GetPivot().Position)
                 
                 
                 
-                task.wait(3)
+                task.wait(7)
+
+                --game:GetService("ReplicatedStorage").Remotes.ChangeRegionRemote:FireServer(v.Name)
                 
                 if region ~= v.Name then
                     continue
@@ -509,27 +668,34 @@ local function rmListener()
                     end
                 end
 
-                currState = states.None
+                --currState = states.None
                 
-                repeat task.wait() until (not ea or ea.Value) and (not tplayed or tplayed.Value) and (not attorh or attorh.Value)
+                repeat task.wait() until (not tplayed or tplayed.Value) and (not attorh or attorh.Value)
+
+
+                desiredFoodLoc = targetRegion
+
+                repeat
+                task.wait(0.1)
+                selfharm()
+                until dgui.Enabled
                 
-                
-            end
+            end]=]
         end
     end)
 end
 
 initListeners = function()
+    targetRegion = nil
     genv.running = true
     --hungerListener()
     npcListener()
     rmListener()
 end
 
-local dgui = player.PlayerGui:WaitForChild("DeathGui")
+
 dgui:GetPropertyChangedSignal("Enabled"):Connect(function()
     if dgui.Enabled then
-        cancelT()
         task.wait(3)
         game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ClaimDeathRewardsRemote"):InvokeServer()
 
@@ -546,7 +712,7 @@ dgui:GetPropertyChangedSignal("Enabled"):Connect(function()
     end
 end)
 
-set_thread_identity(4)
+--[[set_thread_identity(4)
 local Window = Rayfield:CreateWindow({
    Name = "brainfuck",
    Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
@@ -654,22 +820,22 @@ local ButtonSafe = Tab:CreateButton({
 local ButtonSelfDamage = Tab:CreateButton({
    Name = "Self harm",
    Callback = function()
-        game.ReplicatedStorage.Remotes.OxygenRemote:FireServer()
+        selfharm()
     end
 })
 
-set_thread_identity(4)
+set_thread_identity(4)]]
 
 if genv.toggles.AutoEat then
     player.Character:PivotTo(safePos)
 end
 initListeners()
-set_thread_identity(4)
+--set_thread_identity(4)
 
 if genv.toggles.AutoEat then
     hungerListener()
 end
-set_thread_identity(4)
+--set_thread_identity(4)
 
 
 --print(client:GetCurrentSlot().Water.Value, cData:GetWithModifiers("ThirstAppetite"))
