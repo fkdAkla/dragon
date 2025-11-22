@@ -612,7 +612,7 @@ local function rmListener()
                     until ea.Value
                 end
 
-                repeat task.wait() if player.Character then player.Character:PivotTo(myPos+Vector3.new(0,100,0)) end until (not tplayed or tplayed.Value) and (not attorh or attorh.Value)
+                repeat task.wait() if currState == states.None and player.Character then player.Character:PivotTo(myPos+Vector3.new(0,100,0)) end until (not tplayed or tplayed.Value) and (not attorh or attorh.Value)
             end
             
             --[=[for _, v in rmissions:GetChildren() do
