@@ -1,3 +1,4 @@
+if game.PlaceId ~= 5233782396 then return end
 print("ran")
 local genv = getgenv()
 genv.running = false
@@ -12,9 +13,16 @@ local attrs = {
 
 local player = game:GetService("Players").LocalPlayer
 
+local vu = game:GetService("VirtualUser")
+
+player.Idled:Connect(function()
+    vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+    vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+    end)
+
 for i, v in attrs do
     print("Waiting for: "..v)
-    repeat task.wait() until player:GetAttribute(v)
+    repeat task.wait(0.1) until player:GetAttribute(v)
 end
 
 print("Started script.")
@@ -24,6 +32,8 @@ print("Started script.")
 
 local ignoreFood = {"Grass"}
 
+local b3d = require(game:GetService("ReplicatedStorage")._replicationFolder.Button3D)
+set_thread_identity(2)
 
 local function restartAndSpawn()
 
@@ -44,6 +54,66 @@ end
 local function selfharm()
     game.ReplicatedStorage.Remotes.OxygenRemote:FireServer()
 end
+
+local tutorialGui = player.PlayerGui:WaitForChild("TutorialGui")
+local promptGui = player.PlayerGui:WaitForChild("PromptGui")
+
+local function clickButton(_btn)
+    local name = _btn:GetFullName()
+
+    local btn = b3d:_getButtonFromInstance(_btn)
+
+    --[[print("Ran for: "..name)
+    if not btn and val then
+        print("Yielding for: "..name)
+        repeat task.wait() btn = b3d:_getButtonFromInstance(_btn) until btn and btn.OnClick
+        print("Finished yielding for: "..name)
+    end]]
+    if not btn then return end
+    for i, v in btn.OnClick do
+        task.spawn(v)
+    end
+end
+
+local tutNextBtn = tutorialGui.TalkFrame.NextButton
+tutNextBtn:GetPropertyChangedSignal("Visible"):Connect(function()
+    if not tutNextBtn.Visible then return end
+    repeat task.wait(0.5) clickButton(tutNextBtn) until not tutNextBtn.Visible
+end)
+
+
+local tutSkipBtn = tutorialGui.TalkFrame.SkipButton
+
+tutSkipBtn:GetPropertyChangedSignal("Visible"):Connect(function()
+    if not tutSkipBtn.Visible then return end
+    repeat task.wait(0.5) clickButton(tutSkipBtn) until not tutSkipBtn.Visible
+end)
+
+task.spawn(function()
+    if tutorialGui.SelectionFrame.Visible then
+        clickButton(tutorialGui.SelectionFrame.SlotsFrame.Sochuri.InnerFrame.SelectButton)
+
+        repeat task.wait() until player.PlayerGui.EditorGui.Enabled
+
+        task.wait(2)
+        clickButton(player.PlayerGui.EditorGui.EditFrame.BottomFrame.ButtonsFrame.PlayButton, true)
+
+    end
+end)
+
+
+local beElderFrame = promptGui.PromptFrame.PromptFrames.BecomeElder
+
+beElderFrame:GetPropertyChangedSignal("Visible"):Connect(function()
+    if beElderFrame.Visible then
+        task.wait(1)
+        clickButton(beElderFrame.CloseButton)
+    end
+end)
+
+
+repeat task.wait() until not tutorialGui.SelectionFrame.Visible and not player.PlayerGui.EditorGui.Enabled
+
 
 restartAndSpawn()
 
@@ -137,6 +207,9 @@ local chr = client:GetCurrentCharacter()
 
 local cData = chr.CharacterData
 
+
+local GetTotalDeathPoints = require(game:GetService("ReplicatedStorage")._replicationFolder.CreatureInfoService).GetTotalDeathPoints
+
 local safePos = CFrame.new(-614.358276, 163.675034, 3003.61328, 0.764942229, 2.95419767e-07, 0.644098878, 1.79862042e-07, 1, -6.72262956e-07, -0.644098878, 6.30091279e-07, 0.764942229)
 
 local tempPos
@@ -172,6 +245,8 @@ for i, v in locposes do
    if interactions.Regions:FindFirstChild(i) then continue end
    warn(i, "mismatch")
 end
+
+local sumSafePos = CFrame.new(1385.0376, 9273.52832, 1650.64685, -0.436157703, -7.33058458e-09, -0.899870217, 4.31240679e-08, 1, -2.90480546e-08, 0.899870217, -5.14755989e-08, -0.436157703)
 
 --local block = {
 --    ["Rocky Drop"] = true
@@ -274,7 +349,7 @@ local function eat()
         chr:StartEat(v)
         repeat task.wait() until mission and mission.Value or not chr.Eating or not v or v:GetAttribute("Value") == 0 or (player.Character:GetPivot().Position - v:GetPivot().Position).Magnitude >= 50
         chr:StopBlockingStates()
-        if foodRatio() >= 0.99 or (mission and mission.Value) then break end
+        if foodRatio() >= 1 or (mission and mission.Value) then break end
     end
 
     
@@ -288,11 +363,12 @@ local function hungerListener()
             player.Character:PivotTo(safePos)
         end]]
         while genv.running and genv.toggles.AutoEat do
-            task.wait()
+            task.wait(0.1)
+            if not player.Character then continue end
             local ratioFood, ratioWater = foodRatio()
             
             local drankOrAte
-            if ratioWater <= 0.9 then
+            if ratioWater <= 0.99 then
                 
                 --cancelT()
 
@@ -306,7 +382,7 @@ local function hungerListener()
                 drankOrAte = true
             end
             
-            if ratioFood <= 0.9 then
+            if ratioFood <= 0.99 then
                 --if tempPos then player.Character:PivotTo(tempPos) end
                 --cancelT()
                 repeat task.wait() until currState == states.None and targetRegion
@@ -507,14 +583,20 @@ local function rmListener()
                 end
 
                 --currState = states.None
-                repeat task.wait() until (not tplayed or tplayed.Value) and (not attorh or attorh.Value)
 
+                local myPos = player.Character:GetPivot()
                 if ea and not ea.Value then
-                    
+                    currState = states.None
                     repeat
-                    task.wait(0.5)
+                    task.wait()
 
-                        repeat task.wait() until player.Character
+                    if currState == states.None then
+                        if not player.Character then continue end
+                        player.Character:PivotTo(myPos+Vector3.new(0,100,0))
+                    end
+
+
+                        --[[repeat task.wait() until player.Character
                         if foodRatio() > 0.7 then
                         killself()
                         task.wait(10)
@@ -525,10 +607,12 @@ local function rmListener()
                         repeat task.wait() until currState == states.Eating
                         repeat task.wait() until currState == states.None
 
-                        currState = states.AutoRM
+                        currState = states.AutoRM]]
 
                     until ea.Value
                 end
+
+                repeat task.wait() if player.Character then player.Character:PivotTo(myPos+Vector3.new(0,100,0)) end until (not tplayed or tplayed.Value) and (not attorh or attorh.Value)
             end
             
             --[=[for _, v in rmissions:GetChildren() do
@@ -692,12 +776,14 @@ initListeners = function()
     genv.running = true
     --hungerListener()
     npcListener()
+    task.wait()
     rmListener()
 end
 
 
-dgui:GetPropertyChangedSignal("Enabled"):Connect(function()
-    if dgui.Enabled then
+--[[dgui:GetPropertyChangedSignal("Enabled"):Connect(function()
+    if dgui.Enabled then]]
+player.CharacterRemoving:Connect(function()
         cancelT()
         task.wait(3)
         game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ClaimDeathRewardsRemote"):InvokeServer()
@@ -712,7 +798,7 @@ dgui:GetPropertyChangedSignal("Enabled"):Connect(function()
         restartAndSpawn()
         task.wait(5)
         initListeners()
-    end
+    --end
 end)
 
 --[[set_thread_identity(4)
