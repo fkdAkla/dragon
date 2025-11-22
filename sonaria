@@ -89,10 +89,8 @@ tutSkipBtn:GetPropertyChangedSignal("Visible"):Connect(function()
     repeat task.wait(0.5) clickButton(tutSkipBtn) until not tutSkipBtn.Visible
 end)
 
-local __should1Res = true
 task.spawn(function()
     if tutorialGui.SelectionFrame.Visible then
-        __should1Res = false
         clickButton(tutorialGui.SelectionFrame.SlotsFrame.Sochuri.InnerFrame.SelectButton)
 
         repeat task.wait() until player.PlayerGui.EditorGui.Enabled
@@ -117,7 +115,7 @@ end)
 repeat task.wait() until not tutorialGui.SelectionFrame.Visible and not player.PlayerGui.EditorGui.Enabled
 
 
-if __should1Res then restartAndSpawn() end
+restartAndSpawn()
 
 local clientCharacter = require(game:GetService("ReplicatedStorage")._replicationFolder.ClientCharacter)
 
