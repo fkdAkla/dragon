@@ -18,9 +18,10 @@ local player = game:GetService("Players").LocalPlayer
 local vu = game:GetService("VirtualUser")
 
 player.Idled:Connect(function()
+    set_thread_identity(8)
     vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
     vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
-    end)
+end)
 
 for i, v in attrs do
     print("Waiting for: "..v)
@@ -340,16 +341,18 @@ local function foodRatio()
     return ratioFood, ratioWater
 end
 
-local _breathTutorText = "Try out your new breath ability!"
 
-local _tutorTextLabel = tutorialGui.TalkFrame.SpeechLabels.TextLabel
-_tutorTextLabel:GetPropertyChangedSignal("Text"):Connect(function()
-    if _tutorTextLabel.Text == _breathTutorText then
-        foodRatio()
-        chr.Breath:Fire()
-        chr.Breath:Stop()
-    end
-end)
+
+-- local _breathTutorText = "Try out your new breath ability!"
+
+-- local _tutorTextLabel = tutorialGui.TalkFrame.SpeechLabels.TextLabel
+-- _tutorTextLabel:GetPropertyChangedSignal("Text"):Connect(function()
+--     if _tutorTextLabel.Text == _breathTutorText then
+--         foodRatio()
+--         chr.Breath:Fire()
+--         chr.Breath:Stop()
+--     end
+-- end)
 
 local gachas = {
     Carnivores = 65,
@@ -493,8 +496,12 @@ local function killself()
     until dgui.Enabled
 end
 
+local lastDeathManual
 local function checkPoints()
-    if GetTotalDeathPoints(player.PlayerGui.Data.Slot1) >= maxPoints then
+    local pts = GetTotalDeathPoints(player.PlayerGui.Data.Slot1)
+    if pts >= maxPoints then
+        lastDeathManual = true
+        print("смерть в богатстве.", pts)
         killself()
     end
 end
@@ -894,6 +901,12 @@ end
 dgui:GetPropertyChangedSignal("Enabled"):Connect(function()
     if dgui.Enabled then
         cancelT()
+        local pts = GetTotalDeathPoints(player.PlayerGui.Data.Slot1)
+
+        if not lastDeathManual then print("смерть в нищете.", pts) end
+
+        lastDeathManual = nil
+
         task.wait(3)
         game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ClaimDeathRewardsRemote"):InvokeServer()
 
@@ -937,6 +950,7 @@ dgui:GetPropertyChangedSignal("Enabled"):Connect(function()
         initListeners()
     end
 end)
+
 
 --[[set_thread_identity(4)
 local Window = Rayfield:CreateWindow({
@@ -1061,6 +1075,15 @@ initListeners()
 if genv.toggles.AutoEat then
     hungerListener()
 end
+
+while task.wait(10) do
+    foodRatio()
+    if not chr or not chr.Breath then continue end
+    chr.Breath:Fire()
+    task.wait()
+    chr.Breath:Stop()
+end
+
 --set_thread_identity(4)
 
 
