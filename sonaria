@@ -438,6 +438,12 @@ local function killself()
     until dgui.Enabled
 end
 
+local function checkPoints()
+    if GetTotalDeathPoints(player.PlayerGui.Data.Slot1) >= 1200 then
+        killself()
+    end
+end
+
 local function rmListener()
     threads.rmListener = task.spawn(function ()
         warn("Rmlistener")
@@ -459,6 +465,7 @@ local function rmListener()
         
         while genv.running and genv.toggles.rmissions do
             task.wait(0.1)
+            
 
             currState = states.AutoRM
             for i, v in workspace.Interactions.ShoomPiles:GetChildren() do
@@ -482,6 +489,7 @@ local function rmListener()
 
             for _, lPos in locposes do
                 task.wait()
+                checkPoints()
                 local region = getRegionFromPosition(lPos.Position)
 
                 if not region then continue end
@@ -524,7 +532,7 @@ local function rmListener()
                 
                 --tempPos = player.Character:GetPivot()
                 
-                
+
                 local sniffv = v:FindFirstChild("Sniff")
                 local dtravel = v:FindFirstChild("DistanceTravelled")
                 local csc = v:FindFirstChild("ConcealScent")
@@ -587,6 +595,8 @@ local function rmListener()
 
                 --currState = states.None
 
+                checkPoints()
+
                 local myPos = player.Character:GetPivot()
                 currState = states.None
                 if ea and not ea.Value then
@@ -615,6 +625,8 @@ local function rmListener()
 
                     until ea.Value
                 end
+
+                checkPoints()
 
                 repeat task.wait() if currState == states.None and player.Character then player.Character:PivotTo(myPos+Vector3.new(0,100,0)) end until (not tplayed or tplayed.Value) and (not attorh or attorh.Value)
             end
