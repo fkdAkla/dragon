@@ -585,8 +585,9 @@ local function rmListener()
                 --currState = states.None
 
                 local myPos = player.Character:GetPivot()
+                currState = states.None
                 if ea and not ea.Value then
-                    currState = states.None
+                    
                     repeat
                     task.wait()
 
