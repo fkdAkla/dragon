@@ -781,9 +781,8 @@ initListeners = function()
 end
 
 
---[[dgui:GetPropertyChangedSignal("Enabled"):Connect(function()
-    if dgui.Enabled then]]
-player.CharacterRemoving:Connect(function()
+dgui:GetPropertyChangedSignal("Enabled"):Connect(function()
+    if dgui.Enabled then
         cancelT()
         task.wait(3)
         game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ClaimDeathRewardsRemote"):InvokeServer()
@@ -798,7 +797,7 @@ player.CharacterRemoving:Connect(function()
         restartAndSpawn()
         task.wait(5)
         initListeners()
-    --end
+    end
 end)
 
 --[[set_thread_identity(4)
