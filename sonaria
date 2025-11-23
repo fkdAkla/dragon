@@ -21,6 +21,7 @@ player.Idled:Connect(function()
     set_thread_identity(8)
     vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
     vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+    set_thread_identity(2)
 end)
 
 for i, v in attrs do
