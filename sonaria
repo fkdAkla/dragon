@@ -89,14 +89,21 @@ tutSkipBtn:GetPropertyChangedSignal("Visible"):Connect(function()
     repeat task.wait(0.5) clickButton(tutSkipBtn) until not tutSkipBtn.Visible
 end)
 
+
+
+local __shouldRespawn = true
 task.spawn(function()
     if tutorialGui.SelectionFrame.Visible then
+        __shouldRespawn = false
         clickButton(tutorialGui.SelectionFrame.SlotsFrame.Sochuri.InnerFrame.SelectButton)
 
         repeat task.wait() until player.PlayerGui.EditorGui.Enabled
 
-        task.wait(2)
-        clickButton(player.PlayerGui.EditorGui.EditFrame.BottomFrame.ButtonsFrame.PlayButton, true)
+        task.wait(3)
+
+        repeat task.wait(0.5) clickButton(player.PlayerGui.EditorGui.EditFrame.BottomFrame.ButtonsFrame.PlayButton) until not player.PlayerGui.EditorGui.Enabled
+
+        print("Editor frame appears to be invisible, should work idek")
 
     end
 end)
@@ -115,7 +122,7 @@ end)
 repeat task.wait() until not tutorialGui.SelectionFrame.Visible and not player.PlayerGui.EditorGui.Enabled
 
 
-restartAndSpawn()
+if __shouldRespawn then restartAndSpawn() end
 
 local clientCharacter = require(game:GetService("ReplicatedStorage")._replicationFolder.ClientCharacter)
 
@@ -326,6 +333,18 @@ local function foodRatio()
     return ratioFood, ratioWater
 end
 
+local _breathTutorText = "Try out your new breath ability!"
+
+local _tutorTextLabel = tutorialGui.TalkFrame.SpeechLabels.TextLabel
+_tutorTextLabel:GetPropertyChangedSignal("Text"):Connect(function()
+    if _tutorTextLabel.Text == _breathTutorText then
+        foodRatio()
+        chr.Breath:Fire()
+        chr.Breath:Stop()
+    end
+end)
+
+local tempIgnoreFood = {}
 local function eat()
     --local pos = player.Character:GetPivot()
     
@@ -333,6 +352,7 @@ local function eat()
         if table.find(ignoreFood, v.Name) then continue end
         if v:GetAttribute("Value") < 10 then continue end
 
+        if tempIgnoreFood[v] then continue end
 
         local mission
         if targetRegion and toggles.rmissions then
@@ -343,13 +363,25 @@ local function eat()
             mission = rmissions[targetRegion]:FindFirstChild("EatFoodDrinkWater")
         end
         
-        
+        repeat task.wait() until player.Character
+
+        if currState ~= states.Eating then return end
+        if foodRatio() >= 1 then return end
+        if (mission and mission.Value) then return end
         player.Character:PivotTo(v.PrimaryPart and v.PrimaryPart.CFrame or v:GetPivot() + Vector3.new(0,5,0))
         task.wait(0.5)
+        --print("Tped to food hehe...")
         chr:StartEat(v)
-        repeat task.wait() until mission and mission.Value or not chr.Eating or not v or v:GetAttribute("Value") == 0 or (player.Character:GetPivot().Position - v:GetPivot().Position).Magnitude >= 50
+
+        --local dl = time() + 1
+
+        --repeat task.wait() until time() - dl <= 0 or chr.Eating
+
+        --if not chr.Eating then print("Failed to start eating", v.Name) tempIgnoreFood[v] = true continue end
+
+        repeat task.wait() until foodRatio() >= 1 or currState ~= states.Eating or mission and mission.Value or not chr.Eating or not v or v:GetAttribute("Value") == 0 or (player.Character:GetPivot().Position - v:GetPivot().Position).Magnitude >= 50
         chr:StopBlockingStates()
-        if foodRatio() >= 1 or (mission and mission.Value) then break end
+        if foodRatio() >= 1 or (mission and mission.Value) or currState ~= states.Eating then break end
     end
 
     
@@ -474,7 +506,9 @@ local function rmListener()
             	v.Name:sub(1,#v.Name-1),
             	tonumber(v.Name:sub(#v.Name))
             }
-            game.Players.LocalPlayer.Character:PivotTo(v:GetPivot()+Vector3.new(0,20,0))
+
+            repeat task.wait() until player.Character
+            player.Character:PivotTo(v:GetPivot()+Vector3.new(0,20,0))
             local region = getRegionFromPosition(v:GetPivot().Position)
 
             game:GetService("ReplicatedStorage").Remotes.ChangeRegionRemote:FireServer(region)
@@ -493,8 +527,13 @@ local function rmListener()
                 local region = getRegionFromPosition(lPos.Position)
 
                 if not region then continue end
-
                 currState = states.AutoRM
+
+                print("Player Character wait", debug.info(1, "l"))
+
+                repeat task.wait() until player.Character
+
+
                 fixedLP[region] = lPos
 
                 local v = rmissions[region]
@@ -518,12 +557,16 @@ local function rmListener()
                 
                 targetRegion = v.Name
 
+                 print("Player Character wait", debug.info(1, "l"))
                 repeat task.wait() until player.Character
                 smoothMoveTo(locpos)
                 
                 
                 
                 task.wait(5)
+
+                 print("Player Character wait", debug.info(1, "l"))
+                repeat task.wait() until player.Character
 
                 --game:GetService("ReplicatedStorage").Remotes.ChangeRegionRemote:FireServer(v.Name)
                 
@@ -543,6 +586,8 @@ local function rmListener()
                 if sniffv and not sniffv.Value then
                     local max = sniffv.TargetAmount.Value - sniffv.Amount.Value
                     print("Started sniff for: "..v.Name)
+
+                    local s,f = pcall(function()
                     repeat
                         repeat task.wait() until player.Character
                         sniff:Sniff()
@@ -550,12 +595,16 @@ local function rmListener()
                         
                         task.wait(4)
                     until sniffv.Value
+                end)
+                    if not s then player:Kick(f) return end
                     print("Finished sniff for: "..v.Name)
                 end
                 
                 if dtravel and not dtravel.Value then
                     print("Started travel for: "..v.Name)
                     repeat task.wait() until player.Character
+                    
+                    local s,f = pcall(function()
                     local currPos = player.Character:GetPivot()
                     repeat
                         local rnd = Vector3.new(currPos.X, currPos.Y + 500, currPos.Z)
@@ -566,6 +615,8 @@ local function rmListener()
                         curr = dtravel.Amount.Value
                         repeat task.wait() if not player.Character then repeat task.wait() until player.Character end player.Character:PivotTo(currPos) until curr ~= dtravel.Amount.Value or dtravel.Value or getRegionFromPosition(player.Character:GetPivot().Position) ~= v.Name
                     until dtravel.Value
+                end)
+                    if not s then print(f) end
                     print("Finished travel for: "..v.Name)
                 end
                 
