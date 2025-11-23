@@ -368,6 +368,7 @@ local function eat()
         if currState ~= states.Eating then return end
         if foodRatio() >= 1 then return end
         if (mission and mission.Value) then return end
+        currState = states.Eating
         player.Character:PivotTo(v.PrimaryPart and v.PrimaryPart.CFrame or v:GetPivot() + Vector3.new(0,5,0))
         task.wait(0.5)
         --print("Tped to food hehe...")
@@ -375,7 +376,7 @@ local function eat()
 
         --local dl = time() + 1
 
-        --repeat task.wait() until time() - dl <= 0 or chr.Eating
+        --repeat task.wait() until dl - time() <= 0 or chr.Eating
 
         --if not chr.Eating then print("Failed to start eating", v.Name) tempIgnoreFood[v] = true continue end
 
@@ -419,7 +420,7 @@ local function hungerListener()
                 --cancelT()
                 repeat task.wait() until currState == states.None and targetRegion
                 foodRatio()
-                currState = states.Eating
+                --currState = states.Eating
                 chr:StopBlockingStates()
                 eat()
                 drankOrAte = true
@@ -587,16 +588,33 @@ local function rmListener()
                     local max = sniffv.TargetAmount.Value - sniffv.Amount.Value
                     print("Started sniff for: "..v.Name)
 
+                    -- local tr = task.spawn(function()
+                    --     local tpos = player.Character:GetPivot() + Vector3.new(0,100,0)
+
+
+                    --     while task.wait() do if dgui.Enabled then return end if player.Character then player.Character:PivotTo(tpos) end end
+                    -- end)
+
                     local s,f = pcall(function()
-                    repeat
-                        repeat task.wait() until player.Character
-                        sniff:Sniff()
-                        if sniffv.Value then break end
+
+                        local deadline = time() + 20
+                        repeat
+                            repeat task.wait() until player.Character
                         
-                        task.wait(4)
-                    until sniffv.Value
+                            sniff:Sniff()
+                            if sniffv.Value then break end
+                            
+                            task.wait(4)
+                        until sniffv.Value or getRegionFromPosition(player.Character:GetPivot().Position) ~= targetRegion
+
                 end)
+
+                    -- pcall(function()
+                    --     task.cancel(tr)
+                    -- end)
                     if not s then player:Kick(f) return end
+
+                    if not sniffv.Value then print("Skipping: Sniff failed for", targetRegion) continue end
                     print("Finished sniff for: "..v.Name)
                 end
                 
@@ -605,6 +623,7 @@ local function rmListener()
                     repeat task.wait() until player.Character
                     
                     local s,f = pcall(function()
+                    
                     local currPos = player.Character:GetPivot()
                     repeat
                         local rnd = Vector3.new(currPos.X, currPos.Y + 500, currPos.Z)
