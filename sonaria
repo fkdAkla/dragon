@@ -365,7 +365,7 @@ local function eat()
         
         repeat task.wait() until player.Character
 
-        if currState ~= states.Eating then return end
+        --if currState ~= states.Eating then return end
         if foodRatio() >= 1 then return end
         if (mission and mission.Value) then return end
         currState = states.Eating
