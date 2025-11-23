@@ -11,6 +11,8 @@ local attrs = {
     "ServerLoadedInit"
 }
 
+local maxPoints = 1200
+
 local player = game:GetService("Players").LocalPlayer
 
 local vu = game:GetService("VirtualUser")
@@ -198,7 +200,7 @@ end
 
 
 local wrapper = require(game:GetService("ReplicatedStorage")._replicationFolder.PlayerWrapper)
-
+local dmg = require(game:GetService("ReplicatedStorage")._replicationFolder.CreatureDamageClient)
 local sniff = require(game:GetService("ReplicatedStorage")._replicationFolder.Sniff)
 local constants = require(game:GetService("ReplicatedStorage")._replicationFolder.Constants)
 
@@ -349,6 +351,12 @@ _tutorTextLabel:GetPropertyChangedSignal("Text"):Connect(function()
     end
 end)
 
+local gachas = {
+    Carnivores = 65,
+    Herbivores = 65,
+    Omnivores = 85
+}
+
 local tempIgnoreFood = {}
 local function eat()
     --local pos = player.Character:GetPivot()
@@ -377,6 +385,9 @@ local function eat()
         player.Character:PivotTo(v.PrimaryPart and v.PrimaryPart.CFrame or v:GetPivot() + Vector3.new(0,5,0))
         task.wait(0.5)
         --print("Tped to food hehe...")
+        repeat task.wait() until player.Character
+
+        foodRatio()
         chr:StartEat(v)
 
         --local dl = time() + 1
@@ -437,13 +448,19 @@ local function hungerListener()
     end)
 end
 
+
 local function npcListener()
     threads.npcListener = task.spawn(function ()
         local folder = interactions:WaitForChild("NPCs"):WaitForChild("Roots")
         while genv.running and genv.toggles.NPCAura do
             task.wait(0.1)
             for i, v in folder:GetChildren() do
-                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("NPCDamageRemote"):FireServer({v})
+                local ent = dmg.GetEntityFromHit(workspace.Interactions.NPCs.Roots.RootPart)
+
+                if not ent then continue end
+                if ent.IsDead then continue end
+                dmg.RegisterHits({ent})
+                --game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("NPCDamageRemote"):FireServer({v})
             end
         end
     end)
@@ -477,7 +494,7 @@ local function killself()
 end
 
 local function checkPoints()
-    if GetTotalDeathPoints(player.PlayerGui.Data.Slot1) >= 1200 then
+    if GetTotalDeathPoints(player.PlayerGui.Data.Slot1) >= maxPoints then
         killself()
     end
 end
@@ -535,7 +552,7 @@ local function rmListener()
                 if not region then continue end
                 currState = states.AutoRM
 
-                print("Player Character wait", debug.info(1, "l"))
+                --print("Player Character wait", debug.info(1, "l"))
 
                 repeat task.wait() until player.Character
 
@@ -563,7 +580,7 @@ local function rmListener()
                 
                 targetRegion = v.Name
 
-                 print("Player Character wait", debug.info(1, "l"))
+                 --print("Player Character wait", debug.info(1, "l"))
                 repeat task.wait() until player.Character
                 smoothMoveTo(locpos)
                 
@@ -571,7 +588,7 @@ local function rmListener()
                 
                 task.wait(5)
 
-                 print("Player Character wait", debug.info(1, "l"))
+                 --print("Player Character wait", debug.info(1, "l"))
                 repeat task.wait() until player.Character
 
                 --game:GetService("ReplicatedStorage").Remotes.ChangeRegionRemote:FireServer(v.Name)
@@ -633,11 +650,13 @@ local function rmListener()
                     repeat
                         local rnd = Vector3.new(currPos.X, currPos.Y + 500, currPos.Z)
                         
+                        local dl = time() + 10
                         local curr = dtravel.Amount.Value
-                        repeat task.wait() if not player.Character then repeat task.wait() until player.Character end player.Character:PivotTo(CFrame.new(rnd)) until curr ~= dtravel.Amount.Value or dtravel.Value or getRegionFromPosition(player.Character:GetPivot().Position) ~= v.Name
+                        repeat task.wait() if not player.Character then repeat task.wait() until player.Character end player.Character:PivotTo(CFrame.new(rnd)) until curr ~= dtravel.Amount.Value or dtravel.Value or getRegionFromPosition(player.Character:GetPivot().Position) ~= v.Name or dl - time() <= 0
                         
+                        dl = time() + 10
                         curr = dtravel.Amount.Value
-                        repeat task.wait() if not player.Character then repeat task.wait() until player.Character end player.Character:PivotTo(currPos) until curr ~= dtravel.Amount.Value or dtravel.Value or getRegionFromPosition(player.Character:GetPivot().Position) ~= v.Name
+                        repeat task.wait() if not player.Character then repeat task.wait() until player.Character end player.Character:PivotTo(currPos) until curr ~= dtravel.Amount.Value or dtravel.Value or getRegionFromPosition(player.Character:GetPivot().Position) ~= v.Name or dl - time() <= 0
                     until dtravel.Value
                 end)
                     if not s then print(f) end
@@ -882,6 +901,34 @@ dgui:GetPropertyChangedSignal("Enabled"):Connect(function()
 
 
         func()
+
+        task.wait(1)
+
+        local dragonCount = client:GetTotalOwnedSpecies()
+
+        if dragonCount < 10 then
+            
+            local args = {
+	            "Carnivores",
+	            1
+            }
+        local remote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("PurchaseItemRemote")
+
+            local needed = 65
+
+            repeat task.wait(0.5)
+            for i, v in gachas do
+                if client:GetTotalOwnedSpecies() >= 10 then break end
+                if client.PlayerData.Coins.Value < v then continue end
+
+                args[1] = i
+
+                remote:InvokeServer(unpack(args))
+
+            end
+
+            until client.PlayerData.Coins.Value < needed or client:GetTotalOwnedSpecies() >= 10
+        end
 
         task.wait(1)
 
