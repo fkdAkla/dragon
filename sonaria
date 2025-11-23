@@ -58,6 +58,11 @@ end
 local tutorialGui = player.PlayerGui:WaitForChild("TutorialGui")
 local promptGui = player.PlayerGui:WaitForChild("PromptGui")
 
+local found = player.PlayerGui:WaitForChild("ClientScripts"):WaitForChild("AntiAFKClientHelper", 1)
+if found then found.Enabled = false end
+
+game.ReplicatedStorage:WaitForChild("AFKEvent"):Destroy()
+
 local function clickButton(_btn)
     local name = _btn:GetFullName()
 
