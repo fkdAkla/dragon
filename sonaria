@@ -614,6 +614,30 @@ local function rmListener()
                 local attorh = v:FindFirstChild("AttackOrHealCreatureOrNPC")
                 local ea = v:FindFirstChild("EatFoodDrinkWater")
                 
+
+                local tr
+                tr = task.spawn(function()
+                    local folder = workspace.Characters
+
+                    repeat
+                        task.wait(0.1)
+                        for i, v in folder:GetChildren() do
+                            if v.Name == player.Name then continue end
+                            if attorh.Value then return end
+                            local hb = v:FindFirstChild("Hitbox")
+                            if not hb then continue end
+
+                            local ent = dmg.GetEntityFromHit(hb)
+
+                            if not ent then continue end
+                            --if ent.IsDead then continue end
+                            dmg.RegisterHits({ent})
+                    --game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("NPCDamageRemote"):FireServer({v})
+                        end
+                    until not player.Character or attorh.Value
+                end)
+
+
                 if sniffv and not sniffv.Value then
                     local max = sniffv.TargetAmount.Value - sniffv.Amount.Value
                     print("Started sniff for: "..v.Name)
@@ -701,6 +725,8 @@ local function rmListener()
 
                 local myPos = player.Character:GetPivot()
                 currState = states.None
+
+
                 if ea and not ea.Value then
                     
                     repeat
@@ -1077,7 +1103,7 @@ if genv.toggles.AutoEat then
     hungerListener()
 end
 
-while task.wait(10) do
+while task.wait(5) do
     foodRatio()
     if not chr or not chr.Breath then continue end
     chr.Breath:Fire()
