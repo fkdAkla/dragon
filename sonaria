@@ -195,6 +195,23 @@ if not genv.firstload then
     hookfunction(clientCharacter._isAFK, function() --line 2947
         return false
     end)
+
+
+    local sheltered = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Sheltered")
+
+    local oldnc
+    oldnc = hookmetamethod(game, "__namecall", function(obj, ...)
+        local args = {...}
+        if checkcaller() then return oldnc(obj, unpack(args)) end
+
+        local method = getnamecallmethod()
+
+        if obj == sheltered and method == "FireServer" then
+            args[1] = true
+        end
+
+        return oldnc(obj, unpack(args))
+    end)
     
 end
 
