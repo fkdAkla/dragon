@@ -510,6 +510,7 @@ local function rmListener()
                 
                 targetRegion = v.Name
 
+                repeat task.wait() until player.Character
                 smoothMoveTo(locpos)
                 
                 
@@ -535,6 +536,7 @@ local function rmListener()
                     local max = sniffv.TargetAmount.Value - sniffv.Amount.Value
                     print("Started sniff for: "..v.Name)
                     repeat
+                        repeat task.wait() until player.Character
                         sniff:Sniff()
                         if sniffv.Value then break end
                         
@@ -545,15 +547,16 @@ local function rmListener()
                 
                 if dtravel and not dtravel.Value then
                     print("Started travel for: "..v.Name)
+                    repeat task.wait() until player.Character
                     local currPos = player.Character:GetPivot()
                     repeat
                         local rnd = Vector3.new(currPos.X, currPos.Y + 500, currPos.Z)
                         
                         local curr = dtravel.Amount.Value
-                        repeat task.wait() player.Character:PivotTo(CFrame.new(rnd)) until curr ~= dtravel.Amount.Value or dtravel.Value or getRegionFromPosition(player.Character:GetPivot().Position) ~= v.Name
+                        repeat task.wait() if not player.Character then repeat task.wait() until player.Character end player.Character:PivotTo(CFrame.new(rnd)) until curr ~= dtravel.Amount.Value or dtravel.Value or getRegionFromPosition(player.Character:GetPivot().Position) ~= v.Name
                         
                         curr = dtravel.Amount.Value
-                        repeat task.wait() player.Character:PivotTo(currPos) until curr ~= dtravel.Amount.Value or dtravel.Value or getRegionFromPosition(player.Character:GetPivot().Position) ~= v.Name
+                        repeat task.wait() if not player.Character then repeat task.wait() until player.Character end player.Character:PivotTo(currPos) until curr ~= dtravel.Amount.Value or dtravel.Value or getRegionFromPosition(player.Character:GetPivot().Position) ~= v.Name
                     until dtravel.Value
                     print("Finished travel for: "..v.Name)
                 end
@@ -567,7 +570,7 @@ local function rmListener()
                         print("Started mud for: "..v.Name)
                         
                         
-                        
+                        if not player.Character then repeat task.wait() until player.Character end
                         game.Players.LocalPlayer.Character:PivotTo(mud.CFrame + Vector3.new(0,15,0))
                         
                         --local max = csc.TargetAmount.Value - csc.Amount.Value
