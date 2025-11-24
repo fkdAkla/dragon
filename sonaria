@@ -197,24 +197,15 @@ if not genv.firstload then
     end)
 
 
-    local sheltered = game:GetService("ReplicatedStorage"):WaitForChild("Remotes").Sheltered
-
-    local oldnc
-    oldnc = hookmetamethod(game, "__namecall", function(obj, ...)
-        local args = {...}
-        if checkcaller() then return oldnc(obj, unpack(args)) end
-
-        local method = getnamecallmethod()
-
-        if typeof(obj) == "Instance" and obj.Name == sheltered.Name and method == "FireServer" then
-            print("Anti acid rain revoked dmg")
-            args[1] = true
+    local oldsheltered
+    local Sheltered = game:GetService("ReplicatedStorage").Remotes.Sheltered
+    oldsheltered = hookfunction(Sheltered.FireServer, function(obj, arg)
+        if obj == Sheltered then
+            print("Captured acid rain shi")
+            return oldsheltered(obj, true)
         end
-
-        return oldnc(obj, unpack(args))
     end)
 
-    print("Sheltered hook.")
     
 end
 
