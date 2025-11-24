@@ -199,11 +199,15 @@ if not genv.firstload then
 
     local oldsheltered
     local Sheltered = game:GetService("ReplicatedStorage").Remotes.Sheltered
-    oldsheltered = hookfunction(Sheltered.FireServer, function(obj, arg)
+    oldsheltered = hookfunction(Sheltered.FireServer, function(obj, ...)
+
+        local args = {...}
         if obj == Sheltered then
             print("Captured acid rain shi")
             return oldsheltered(obj, true)
         end
+        
+        return oldsheltered(obj, unpack(args))
     end)
 
     Sheltered:FireServer(true)
