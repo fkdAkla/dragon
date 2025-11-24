@@ -206,6 +206,7 @@ if not genv.firstload then
         end
     end)
 
+    Sheltered:FireServer(true)
     
 end
 
