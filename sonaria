@@ -191,6 +191,10 @@ if not genv.firstload then
         if genv.hookingCheckGround then return end
         return oldf5(...)
     end)]]
+
+    hookfunction(require(game:GetService("ReplicatedStorage")._replicationFolder.TutorialService).HasCompletedContextualTutorial, function()
+        return true
+    end)
     
     hookfunction(clientCharacter._isAFK, function() --line 2947
         return false
@@ -523,6 +527,8 @@ local function checkPoints()
     end
 end
 
+local tpUpVec = Vector3.new(0,50,0)
+
 local function rmListener()
     threads.rmListener = task.spawn(function ()
         warn("Rmlistener")
@@ -631,12 +637,23 @@ local function rmListener()
                 local ea = v:FindFirstChild("EatFoodDrinkWater")
                 
 
-                --[[local tr
+                local tr
                 tr = task.spawn(function()
                     local folder = workspace.Characters
 
+                    set_thread_identity(2)
+
                     repeat
-                        task.wait(0.1)
+                        task.wait(0.5)
+                        if attorh.Value then return end
+                        if not player.Character then continue end
+                        foodRatio()
+
+
+                        if not chr.Breath:_canEnable() then continue end
+                        if chr.CharacterData:HasAilment("SpawnImmunity") then continue end
+                        
+                        
                         for i, v in folder:GetChildren() do
                             if v.Name == player.Name then continue end
                             if attorh.Value then return end
@@ -646,12 +663,21 @@ local function rmListener()
                             local ent = dmg.GetEntityFromHit(hb)
 
                             if not ent then continue end
-                            --if ent.IsDead then continue end
-                            dmg.RegisterHits({ent})
+
+                            task.wait(.1)
+                            chr.Breath:Fire()
+
+                            task.wait(.1)
+                            dmg.RegisterHits({ent}, "Breath")
+                            task.wait(.1)
+
+                            chr.Breath:Stop()
+                            
                     --game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("NPCDamageRemote"):FireServer({v})
                         end
+
                     until not player.Character or attorh.Value
-                end)]]
+                end)
 
 
                 if sniffv and not sniffv.Value then
@@ -750,7 +776,7 @@ local function rmListener()
 
                     if currState == states.None then
                         if not player.Character then continue end
-                        player.Character:PivotTo(myPos+Vector3.new(0,100,0))
+                        player.Character:PivotTo(myPos+tpUpVec)
                     end
 
 
@@ -767,12 +793,12 @@ local function rmListener()
 
                         currState = states.AutoRM]]
 
-                    until ea.Value
+                    until ea.Value or getRegionFromPosition(player.Character:GetPivot().Position) ~= targetRegion
                 end
 
                 checkPoints()
 
-                repeat task.wait() if currState == states.None and player.Character then player.Character:PivotTo(myPos+Vector3.new(0,100,0)) end until (not tplayed or tplayed.Value) and (not attorh or attorh.Value)
+                repeat task.wait() if currState == states.None and player.Character then player.Character:PivotTo(myPos+tpUpVec) end until (not tplayed or tplayed.Value) and (not attorh or attorh.Value) or getRegionFromPosition(player.Character:GetPivot().Position) ~= targetRegion
             end
             
             --[=[for _, v in rmissions:GetChildren() do
@@ -1119,13 +1145,13 @@ if genv.toggles.AutoEat then
     hungerListener()
 end
 
-while task.wait(5) do
+--[[while task.wait(5) do
     foodRatio()
     if not chr or not chr.Breath then continue end
     chr.Breath:Fire()
     task.wait()
     chr.Breath:Stop()
-end
+end]]
 
 --set_thread_identity(4)
 
