@@ -632,7 +632,7 @@ local function rmListener()
                 local ea = v:FindFirstChild("EatFoodDrinkWater")
                 
 
-                local tr
+                --[[local tr
                 tr = task.spawn(function()
                     local folder = workspace.Characters
 
@@ -652,7 +652,7 @@ local function rmListener()
                     --game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("NPCDamageRemote"):FireServer({v})
                         end
                     until not player.Character or attorh.Value
-                end)
+                end)]]
 
 
                 if sniffv and not sniffv.Value then
