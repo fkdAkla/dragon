@@ -226,12 +226,12 @@ if not genv.firstload then
         return oldf3(unpack(args))
     end)
 
-    local oldf4
-    oldf4 = hookfunction(_cData.AilmentCheck, function(p138, p139)
-        if p139 == "ImmuneToDisasters" then return true end
+    -- local oldf4
+    -- oldf4 = hookfunction(_cData.AilmentCheck, function(p138, p139)
+    --     if p139 == "ImmuneToDisasters" then return true end
 
-        return oldf4(p138, p139)
-    end)
+    --     return oldf4(p138, p139)
+    -- end)
     
     --[[local oldf4
     oldf4 = hookfunction(clientCharacter._checkGroundForTeleportAsync, function(...)
