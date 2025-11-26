@@ -40,11 +40,26 @@ local ignoreFood = {"Grass"}
 local b3d = require(game:GetService("ReplicatedStorage")._replicationFolder.Button3D)
 set_thread_identity(2)
 
+local wrapper = require(game:GetService("ReplicatedStorage")._replicationFolder.PlayerWrapper)
+local client = wrapper:GetClient()
+
+if client.PlayerData.Coins.Value >= 80 then
+    local args = {
+	"TrialCreatures",
+	"Mobuushiy",
+	false
+}
+game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("PurchaseCreatureRemote"):InvokeServer(unpack(args))
+
+
+end
+
+
 local function restartAndSpawn()
 
     local slot = "Slot1"
 
-    for i = 1,3,1 do
+    for i = 2,1,-1 do
         slot = "Slot"..i
         local args = {
         slot,
@@ -229,9 +244,6 @@ if not genv.firstload then
 end
 
 
-
-
-local wrapper = require(game:GetService("ReplicatedStorage")._replicationFolder.PlayerWrapper)
 local dmg = require(game:GetService("ReplicatedStorage")._replicationFolder.CreatureDamageClient)
 local sniff = require(game:GetService("ReplicatedStorage")._replicationFolder.Sniff)
 local constants = require(game:GetService("ReplicatedStorage")._replicationFolder.Constants)
@@ -246,8 +258,6 @@ local interactions = workspace:WaitForChild("Interactions")
 local rmissions = player.PlayerGui.Data.Missions.RegionMissions
 
 local lake = interactions:WaitForChild("Lakes"):WaitForChild("Lake")
-
-local client = wrapper:GetClient()
 
 local chr = client:GetCurrentCharacter()
 
@@ -381,11 +391,14 @@ local function healingHunterAndDmgSelf()
             if not _temp then continue end
             
 
+            if not _temp.Abilities.HealingHunter then continue end
+
             local h,mh = _temp.Data:GetAttribute("h"), _temp.Data:GetAttribute("mh")
 
-            if (h/mh) > healthRatio then selfharm() end
-
-            if not _temp.Abilities.HealingHunter then continue end
+            if (h/mh) > healthRatio then
+                selfharm()
+                repeat task.wait() until not _temp.Data or h ~= _temp.Data:GetAttribute("h")
+            end
 
             if _temp.Abilities.HealingHunter.Toggled then continue end
 
@@ -836,158 +849,6 @@ local function rmListener()
                 repeat task.wait() if currState == states.None and player.Character then player.Character:PivotTo(myPos+tpUpVec) end until (not tplayed or tplayed.Value) and (not attorh or attorh.Value) or getRegionFromPosition(player.Character:GetPivot().Position) ~= targetRegion
             end
             
-            --[=[for _, v in rmissions:GetChildren() do
-                local location = interactions.Regions:FindFirstChild(v.Name)
-                if not location then continue end
-                --if block[location.Name] then continue end
-                
-                local eligible
-                for _, k in v:GetChildren() do
-                    if not k.Value and table.find(todo, k.Name) then eligible = true break end
-                end
-                
-                if not eligible then continue end
-                
-                
-                repeat task.wait() until currState == states.None or currState == states.AutoRM
-
-                currState = states.AutoRM
-                --local height = player.Character:GetPivot().Y
-                local locpos = locposes[location.Name] and locposes[location.Name].Position -- or regions[location.Name].RegionCenterPosition
-                if not locpos then warn("Locpos not found for", location.Name) continue end
-                
-                
-                
-                
-                
-                warn("Location:", location.Name, "Pos:", locpos)
-                
-                targetRegion = v.Name
-
-                smoothMoveTo(locpos)
-                
-                --[[local maxCount = math.floor(distance/50)
-                
-                --genv.hookingCheckGround = true
-                local thread
-                if maxCount <= 1 then
-                    player.Character:PivotTo(CFrame.new(locpos))
-                else
-                    warn("Started tping")
-                    for i = 1, maxCount do
-                        local pos = startPos + direction * distance * (i/maxCount)
-                        
-                        --warn("dist left:", (locpos-pos).Magnitude)
-                        player.Character:PivotTo(CFrame.new(pos))
-                        --if i ~= maxCount then player.Character:PivotTo(CFrame.new(pos)) end
-                        --[[if i == maxCount then
-                            local studs = 0
-                            while task.wait() do
-                                local ray = workspace:Raycast(pos+Vector3.new(0,studs,0), Vector3.new(0,-1000,0), params)
-                                if not ray then player.Character:PivotTo(CFrame.new(pos)) break end
-                                if ray.Distance <= 40 then
-                                    studs += 20
-                                else
-                                    player.Character:PivotTo(CFrame.new(ray.Position+Vector3.new(0,20,0)))
-                                    break
-                                end
-                            end
-                        end]]
-                       --[[ task.wait(0.05)
-                    end
-                    warn("Finished tping")
-                end]]
-                
-                local region = getRegionFromPosition(player.Character:GetPivot().Position)
-                
-                warn(region == v.Name, player.Character:GetPivot().Position)
-                
-                
-                
-                task.wait(7)
-
-                --game:GetService("ReplicatedStorage").Remotes.ChangeRegionRemote:FireServer(v.Name)
-                
-                if region ~= v.Name then
-                    continue
-                end
-                
-                genv.hookingCheckGround = nil
-                
-                --tempPos = player.Character:GetPivot()
-                
-                
-                local sniffv = v:FindFirstChild("Sniff")
-                local dtravel = v:FindFirstChild("DistanceTravelled")
-                local csc = v:FindFirstChild("ConcealScent")
-                local tplayed = v:FindFirstChild("TimePlayed")
-                local attorh = v:FindFirstChild("AttackOrHealCreatureOrNPC")
-                local ea = v:FindFirstChild("EatFoodDrinkWater")
-                
-                if sniffv and not sniffv.Value then
-                    local max = sniffv.TargetAmount.Value - sniffv.Amount.Value
-                    print("Started sniff for: "..v.Name)
-                    repeat
-                        sniff:Sniff()
-                        if sniffv.Value then break end
-                        
-                        task.wait(4)
-                    until sniffv.Value
-                    print("Finished sniff for: "..v.Name)
-                end
-                
-                if dtravel and not dtravel.Value then
-                    print("Started travel for: "..v.Name)
-                    local currPos = player.Character:GetPivot()
-                    repeat
-                        local rnd = Vector3.new(currPos.X, currPos.Y + 500, currPos.Z)
-                        
-                        local curr = dtravel.Amount.Value
-                        repeat task.wait() player.Character:PivotTo(CFrame.new(rnd)) until curr ~= dtravel.Amount.Value or dtravel.Value or getRegionFromPosition(player.Character:GetPivot().Position) ~= v.Name
-                        
-                        curr = dtravel.Amount.Value
-                        repeat task.wait() player.Character:PivotTo(currPos) until curr ~= dtravel.Amount.Value or dtravel.Value or getRegionFromPosition(player.Character:GetPivot().Position) ~= v.Name
-                    until dtravel.Value
-                    print("Finished travel for: "..v.Name)
-                end
-                
-                
-                if csc and not csc.Value then
-                    local mud = getClosestPart(interactions.Mud:GetChildren())
-                    
-                    if mud then
-                        
-                        print("Started mud for: "..v.Name)
-                        
-                        
-                        
-                        game.Players.LocalPlayer.Character:PivotTo(mud.CFrame + Vector3.new(0,15,0))
-                        
-                        --local max = csc.TargetAmount.Value - csc.Amount.Value
-                        task.wait(2)
-                        local startT = time()
-                        repeat
-                            task.wait(0.1)
-                            if time() - startT >= 5 then break end
-                            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Mud"):FireServer(mud)
-                        until csc.Value
-                        print("Finished mud for: "..v.Name)
-                    end
-                end
-
-                --currState = states.None
-                
-                repeat task.wait() until (not tplayed or tplayed.Value) and (not attorh or attorh.Value)
-
-
-                desiredFoodLoc = targetRegion
-
-                repeat
-                task.wait(0.1)
-                selfharm()
-                until dgui.Enabled
-                
-            end]=]
         end
     end)
 end
