@@ -805,7 +805,12 @@ local function rmListener()
                             if time() - startT >= 5 then break end
                             game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Mud"):FireServer(mud)
                         until csc.Value
-                        print("Finished mud for: "..v.Name)
+                        
+                        if not csc.Value then
+                            print("Failed mud for: "..v.Name)
+                        else
+                            print("Finished mud for: "..v.Name)
+                        end
                     end
                 end
 
