@@ -11,8 +11,10 @@ local attrs = {
     "ServerLoadedInit"
 }
 
+genv.limitLocs = genv.limitLocs or 5
 local maxPoints = 1200
 local healthRatio = 0.6
+local limitLocs = genv.limitLocs
 
 local player = game:GetService("Players").LocalPlayer
 
@@ -43,13 +45,30 @@ set_thread_identity(2)
 local wrapper = require(game:GetService("ReplicatedStorage")._replicationFolder.PlayerWrapper)
 local client = wrapper:GetClient()
 
+local dino = "Mobuushiy"
 if client.PlayerData.Coins.Value >= 80 then
+    local shouldBuy = true
+
+    for i = 1,3 do
+        if client.PlayerData["Slot"..i].Dino.Value ~= dino then continue end
+        shouldBuy = false
+    end
+
+    if not shouldBuy then
+        for i, v in client.PlayerData.Slots:GetChildren() do
+            if v.Dino.Value ~= dino then continue end
+            shouldBuy = false
+        end
+    end
+
+    if shouldBuy then
     local args = {
 	"TrialCreatures",
-	"Mobuushiy",
+	dino,
 	false
 }
 game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("PurchaseCreatureRemote"):InvokeServer(unpack(args))
+    end
 
 
 end
@@ -57,27 +76,36 @@ end
 
 local function restartAndSpawn()
 
-    local slot = "Slot1"
-
-    for i = 2,1,-1 do
+    local slot
+    
+    for i = 1,3 do
+        if client.PlayerData["Slot"..i].Dino.Value ~= dino then continue end
         slot = "Slot"..i
-        local args = {
+    end
+
+    if not slot then
+        for i, v in client.PlayerData.Slots:GetChildren() do
+            if v.Dino.Value ~= dino then continue end
+
+            slot = v.Name
+        end
+    end
+    
+    if not slot then slot = "Slot1" end
+
+    local args = {
         slot,
         false
     }
-        local s,_ = pcall(function()
-            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("RestartSlotRemote"):InvokeServer(unpack(args))
-        end)
-
-        if s then break end
-    end
-    
+        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("RestartSlotRemote"):InvokeServer(unpack(args))
 
     set_thread_identity(2)
 
     local thing = require(game:GetService("ReplicatedStorage")._replicationFolder.SaveSelectionClient)
 
     thing.Respawn(slot)
+
+    print("Spawned "..slot)
 end
 
 local function selfharm()
@@ -278,7 +306,7 @@ genv.safePos = safePos
     
 }]]
 
-local locposes = {
+--[[local locposes = {
     ["Grassy Shoal"] = CFrame.new(-465.201935, 212.568848, 2199.88306, -0.697458208, 0.0161381122, -0.716443717, -0.196838886, 0.956979215, 0.213178962, 0.689062059, 0.289707392, -0.664276421),
     ["Seaweed Depths"] = CFrame.new(25.7415829, 158.15654, 684.16571, -0.57525152, -0.0685414821, 0.815099835, 0.127119586, 0.976885259, 0.171859816, -0.808038533, 0.202477783, -0.553241789),
     ["Jungle"] = CFrame.new(2492.13452, 250.571716, -960.84906, 1, 0, 0.000172861372, 0, 1, 0, -0.000172861372, 0, 1), 
@@ -295,12 +323,32 @@ local locposes = {
     ["Mesa"] = CFrame.new(46, 208.524841, 1446.5, 1, -8.42078851e-09, -9.15623241e-06, 8.4207592e-09, 1, -3.19796412e-09, 9.15623241e-06, 3.19788707e-09, 1),
     ["Pride Rocks"] = CFrame.new(-2322.86133, 220.524841, 222.930939, 1, 4.35035341e-09, -1.62476942e-06, -4.35035163e-09, 1, 1.0783785e-09, 1.62476942e-06, -1.07837139e-09, 1),
     ["Volcano Island"] = CFrame.new(1850.10693, 188.469452, -271.437622, 0.999121308, -0.0419118702, 5.72003592e-06, 0.0415784419, 0.991190076, 0.125751764, -0.00527616125, -0.125641033, 0.992061734)
+}]]
+
+local locposes = {
+    CFrame.new(-465.201935, 212.568848, 2199.88306, -0.697458208, 0.0161381122, -0.716443717, -0.196838886, 0.956979215, 0.213178962, 0.689062059, 0.289707392, -0.664276421),
+    CFrame.new(25.7415829, 158.15654, 684.16571, -0.57525152, -0.0685414821, 0.815099835, 0.127119586, 0.976885259, 0.171859816, -0.808038533, 0.202477783, -0.553241789),
+    CFrame.new(2492.13452, 250.571716, -960.84906, 1, 0, 0.000172861372, 0, 1, 0, -0.000172861372, 0, 1), 
+    CFrame.new(1133.80005, 93.4539719, -1550.59998, 0.999475181, -4.62921523e-09, 0.0323939808, 4.03909572e-09, 1, 1.82823836e-08, -0.0323939808, -1.81419466e-08, 0.999475181), 
+    CFrame.new(552.638855, 258.996826, -595.808472, 0.997276902, -0.0737443119, 0.000773774693, 0.0703631788, 0.954589903, 0.289494693, -0.0220872238, -0.288651913, 0.957179308),
+    CFrame.new(1136.71326, 188.537994, -2424.69409, 0.999938786, 0.0110654598, 1.46607135e-06, -0.011064481, 0.999852002, -0.0131738586, -0.000147240658, 0.0131730363, 0.999913216),
+    CFrame.new(1108.45898, 66.587677, 1185.58569, 0.0967723504, -5.71577687e-07, -0.995306551, 2.41426665e-06, 1, -3.39537053e-07, 0.995306551, -2.37007748e-06, 0.0967723504),
+    CFrame.new(-1436.86328, 290.616211, 1151.63806, 0.988877296, -0.148560897, -0.00716752047, 0.148344934, 0.981664538, 0.119701788, -0.0107469046, -0.119433649, 0.992784023),
+    CFrame.new(1060.5, 58.0601425, 536.099976, 1, -5.78338779e-24, -0.000136238159, 5.783387e-24, 1, -5.02714554e-27, 0.000136238159, 4.23922757e-27, 1),
+    CFrame.new(313.000427, 209.607925, -1288.79529, 0.996374786, 0.0286425687, 0.0801052973, -0.0198083762, 0.993846714, -0.108978525, -0.0827338099, 0.1069967, 0.990811169),
+    CFrame.new(-1343.40002, 306.540436, -498.100006, 0.999999881, 0.000432946807, 5.33381399e-06, -0.000432947942, 0.999999881, 0.000214863278, -5.24078905e-06, -0.000214865562, 1),
+    CFrame.new(-1362.74243, 367.144196, -2329.38208, 0.997940898, -0.0640439466, -0.00351124466, 0.0631373972, 0.990508616, -0.122091651, 0.0112971496, 0.121618561, 0.992512643),
+    CFrame.new(-55, -33.1551666, 891.299988, 0.999999523, -7.01389702e-09, -0.000988716492, 7.00107883e-09, 1, -1.29679654e-08, 0.000988716492, 1.29610367e-08, 0.999999523),
+    CFrame.new(46, 208.524841, 1446.5, 1, -8.42078851e-09, -9.15623241e-06, 8.4207592e-09, 1, -3.19796412e-09, 9.15623241e-06, 3.19788707e-09, 1),
+    CFrame.new(-2322.86133, 220.524841, 222.930939, 1, 4.35035341e-09, -1.62476942e-06, -4.35035163e-09, 1, 1.0783785e-09, 1.62476942e-06, -1.07837139e-09, 1),
+    CFrame.new(1850.10693, 188.469452, -271.437622, 0.999121308, -0.0419118702, 5.72003592e-06, 0.0415784419, 0.991190076, 0.125751764, -0.00527616125, -0.125641033, 0.992061734)
 }
 
-for i, v in locposes do
+
+--[[for i, v in locposes do
    if interactions.Regions:FindFirstChild(i) then continue end
    warn(i, "mismatch")
-end
+end]]
 
 local sumSafePos = CFrame.new(1385.0376, 9273.52832, 1650.64685, -0.436157703, -7.33058458e-09, -0.899870217, 4.31240679e-08, 1, -2.90480546e-08, 0.899870217, -5.14755989e-08, -0.436157703)
 
@@ -393,12 +441,12 @@ local function healingHunterAndDmgSelf()
 
             if not _temp.Abilities.HealingHunter then continue end
 
-            local h,mh = _temp.Data:GetAttribute("h"), _temp.Data:GetAttribute("mh")
+            -- local h,mh = _temp.Data:GetAttribute("h"), _temp.Data:GetAttribute("mh")
 
-            if (h/mh) > healthRatio then
-                selfharm()
-                repeat task.wait() until not _temp.Data or h ~= _temp.Data:GetAttribute("h")
-            end
+            -- if (h/mh) > healthRatio then
+            --     selfharm()
+            --     repeat task.wait() until not _temp.Data or h ~= _temp.Data:GetAttribute("h")
+            -- end
 
             if _temp.Abilities.HealingHunter.Toggled then continue end
 
@@ -450,7 +498,7 @@ local function eat()
 
         --if currState ~= states.Eating then return end
         if foodRatio() >= 1 then return end
-        if (mission and mission.Value) then return end
+        if (mission and mission.Value and foodRatio > 0.5) then return end
         currState = states.Eating
         player.Character:PivotTo(v.PrimaryPart and v.PrimaryPart.CFrame or v:GetPivot() + Vector3.new(0,5,0))
         task.wait(0.5)
@@ -619,8 +667,9 @@ local function rmListener()
             warn('loop '..n)
             
            
-
-            for _, lPos in locposes do
+            local madeThru = 0
+            for _i, lPos in locposes do
+                if madeThru >= limitLocs then break end
                 task.wait()
                 checkPoints()
                 local region = getRegionFromPosition(lPos.Position)
@@ -634,6 +683,8 @@ local function rmListener()
 
 
                 fixedLP[region] = lPos
+
+                madeThru += 1
 
                 local v = rmissions[region]
 
@@ -653,6 +704,8 @@ local function rmListener()
                 
                 
                 warn("Location:", region)
+
+                
                 
                 targetRegion = v.Name
 
@@ -685,7 +738,7 @@ local function rmListener()
                 local ea = v:FindFirstChild("EatFoodDrinkWater")
                 
 
-                --[[local tr
+                local tr
                 tr = task.spawn(function()
                     local folder = workspace.Characters
 
@@ -697,9 +750,11 @@ local function rmListener()
                         if not player.Character then continue end
                         foodRatio()
 
-
-                        if not chr.Breath:_canEnable() then continue end
-                        if chr.CharacterData:HasAilment("SpawnImmunity") then continue end
+                        if not chr then return end
+                        if not chr.Abilities.HealingHunter then return end
+                        if not chr.Abilities.HealingHunter.Toggled then continue end
+                        -- if not chr.Breath:_canEnable() then continue end
+                        -- if chr.CharacterData:HasAilment("SpawnImmunity") then continue end
                         
                         
                         for i, v in folder:GetChildren() do
@@ -712,20 +767,14 @@ local function rmListener()
 
                             if not ent then continue end
 
-                            task.wait(.1)
-                            chr.Breath:Fire()
-
-                            task.wait(.1)
-                            dmg.RegisterHits({ent}, "Breath")
-                            task.wait(.1)
-
-                            chr.Breath:Stop()
+                            
+                            dmg.RegisterHits({ent})
                             
                     --game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("NPCDamageRemote"):FireServer({v})
                         end
 
                     until not player.Character or attorh.Value
-                end)]]
+                end)
 
 
                 if sniffv and not sniffv.Value then
@@ -805,7 +854,7 @@ local function rmListener()
                             if time() - startT >= 5 then break end
                             game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Mud"):FireServer(mud)
                         until csc.Value
-                        
+
                         if not csc.Value then
                             print("Failed mud for: "..v.Name)
                         else
