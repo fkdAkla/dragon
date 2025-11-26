@@ -498,7 +498,7 @@ local function eat()
 
         --if currState ~= states.Eating then return end
         if foodRatio() >= 1 then return end
-        if (mission and mission.Value and foodRatio > 0.5) then return end
+        if (mission and mission.Value and foodRatio() > 0.5) then return end
         currState = states.Eating
         player.Character:PivotTo(v.PrimaryPart and v.PrimaryPart.CFrame or v:GetPivot() + Vector3.new(0,5,0))
         task.wait(0.5)
