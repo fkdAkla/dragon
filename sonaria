@@ -12,6 +12,7 @@ local attrs = {
 }
 
 local maxPoints = 1200
+local healthRatio = 0.6
 
 local player = game:GetService("Players").LocalPlayer
 
@@ -41,18 +42,27 @@ set_thread_identity(2)
 
 local function restartAndSpawn()
 
+    local slot = "Slot1"
 
-    local args = {
-        "Slot1",
+    for i = 1,3,1 do
+        slot = "Slot"..i
+        local args = {
+        slot,
         false
     }
-    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("RestartSlotRemote"):InvokeServer(unpack(args))
+        local s,_ = pcall(function()
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("RestartSlotRemote"):InvokeServer(unpack(args))
+        end)
+
+        if s then break end
+    end
+    
 
     set_thread_identity(2)
 
     local thing = require(game:GetService("ReplicatedStorage")._replicationFolder.SaveSelectionClient)
 
-    thing.Respawn("Slot1")
+    thing.Respawn(slot)
 end
 
 local function selfharm()
@@ -62,10 +72,10 @@ end
 local tutorialGui = player.PlayerGui:WaitForChild("TutorialGui")
 local promptGui = player.PlayerGui:WaitForChild("PromptGui")
 
-local found = player.PlayerGui:WaitForChild("ClientScripts"):WaitForChild("AntiAFKClientHelper", 1)
+local found = player.PlayerGui:WaitForChild("ClientScripts", 1) and player.PlayerGui.ClientScripts:WaitForChild("AntiAFKClientHelper", 1)
 if found then found.Enabled = false end
 
-game.ReplicatedStorage:WaitForChild("AFKEvent"):Destroy()
+if game.ReplicatedStorage:WaitForChild("AFKEvent", 1) then game.ReplicatedStorage:WaitForChild("AFKEvent"):Destroy() end
 
 local function clickButton(_btn)
     local name = _btn:GetFullName()
@@ -363,6 +373,29 @@ local function foodRatio()
 end
 
 
+local function healingHunterAndDmgSelf()
+    task.spawn(function()
+        while task.wait(0.5) do
+            local _temp = client:GetCurrentCharacter()
+
+            if not _temp then continue end
+            
+
+            local h,mh = _temp.Data:GetAttribute("h"), _temp.Data:GetAttribute("mh")
+
+            if (h/mh) > healthRatio then selfharm() end
+
+            if not _temp.Abilities.HealingHunter then continue end
+
+            if _temp.Abilities.HealingHunter.Toggled then continue end
+
+            print("Activated heal")
+            _temp.Abilities.HealingHunter:Run(true)
+        end
+    end)
+
+end
+
 
 -- local _breathTutorText = "Try out your new breath ability!"
 
@@ -624,10 +657,12 @@ local function rmListener()
                 --game:GetService("ReplicatedStorage").Remotes.ChangeRegionRemote:FireServer(v.Name)
                 
                 
+                
                 genv.hookingCheckGround = nil
                 
                 --tempPos = player.Character:GetPivot()
                 
+                local myPos = player.Character:GetPivot()
 
                 local sniffv = v:FindFirstChild("Sniff")
                 local dtravel = v:FindFirstChild("DistanceTravelled")
@@ -765,7 +800,7 @@ local function rmListener()
 
                 checkPoints()
 
-                local myPos = player.Character:GetPivot()
+                
                 currState = states.None
 
 
@@ -1135,10 +1170,12 @@ local ButtonSelfDamage = Tab:CreateButton({
 
 set_thread_identity(4)]]
 
-if genv.toggles.AutoEat then
-    player.Character:PivotTo(safePos)
-end
+-- if genv.toggles.AutoEat then
+--     player.Character:PivotTo(safePos)
+-- end
 initListeners()
+
+healingHunterAndDmgSelf()
 --set_thread_identity(4)
 
 if genv.toggles.AutoEat then
