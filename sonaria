@@ -37,7 +37,7 @@ print("Started script.")
 --local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/SiriusSoftwareLtd/Rayfield/main/source.lua'))()
 
 
-local ignoreFood = {"Grass"}
+--local ignoreFood = {"Grass"}
 
 local b3d = require(game:GetService("ReplicatedStorage")._replicationFolder.Button3D)
 set_thread_identity(2)
@@ -475,15 +475,15 @@ local gachas = {
     Omnivores = 85
 }
 
-local tempIgnoreFood = {}
+--local tempIgnoreFood = {}
 local function eat()
     --local pos = player.Character:GetPivot()
     
     for i, v in interactions.Food:GetChildren() do
-        if table.find(ignoreFood, v.Name) then continue end
+        --if table.find(ignoreFood, v.Name) then continue end
         if v:GetAttribute("Value") < 10 then continue end
 
-        if tempIgnoreFood[v] then continue end
+        --if tempIgnoreFood[v] then continue end
 
         local mission
         if targetRegion and toggles.rmissions then
