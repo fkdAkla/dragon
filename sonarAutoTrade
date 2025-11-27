@@ -1,0 +1,188 @@
+local player = game:GetService("Players").LocalPlayer
+
+local genv = getgenv()
+genv.target = genv.target or game.Players:FindFirstChild("WARPAAGENT2")
+genv.allowedAccs = genv.allowedAccs or {"Snooz3Fr", "WARPAAGENT2"}
+
+local target = genv.target
+if not target then error("No target provided / non-existent") return end
+genv.running = nil
+--local allowedAccs = genv.allowedAccs
+
+local rRemotes = game:GetService("ReplicatedStorage").Remotes
+local tradeGui = player.PlayerGui.TradeGui
+local acceptedLabel = tradeGui.ContainerFrame.Theirs.OffersFrame.AcceptedLabel
+local myOfferScrFrame = tradeGui.ContainerFrame.Yours.OffersFrame.ScrollingFrame
+
+local requestsGui = player.PlayerGui.RequestsGui
+
+local data = player.Data.Items
+
+local tokens = {
+    "RandomStoredCreatureToken",
+    "ChangeCreatureColorsToken",
+    "PartialGrowToken",
+    "FullGrowToken",
+    "CreatureReviveToken",
+    "DeathGachaToken"
+}
+
+local pool = {}
+
+local _tremoteAlt = player.Remotes.TradeRequestRemote
+local tSessRem
+
+local is_main = player == target
+
+--alt
+local _sendReq
+_sendReq = function(nolo)
+
+    while true do
+        task.wait()
+        _tremoteAlt:FireServer(
+            "SendRequest",
+            target
+        )
+
+        if nolo then return end
+        local endT = time() + 5
+        repeat task.wait() until tradeGui.Enabled or endT - time() <= 0 or not target or not game.Players:FindFirstChild(target.Name)
+
+        if target and not tradeGui.Enabled then continue end
+        break
+    end
+end
+
+local function isTradeEnded()
+    if not tradeGui.Enabled or not target or not game.Players:FindFirstChild(target.Name) then return true end
+end
+
+local function send_request()
+    _sendReq()
+
+    if not tradeGui.Enabled then return end
+
+    tSessRem = rRemotes[player.Name.."-"..target.Name.."TradeRemote"]
+
+    local argsAddToken = {
+	"AddTradeItem",
+	{
+		Overwrite = true,
+		ItemType = "Tokens",
+		Name = "GalaxyExplorerGachaToken",
+		Amount = 150
+	}
+}
+
+    local argsAddShooms = {
+        "AddTradeItem",
+        {
+            Overwrite = true,
+            ItemType = "Currency",
+            Name = "Shooms",
+            Amount = 500000
+        }
+    }
+
+    tSessRem:InvokeServer(unpack(argsAddShooms))
+
+    task.wait(1.1)
+
+    for i, v in tokens do
+        if isTradeEnded() then return end
+        
+        if data[v].Value <= 0 then continue end
+        argsAddToken[2].Name = v
+        tSessRem:InvokeServer(unpack(argsAddToken))
+        task.wait(1.1)
+    end
+
+
+    tSessRem:InvokeServer("AcceptTrade")
+    
+end
+
+--main
+local accept_request
+accept_request = function(plr)
+    print("Accept request")
+    local rem = plr.Remotes.TradeRequestRemote
+
+    rem:FireServer("AcceptRequest")
+
+    local endT = time() + 5
+    repeat task.wait() until tradeGui.Enabled or endT - time() <= 0
+
+    if not tradeGui.Enabled then return end
+
+    tSessRem = rRemotes:FindFirstChild(plr.Name.."-"..player.Name.."TradeRemote")
+
+    repeat task.wait() until acceptedLabel.Visible
+    
+    local tr = task.spawn(function()
+        tSessRem:InvokeServer("AcceptTrade")
+    end)
+
+    repeat task.wait() until not tradeGui.Enabled
+
+    task.cancel(tr)
+
+end
+
+requestsGui.RequestsFrame.Other.ChildAdded:Connect(function(child)
+    if not is_main then return end
+
+    local senderName = child.Name:sub(6)
+
+    if not table.find(allowedAccs, senderName) then return end
+
+    local plr = game.Players:FindFirstChild(senderName)
+    if not plr then return end
+
+    print("Added "..senderName.." to the pool.")
+    table.insert(pool, plr)
+end)
+
+if not is_main then
+    if not genv.ft then
+        genv.ft = true
+        _sendReq(true)
+        task.wait(5)
+    end
+    send_request()
+    return
+end
+
+if not genv.ft then
+    genv.ft = true
+    for i, v in allowedAccs do
+        if v == player.Name then continue end
+        if not game.Players:FindFirstChild(v) then continue end
+        _tremoteAlt:FireServer(
+                "SendRequest",
+                game.Players:FindFirstChild(v)
+            )
+        task.wait(5)
+        break
+    end
+end
+
+game.Players.PlayerRemoving:Connect(function(plr)
+    table.remove(pool, table.find(pool, plr))
+end)
+
+genv.running = true
+while task.wait(1) do
+    if not genv.running then break end
+    local found = pool[1]
+
+    if not found then continue end
+
+    table.remove(pool, table.find(pool, found))
+
+    accept_request(found)
+
+    print("Ended the trade with "..found.Name)
+
+end
