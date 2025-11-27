@@ -430,7 +430,7 @@ local function foodRatio()
     return ratioFood, ratioWater
 end
 
-
+local checkPoints
 local function healingHunterAndDmgSelf()
     task.spawn(function()
         while task.wait(0.5) do
@@ -438,6 +438,7 @@ local function healingHunterAndDmgSelf()
 
             if not _temp then continue end
             
+            if checkPoints(_temp) then return end
 
             if not _temp.Abilities.HealingHunter then continue end
 
@@ -612,13 +613,17 @@ local function killself()
 end
 
 local lastDeathManual
-local function checkPoints()
-    local pts = GetTotalDeathPoints(client:GetCurrentCharacter().Slot)
+checkPoints = function(_temp)
+    _temp = _temp or client:GetCurrentCharacter()
+    if not _temp then return end
+    local pts = GetTotalDeathPoints(_temp.Slot)
     if pts >= maxPoints then
         lastDeathManual = true
         print("смерть в богатстве.", pts)
         killself()
+        return true
     end
+    return
 end
 
 local tpUpVec = Vector3.new(0,50,0)
@@ -671,7 +676,7 @@ local function rmListener()
             for _i, lPos in locposes do
                 if madeThru >= limitLocs then break end
                 task.wait()
-                checkPoints()
+                --checkPoints()
                 local region = getRegionFromPosition(lPos.Position)
 
                 if not region then continue end
@@ -865,7 +870,7 @@ local function rmListener()
 
                 --currState = states.None
 
-                checkPoints()
+                --checkPoints()
 
                 
                 currState = states.None
@@ -898,7 +903,7 @@ local function rmListener()
                     until ea.Value or getRegionFromPosition(player.Character:GetPivot().Position) ~= targetRegion
                 end
 
-                checkPoints()
+                --checkPoints()
 
                 repeat task.wait() if currState == states.None and player.Character then player.Character:PivotTo(myPos+tpUpVec) end until (not tplayed or tplayed.Value) and (not attorh or attorh.Value) or getRegionFromPosition(player.Character:GetPivot().Position) ~= targetRegion
             end
