@@ -218,13 +218,13 @@ if not genv.firstload then
         return
     end)
     
-    local oldf3
-    oldf3 = hookfunction(weather.SetWeather, function(...)
-        if not genv.toggles.nd then return oldf3(...) end
-        local args = {...}
-        args[2] = "Clear Skies"
-        return oldf3(unpack(args))
-    end)
+    -- local oldf3
+    -- oldf3 = hookfunction(weather.SetWeather, function(...)
+    --     if not genv.toggles.nd then return oldf3(...) end
+    --     local args = {...}
+    --     args[2] = "Clear Skies"
+    --     return oldf3(unpack(args))
+    -- end)
 
     -- local oldf4
     -- oldf4 = hookfunction(_cData.AilmentCheck, function(p138, p139)
@@ -613,7 +613,7 @@ end
 
 local lastDeathManual
 local function checkPoints()
-    local pts = GetTotalDeathPoints(player.PlayerGui.Data.Slot1)
+    local pts = GetTotalDeathPoints(client:GetCurrentCharacter().Slot)
     if pts >= maxPoints then
         lastDeathManual = true
         print("смерть в богатстве.", pts)
