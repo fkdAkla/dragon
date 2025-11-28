@@ -438,7 +438,8 @@ local function healingHunterAndDmgSelf()
 
             if not _temp then continue end
             
-            if checkPoints(_temp) then return end
+            --if checkPoints(_temp) then return end
+            checkPoints(_temp)
 
             if not _temp.Abilities.HealingHunter then continue end
 
@@ -952,11 +953,13 @@ dgui:GetPropertyChangedSignal("Enabled"):Connect(function()
         local remote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("PurchaseItemRemote")
 
             local needed = 65
+            local max = 85
 
             repeat task.wait(0.5)
             for i, v in gachas do
                 if client:GetTotalOwnedSpecies() >= 10 then break end
                 if client.PlayerData.Coins.Value < v then continue end
+                if client.PlayerData.Coins.Value - v < 80 then continue end
 
                 args[1] = i
 
@@ -964,7 +967,7 @@ dgui:GetPropertyChangedSignal("Enabled"):Connect(function()
 
             end
 
-            until client.PlayerData.Coins.Value < needed or client:GetTotalOwnedSpecies() >= 10
+            until client.PlayerData.Coins.Value < needed or client.PlayerData.Coins.Value - max < 80 or client:GetTotalOwnedSpecies() >= 10
         end
 
         task.wait(1)
