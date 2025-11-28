@@ -30,6 +30,7 @@ local tokens = {
 local pool = {}
 
 local _tremoteAlt = player.Remotes.TradeRequestRemote
+local b3d = require(game:GetService("ReplicatedStorage")._replicationFolder.Button3D)
 local tSessRem
 
 local is_main = player == target
@@ -39,12 +40,19 @@ local _sendReq
 _sendReq = function(nolo)
 
     while true do
+        
         task.wait()
-        _tremoteAlt:FireServer(
-            "SendRequest",
-            target
-        )
 
+        local s, btn = pcall(function()
+            for i, v in b3d:_getButtonFromInstance(player.PlayerGui.PlayersGui.ContainerFrame.PlayersFrame[target.Name].InnerFrame.ButtonsFrame.TradeButton).OnClick do
+                task.spawn(v)
+            end
+        end)
+
+        if not s then break end
+
+
+        if not genv.running then return end
         if nolo then return end
         local endT = time() + 5
         repeat task.wait() until tradeGui.Enabled or endT - time() <= 0 or not target or not game.Players:FindFirstChild(target.Name)
@@ -114,12 +122,13 @@ accept_request = function(plr)
     local endT = time() + 5
     repeat task.wait() until tradeGui.Enabled or endT - time() <= 0
 
-    if not tradeGui.Enabled then return end
+    if not tradeGui.Enabled then print("Past deadline") return end
 
     tSessRem = rRemotes:FindFirstChild(plr.Name.."-"..player.Name.."TradeRemote")
 
-    repeat task.wait() until acceptedLabel.Visible
+    repeat task.wait() until acceptedLabel.Visible or not tradeGui.Enabled
     
+    if not tradeGui.Enabled then return end
     local tr = task.spawn(function()
         tSessRem:InvokeServer("AcceptTrade")
     end)
@@ -141,45 +150,47 @@ requestsGui.RequestsFrame.Other.ChildAdded:Connect(function(child)
     if not plr then return end
 
     print("Added "..senderName.." to the pool.")
-    table.insert(pool, plr)
+    --table.insert(pool, plr)
+    pool[plr] = true
 end)
 
 if not is_main then
-    if not genv.ft then
-        genv.ft = true
-        _sendReq(true)
-        task.wait(5)
-    end
+    -- genv.ft = true
+    -- _sendReq(true)
+    -- task.wait(5)
+
+    genv.running = true
     send_request()
     return
 end
 
-if not genv.ft then
-    genv.ft = true
-    for i, v in allowedAccs do
-        if v == player.Name then continue end
-        if not game.Players:FindFirstChild(v) then continue end
-        _tremoteAlt:FireServer(
-                "SendRequest",
-                game.Players:FindFirstChild(v)
-            )
-        task.wait(5)
-        break
-    end
-end
+
+-- for i, v in allowedAccs do
+--     if v == player.Name then continue end
+--     if not game.Players:FindFirstChild(v) then continue end
+--     _tremoteAlt:FireServer(
+--             "SendRequest",
+--             game.Players:FindFirstChild(v)
+--         )
+--     task.wait(5)
+--     break
+-- end
+
 
 game.Players.PlayerRemoving:Connect(function(plr)
-    table.remove(pool, table.find(pool, plr))
+    --table.remove(pool, table.find(pool, plr))
+    pool[plr] = nil
 end)
 
 genv.running = true
 while task.wait(1) do
     if not genv.running then break end
-    local found = pool[1]
+    local found = next(pool)
 
     if not found then continue end
 
-    table.remove(pool, table.find(pool, found))
+    pool[found] = nil
+    --table.remove(pool, table.find(pool, found))
 
     accept_request(found)
 
