@@ -1,3 +1,4 @@
+if game.PlaceId ~= 14119723130 then return end
 local player = game:GetService("Players").LocalPlayer
 
 local genv = getgenv()
@@ -89,7 +90,7 @@ local function send_request()
             Overwrite = true,
             ItemType = "Currency",
             Name = "Shooms",
-            Amount = 500000
+            Amount = player.Data.Coins.Value - 200
         }
     }
 
