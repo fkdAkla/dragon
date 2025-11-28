@@ -10,6 +10,22 @@ if not target then error("No target provided / non-existent") return end
 genv.running = nil
 --local allowedAccs = genv.allowedAccs
 
+local vu = game:GetService("VirtualUser")
+
+player.Idled:Connect(function()
+    set_thread_identity(8)
+    vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+    vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+    set_thread_identity(2)
+end)
+
+local found = player.PlayerGui:WaitForChild("ClientScripts", 1) and player.PlayerGui.ClientScripts:WaitForChild("AntiAFKClientHelper", 1)
+if found then found.Enabled = false end
+
+if game.ReplicatedStorage:WaitForChild("AFKEvent", 1) then game.ReplicatedStorage:WaitForChild("AFKEvent"):Destroy() end
+
+
+
 local rRemotes = game:GetService("ReplicatedStorage").Remotes
 local tradeGui = player.PlayerGui.TradeGui
 local acceptedLabel = tradeGui.ContainerFrame.Theirs.OffersFrame.AcceptedLabel
