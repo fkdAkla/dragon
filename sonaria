@@ -544,7 +544,7 @@ local function eat()
 
         --if currState ~= states.Eating then return end
         if foodRatio() >= 1 then return end
-        if (mission and mission.Value and foodRatio() > 0.5 and not isBiter) then return end
+        if (mission and mission.Value and not isBiter) then return end
         currState = states.Eating
         player.Character:PivotTo(v.PrimaryPart and v.PrimaryPart.CFrame or v:GetPivot() + Vector3.new(0,5,0))
         task.wait(0.5)
@@ -560,7 +560,7 @@ local function eat()
 
         --if not chr.Eating then print("Failed to start eating", v.Name) tempIgnoreFood[v] = true continue end
 
-        repeat task.wait() until foodRatio() >= 1 or currState ~= states.Eating or mission and mission.Value or not chr.Eating or not v or v:GetAttribute("Value") == 0 or (player.Character:GetPivot().Position - v:GetPivot().Position).Magnitude >= 50
+        repeat task.wait() until foodRatio() >= 1 or currState ~= states.Eating or (mission and mission.Value and not isBiter) or not chr.Eating or not v or v:GetAttribute("Value") == 0 or (player.Character:GetPivot().Position - v:GetPivot().Position).Magnitude >= 50
         chr:StopBlockingStates()
         if foodRatio() >= 1 or (mission and mission.Value) or currState ~= states.Eating then break end
     end
