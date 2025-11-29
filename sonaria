@@ -475,9 +475,11 @@ local function foodRatio()
 end
 
 local checkPoints
+
 local function healingHunterAndDmgSelf()
     task.spawn(function()
         while task.wait(0.5) do
+            
             local _temp = client:GetCurrentCharacter()
 
             if not _temp then continue end
@@ -692,7 +694,8 @@ local function rmListener()
 
         local n = 0
 
-        task.wait(10)
+        
+        --task.wait(10)
         
         while genv.running and genv.toggles.rmissions do
             task.wait(0.1)
@@ -1190,6 +1193,7 @@ set_thread_identity(4)]]
 -- if genv.toggles.AutoEat then
 --     player.Character:PivotTo(safePos)
 -- end
+task.wait(10)
 initListeners()
 
 healingHunterAndDmgSelf()
