@@ -1,7 +1,7 @@
 if game.PlaceId ~= 5233782396 then return end
 print("ran")
 local genv = getgenv()
---genv.TheBiter = "idaksa"
+genv.TheBiter = "adsdasadsq"
 
 genv.running = false
 genv.hookingCheckGround = nil
@@ -692,6 +692,7 @@ local function rmListener()
 
         local n = 0
 
+        task.wait(10)
         
         while genv.running and genv.toggles.rmissions do
             task.wait(0.1)
@@ -767,32 +768,43 @@ local function rmListener()
                 
                 if isBiter then
                     local folder = workspace.Characters
-                    for i, v in folder:GetChildren() do
-                        if v.Name == player.Name then continue end
 
-                        if hasAilment(v, "SpawnImmunity") then continue end
+                    if hasAilment(player.Character, "SpawnImmunity") then
+                        --print("You are in spawn immunity. Waiting...")
+                    end
+
+                    repeat task.wait() until not hasAilment(player.Character, "SpawnImmunity")
+
+                    
+                    for _, thing in folder:GetChildren() do
+                        if thing.Name == player.Name then continue end
+
+
+                        if hasAilment(thing, "SpawnImmunity") then continue end
                         
-                        local ailVal = hasAilment(v, "Disease") or 0
+                        local ailVal = hasAilment(thing, "Disease") or 0
 
-                        local ratio = v.Data:GetAttribute("h") / v.Data:GetAttribute("mh")
+                        local ratio = thing.Data:GetAttribute("h") / thing.Data:GetAttribute("mh")
                         
 
                         repeat
                             task.wait(2)
-                            ailVal = hasAilment(v, "Disease") or 0
+                            ailVal = hasAilment(thing, "Disease") or 0
 
                             local hb = v:FindFirstChild("Hitbox")
-                            if not hb then continue end
+                            if not hb then break end
 
                             local ent = dmg.GetEntityFromHit(hb)
 
-                            if not ent then continue end
+                            if not ent then break end
 
                             
                             dmg.RegisterHits({ent})
 
-                            ratio = v.Data:GetAttribute("h") / v.Data:GetAttribute("mh")
-                        until not folder:FindFirstChild(v.Name) or not v:FindFirstChild("Hitbox") or hasAilment(v, "Disease") >= 60 or ratio <= 0.5
+                            print("Hit target: "..thing.Name)
+
+                            ratio = thing.Data:GetAttribute("h") / thing.Data:GetAttribute("mh")
+                        until not player.Character or not folder:FindFirstChild(thing.Name) or not thing:FindFirstChild("Hitbox") or ailVal >= 60 or ratio <= 0.5
 
                     end
                 end
