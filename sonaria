@@ -1,6 +1,8 @@
 if game.PlaceId ~= 5233782396 then return end
 print("ran")
 local genv = getgenv()
+--genv.isBiter = true
+local isBiter = genv.isBiter
 genv.running = false
 genv.hookingCheckGround = nil
 local attrs = {
@@ -45,8 +47,21 @@ set_thread_identity(2)
 local wrapper = require(game:GetService("ReplicatedStorage")._replicationFolder.PlayerWrapper)
 local client = wrapper:GetClient()
 
+local function dragonExistsInInventory(val)
+
+    for i = 1,3 do
+        if client.PlayerData["Slot"..i].Dino.Value ~= val then continue end
+        return client.PlayerData["Slot"..i]
+    end
+
+    for i, v in client.PlayerData.Slots:GetChildren() do
+        if v.Dino.Value ~= val then continue end
+        return v
+    end
+end
+
 local dino = "Mobuushiy"
-if client.PlayerData.Coins.Value >= 80 then
+if client.PlayerData.Coins.Value >= 80 and not isBiter then
     local shouldBuy = true
 
     for i = 1,3 do
@@ -70,28 +85,47 @@ if client.PlayerData.Coins.Value >= 80 then
 game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("PurchaseCreatureRemote"):InvokeServer(unpack(args))
     end
 
-
 end
+
+local biter = "Tohukos"
+if client.PlayerData.Coins.Value >= 800 and isBiter then
+
+    if not dragonExistsInInventory(biter) then
+        local args = {
+	"TrialCreatures",
+	biter,
+	false
+}
+game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("PurchaseCreatureRemote"):InvokeServer(unpack(args))
+    end
+end
+
+
 
 
 local function restartAndSpawn()
 
+    local _tdino = not isBiter and dino or biter
     local slot
-    
-    for i = 1,3 do
-        if client.PlayerData["Slot"..i].Dino.Value ~= dino then continue end
-        slot = "Slot"..i
-    end
 
-    if not slot then
-        for i, v in client.PlayerData.Slots:GetChildren() do
-            if v.Dino.Value ~= dino then continue end
 
-            slot = v.Name
-        end
-    end
+    slot = dragonExistsInInventory(_tdino)
+
+    slot = slot and slot.Name or "Slot1"
     
-    if not slot then slot = "Slot1" end
+    -- for i = 1,3 do
+    --     if client.PlayerData["Slot"..i].Dino.Value ~= _tdino then continue end
+    --     slot = "Slot"..i
+    -- end
+
+    -- if not slot then
+    --     for i, v in client.PlayerData.Slots:GetChildren() do
+    --         if v.Dino.Value ~= _tdino then continue end
+
+    --         slot = v.Name
+    --     end
+    -- end
+    
 
     local args = {
         slot,
@@ -405,6 +439,13 @@ local function getClosestPart(parts, reg)
     return closest
 end
 
+local function hasAilment(_chr, _name)
+    if not _chr then return end
+    if not _name then return end
+
+    return _chr:FindFirstChild("Ailments") and _chr.Ailments:GetAttribute(_name)
+end
+
 local states = {
     None = 0,
     Eating = 1,
@@ -500,7 +541,7 @@ local function eat()
 
         --if currState ~= states.Eating then return end
         if foodRatio() >= 1 then return end
-        if (mission and mission.Value and foodRatio() > 0.5) then return end
+        if (mission and mission.Value and foodRatio() > 0.5 and not isBiter) then return end
         currState = states.Eating
         player.Character:PivotTo(v.PrimaryPart and v.PrimaryPart.CFrame or v:GetPivot() + Vector3.new(0,5,0))
         task.wait(0.5)
@@ -654,20 +695,21 @@ local function rmListener()
 
             currState = states.AutoRM
             for i, v in workspace.Interactions.ShoomPiles:GetChildren() do
+                if isBiter then continue end
                 if not v:FindFirstChild("Pebble") or v.Pebble.Transparency == 1 then continue end
                 local args = {
             	v.Name:sub(1,#v.Name-1),
             	tonumber(v.Name:sub(#v.Name))
             }
 
-            repeat task.wait() until player.Character
-            player.Character:PivotTo(v:GetPivot()+Vector3.new(0,20,0))
-            local region = getRegionFromPosition(v:GetPivot().Position)
+                repeat task.wait() until player.Character
+                player.Character:PivotTo(v:GetPivot()+Vector3.new(0,20,0))
+                local region = getRegionFromPosition(v:GetPivot().Position)
 
-            game:GetService("ReplicatedStorage").Remotes.ChangeRegionRemote:FireServer(region)
-            task.wait(1)
-            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ShoomPileCollected"):InvokeServer(unpack(args))
-            task.wait(1)
+                game:GetService("ReplicatedStorage").Remotes.ChangeRegionRemote:FireServer(region)
+                task.wait(1)
+                game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("ShoomPileCollected"):InvokeServer(unpack(args))
+                task.wait(1)
             end
             n+=1
             warn('loop '..n)
@@ -696,7 +738,7 @@ local function rmListener()
 
                 local eligible
                 for _, k in v:GetChildren() do
-                    if not k.Value and table.find(todo, k.Name) then eligible = true break end
+                    if not k.Value and table.find(todo, k.Name) or isBiter then eligible = true break end
                 end
                 
                 if not eligible then continue end
@@ -719,9 +761,44 @@ local function rmListener()
                 repeat task.wait() until player.Character
                 smoothMoveTo(locpos)
                 
-                
+                if isBiter then
+                    local folder = workspace.Characters
+                    for i, v in folder:GetChildren() do
+                        if v.Name == player.Name then continue end
+
+                        if hasAilment(v, "SpawnImmunity") then continue end
+                        
+                        local ailVal = hasAilment(v, "Disease") or 0
+
+                        local ratio = v.Data:GetAttribute("h") / v.Data:GetAttribute("mh")
+                        
+
+                        repeat
+                            task.wait(1)
+                            ailVal = hasAilment(v, "Disease") or 0
+
+                            local hb = v:FindFirstChild("Hitbox")
+                            if not hb then continue end
+
+                            local ent = dmg.GetEntityFromHit(hb)
+
+                            if not ent then continue end
+
+                            
+                            dmg.RegisterHits({ent})
+
+                            ratio = v.Data:GetAttribute("h") / v.Data:GetAttribute("mh")
+                        until not folder:FindFirstChild("v.Name") or not folder:FindFirstChild("Hitbox") or hasAilment(v, "Disease") >= 60 or ratio <= 0.5
+
+                    end
+                end
+
+                currState = states.None
                 
                 task.wait(5)
+                repeat task.wait() until currState ~= states.Eating
+
+                if isBiter then continue end
 
                  --print("Player Character wait", debug.info(1, "l"))
                 repeat task.wait() until player.Character
