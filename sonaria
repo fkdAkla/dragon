@@ -1,8 +1,8 @@
 if game.PlaceId ~= 5233782396 then return end
 print("ran")
 local genv = getgenv()
-genv.isBiter = false
-local isBiter = genv.isBiter
+--genv.TheBiter = "idaksa"
+
 genv.running = false
 genv.hookingCheckGround = nil
 local attrs = {
@@ -19,6 +19,8 @@ local healthRatio = 0.6
 local limitLocs = genv.limitLocs
 
 local player = game:GetService("Players").LocalPlayer
+
+local isBiter = player.Name == genv.TheBiter
 
 local vu = game:GetService("VirtualUser")
 
