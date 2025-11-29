@@ -788,7 +788,7 @@ local function rmListener()
                         
 
                         repeat
-                            task.wait(2)
+                            task.wait(1)
                             ailVal = hasAilment(thing, "Disease") or 0
 
                             local hb = v:FindFirstChild("Hitbox")
@@ -798,13 +798,14 @@ local function rmListener()
 
                             if not ent then break end
 
-                            
+                            player.Character:PivotTo(thing:GetPivot())
+                            task.wait(0.5)
                             dmg.RegisterHits({ent})
 
                             print("Hit target: "..thing.Name)
 
                             ratio = thing.Data:GetAttribute("h") / thing.Data:GetAttribute("mh")
-                        until not player.Character or not folder:FindFirstChild(thing.Name) or not thing:FindFirstChild("Hitbox") or ailVal >= 60 or ratio <= 0.5
+                        until not player.Character or not folder:FindFirstChild(thing.Name) or not thing:FindFirstChild("Hitbox") or ailVal >= 60 or ratio <= 0.5 or hasAilment(thing, "SpawnImmunity")
 
                     end
                 end
