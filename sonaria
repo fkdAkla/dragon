@@ -1,7 +1,7 @@
 if game.PlaceId ~= 5233782396 then return end
 print("ran")
 local genv = getgenv()
---genv.isBiter = true
+genv.isBiter = false
 local isBiter = genv.isBiter
 genv.running = false
 genv.hookingCheckGround = nil
@@ -88,7 +88,7 @@ game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Purch
 end
 
 local biter = "Tohukos"
-if client.PlayerData.Coins.Value >= 800 and isBiter then
+if client.PlayerData.Coins.Value >= 300 and isBiter then
 
     if not dragonExistsInInventory(biter) then
         local args = {
@@ -788,7 +788,7 @@ local function rmListener()
                             dmg.RegisterHits({ent})
 
                             ratio = v.Data:GetAttribute("h") / v.Data:GetAttribute("mh")
-                        until not folder:FindFirstChild("v.Name") or not folder:FindFirstChild("Hitbox") or hasAilment(v, "Disease") >= 60 or ratio <= 0.5
+                        until not folder:FindFirstChild(v.Name) or not v:FindFirstChild("Hitbox") or hasAilment(v, "Disease") >= 60 or ratio <= 0.5
 
                     end
                 end
