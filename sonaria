@@ -1,7 +1,7 @@
 if game.PlaceId ~= 5233782396 then return end
 print("ran")
 local genv = getgenv()
-genv.TheBiter = "adsdasadsq"
+genv.TheBiter = "ndscottnb231"
 
 genv.running = false
 genv.hookingCheckGround = nil
@@ -772,6 +772,18 @@ local function rmListener()
                 if isBiter then
                     local folder = workspace.Characters
 
+                    local function checkTarget(t)
+                        if not t then return end
+                        if hasAilment(t, "SpawnImmunity") then return end
+                        
+                        local ailVal = hasAilment(t, "Disease") or 0
+
+                        local ratio = t.Data:GetAttribute("h") / t.Data:GetAttribute("mh")
+                        
+                        if ratio <= 0.5 then return end
+                        return true
+                    end
+
                     if hasAilment(player.Character, "SpawnImmunity") then
                         --print("You are in spawn immunity. Waiting...")
                     end
@@ -779,38 +791,42 @@ local function rmListener()
                     repeat task.wait() until not hasAilment(player.Character, "SpawnImmunity")
 
                     
-                    for _, thing in folder:GetChildren() do
-                        if thing.Name == player.Name then continue end
+                        task.wait()
+
+                        local num = 0
+                        for _, thing in folder:GetChildren() do
+                            if thing.Name == player.Name then continue end
 
 
-                        if hasAilment(thing, "SpawnImmunity") then continue end
+                            if not checkTarget(thing) then continue end
+
+                            
                         
-                        local ailVal = hasAilment(thing, "Disease") or 0
-
-                        local ratio = thing.Data:GetAttribute("h") / thing.Data:GetAttribute("mh")
-                        
-
-                        repeat
-                            task.wait(1)
+                            task.wait(5)
                             ailVal = hasAilment(thing, "Disease") or 0
 
                             local hb = thing:FindFirstChild("Hitbox")
-                            if not hb then break end
+                            if not hb then continue end
 
                             local ent = dmg.GetEntityFromHit(hb)
 
-                            if not ent then break end
+                            if not ent then continue end
 
                             --player.Character:PivotTo(thing:GetPivot())
                             --task.wait(0.5)
+
+                            
                             dmg.RegisterHits({ent})
 
-                            print("Hit target: "..thing.Name)
+                            num += 1
+                            print("["..num.."] ".."Hit target: "..thing.Name)
 
-                            ratio = thing.Data:GetAttribute("h") / thing.Data:GetAttribute("mh")
-                        until not player.Character or not folder:FindFirstChild(thing.Name) or not thing:FindFirstChild("Hitbox") or ailVal >= 60 or ratio <= 0.5 or hasAilment(thing, "SpawnImmunity")
+                            
+                           
+                            end
+                    -- or not folder:FindFirstChild(thing.Name) or not thing:FindFirstChild("Hitbox") or ailVal >= 60 or ratio <= 0.5 or hasAilment(thing, "SpawnImmunity")
 
-                    end
+                    
                 end
 
                 currState = states.None
