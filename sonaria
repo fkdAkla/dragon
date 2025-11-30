@@ -678,6 +678,10 @@ local tpUpVec = Vector3.new(0,50,0)
 
 local function rmListener()
     threads.rmListener = task.spawn(function ()
+        if isBiter then
+            task.wait(60)
+        end
+        
         warn("Rmlistener")
 
         targetRegion = nil
@@ -693,6 +697,7 @@ local function rmListener()
 
 
         local n = 0
+
 
         
         --task.wait(10)
@@ -802,7 +807,7 @@ local function rmListener()
 
                             
                         
-                            task.wait(4)
+                            task.wait(3)
                             ailVal = hasAilment(thing, "Disease") or 0
 
                             local hb = thing:FindFirstChild("Hitbox")
