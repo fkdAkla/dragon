@@ -815,6 +815,10 @@ local function rmListener()
 
                             if not ent then continue end
 
+                            player.Character:PivotTo(hb.CFrame)
+
+                            task.wait(0.3)
+
                             --player.Character:PivotTo(thing:GetPivot())
                             --task.wait(0.5)
 
