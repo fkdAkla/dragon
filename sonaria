@@ -678,9 +678,7 @@ local tpUpVec = Vector3.new(0,50,0)
 
 local function rmListener()
     threads.rmListener = task.spawn(function ()
-        if isBiter then
-            task.wait(60)
-        end
+
         
         warn("Rmlistener")
 
