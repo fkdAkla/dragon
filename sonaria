@@ -817,16 +817,18 @@ local function rmListener()
 
                             player.Character:PivotTo(hb.CFrame)
 
-                            task.wait(0.3)
+                            task.wait(0.1)
 
+                            foodRatio()
+                            chr:Attack()
                             --player.Character:PivotTo(thing:GetPivot())
                             --task.wait(0.5)
 
                             
-                            dmg.RegisterHits({ent})
+                            --dmg.RegisterHits({ent})
 
-                            num += 1
-                            print("["..num.."] ".."Hit target: "..thing.Name)
+                            --num += 1
+                            --print("["..num.."] ".."Try Hit target: "..thing.Name)
 
                             
                            
