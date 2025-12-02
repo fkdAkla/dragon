@@ -805,7 +805,7 @@ local function rmListener()
 
                             
                         
-                            task.wait(5)
+                            task.wait(1)
                             ailVal = hasAilment(thing, "Disease") or 0
 
                             local hb = thing:FindFirstChild("Hitbox")
