@@ -804,7 +804,7 @@ local function rmListener()
                             if not checkTarget(thing) then continue end
 
                             
-                        
+
                             task.wait(1)
                             ailVal = hasAilment(thing, "Disease") or 0
 
@@ -815,12 +815,17 @@ local function rmListener()
 
                             if not ent then continue end
 
-                            player.Character:PivotTo(hb.CFrame)
 
-                            task.wait(0.1)
-
+                            local deadline = time() + 1.5
+                            
                             foodRatio()
+
+                            repeat
+                            task.wait()
+                            player.Character:PivotTo(hb.CFrame)
                             chr:Attack()
+                            until not hb or not player.Character or deadline - time() <= 0
+
                             --player.Character:PivotTo(thing:GetPivot())
                             --task.wait(0.5)
 
