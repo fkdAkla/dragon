@@ -583,7 +583,7 @@ local function hungerListener()
             local ratioFood, ratioWater = foodRatio()
             
             local drankOrAte
-            if ratioWater <= 0.99 then
+            if ratioWater <= not isBiter and 0.99 or 0.6 then
                 
                 --cancelT()
 
@@ -597,7 +597,7 @@ local function hungerListener()
                 drankOrAte = true
             end
             
-            if ratioFood <= 0.99 then
+            if ratioFood <= not isBiter and 0.99 or 0.6 then
                 --if tempPos then player.Character:PivotTo(tempPos) end
                 --cancelT()
                 repeat task.wait() until currState == states.None and targetRegion
