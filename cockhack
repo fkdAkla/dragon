@@ -297,6 +297,7 @@ local function farm()
                     
                     if deadVal.Value then break end
 
+                    player.Character:PivotTo(v:GetPivot())
 
                     if (tick() - lt > 0.2) then
                         lt = tick()
@@ -305,9 +306,9 @@ local function farm()
 
                         dmg.RegisterHits("Bite", client.CurrentDragon, {ent})
                     end
-                    local tPos = bPart.CFrame * CFrame.new(-30, -30, 10)
+                    -- local tPos = bPart.CFrame * CFrame.new(-30, -30, 10)
                     
-                    player.Character:PivotTo(tPos)--CFrame.new(tPos, mousePos))
+                    --CFrame.new(tPos, mousePos))
                 
                     --[[fire:_setAttack(false, "Fire") genv.FoodPos = nil break end]]
                 end
