@@ -278,7 +278,7 @@ local function farm()
         if _G.stopped then c:Disconnect() return end
 
         for _, cfr in teleportPoints do
-            
+            task.wait(1)
             for _, v in food:GetChildren() do
                 local bg = v:FindFirstChild("BillboardPart")
                 if not bg then continue end
@@ -316,6 +316,7 @@ local function farm()
                 
             end
 
+            --print("TP to next")
             player.Character:PivotTo(cfr)
         end
         
