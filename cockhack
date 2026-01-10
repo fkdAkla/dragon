@@ -304,7 +304,7 @@ local function farm()
                         
                         dmg.RegisterHits("Breath", client.CurrentDragon, {ent})
 
-                        dmg.RegisterHits("Bite", client.CurrentDragon, {ent})
+                        --dmg.RegisterHits("Bite", client.CurrentDragon, {ent})
                     end
                     -- local tPos = bPart.CFrame * CFrame.new(-30, -30, 10)
                     
