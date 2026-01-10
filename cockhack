@@ -248,6 +248,8 @@ end)
 end)]]
 
 
+local fakeTreeCfr = CFrame.new(26.3707275, 86.2353973, -736.170044, -0.69808054, 0, 0.716019273, 0, 1, 0, -0.716019273, 0, -0.69808054)
+
 
 local camera = workspace.Camera
 local function farm()
@@ -288,6 +290,10 @@ local function farm()
                 if deadVal.Value then continue end
 
                 local hb = v.Hitbox
+
+                if (hb.Position - fakeTreeCfr.Position).Magnitude < 30 then
+                    continue
+                end
 
                 local ent = dmg.GetEntityFromHit(hb)
 
