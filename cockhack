@@ -248,7 +248,11 @@ end)
 end)]]
 
 
-local fakeTreeCfr = CFrame.new(26.3707275, 86.2353973, -736.170044, -0.69808054, 0, 0.716019273, 0, 1, 0, -0.716019273, 0, -0.69808054)
+local fakeTrees = {
+    CFrame.new(26.3707275, 86.2353973, -736.170044, -0.69808054, 0, 0.716019273, 0, 1, 0, -0.716019273, 0, -0.69808054),
+    CFrame.new(1116.71594, 203.576874, 881.111328, -0.698147535, 0, 0.715953887, 0, 1, 0, -0.715953887, 0, -0.698147535),
+    CFrame.new(-732.745544, 864.955322, -5321.73047, -0.69808054, 0, 0.716019273, 0, 1, 0, -0.716019273, 0, -0.69808054)
+}
 
 
 local camera = workspace.Camera
@@ -290,10 +294,18 @@ local function farm()
                 if deadVal.Value then continue end
 
                 local hb = v.Hitbox
+                
+                local shouldSkip = false
 
-                if (hb.Position - fakeTreeCfr.Position).Magnitude < 30 then
-                    continue
+                for _, v in fakeTrees do
+                    if (hb.Position - v.Position).Magnitude < 30 then
+                        shouldSkip = true
+                        break
+                    end
                 end
+
+                if shouldSkip then continue end
+                
 
                 local ent = dmg.GetEntityFromHit(hb)
 
