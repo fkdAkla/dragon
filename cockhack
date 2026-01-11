@@ -291,8 +291,8 @@ local function farm()
                 
                 local found = false
 
-                for _, v in teleportPoints do
-                    if (hb.Position - v.Position).Magnitude < 30 then
+                for _, uh in teleportPoints do
+                    if (v:GetPivot().Position - uh.Position).Magnitude < 10 then
                         found = true
                         break
                     end
